@@ -341,7 +341,7 @@ body.scroll-locked{overflow:hidden}
 <a href="/cdn-cgi/l/email-protection#1c75727a735c6f7479796c78737b6879647d6f327f7371" class="contact-btn contact-btn--primary">Email Us</a>
 <button class="contact-btn contact-btn--secondary" onclick="toggleForm()" id="quoteToggle">Request a Quote</button>
 </div>
-<form class="quote-form" id="quoteForm" action="https://formspree.io/f/placeholder" method="POST">
+<form class="quote-form" id="quoteForm" onsubmit="return submitForm(event)">
 <div class="qf-grid">
 <div class="qf-field"><label class="qf-label">Name</label><input type="text" name="name" class="qf-input" placeholder="Your name"></div>
 <div class="qf-field"><label class="qf-label">Phone</label><input type="tel" name="phone" class="qf-input" placeholder="(979) 555-0000"></div>
@@ -372,6 +372,53 @@ body.scroll-locked{overflow:hidden}
 </div><!-- /page-content -->
 
 <script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script>
+// Supabase config
+const SUPABASE_URL = 'https://sezzqhmsfulclcqmfwja.supabase.co';
+const SUPABASE_ANON = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNlenpxaG1zZnVsY2xjcW1md2phIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQ3MjcyMTcsImV4cCI6MjA5MDMwMzIxN30.dimodXsa6C40hWhVqpt4nVpsM6t_gwCiKstxAJHaWmw';
+
+async function submitForm(e) {
+  e.preventDefault();
+  const form = e.target;
+  const btn = form.querySelector('.qf-submit');
+  const origText = btn.textContent;
+  btn.textContent = 'Sending...';
+  btn.disabled = true;
+
+  const data = {
+    name: form.name.value,
+    phone: form.phone.value,
+    email: form.email.value,
+    service: form.service.value,
+    message: form.message.value
+  };
+
+  try {
+    const res = await fetch(SUPABASE_URL + '/rest/v1/contact_submissions', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'apikey': SUPABASE_ANON,
+        'Authorization': 'Bearer ' + SUPABASE_ANON,
+        'Prefer': 'return=minimal'
+      },
+      body: JSON.stringify(data)
+    });
+    if (res.ok) {
+      btn.textContent = 'Sent! We\'ll be in touch.';
+      btn.style.background = '#357A38';
+      form.reset();
+    } else {
+      throw new Error('Failed');
+    }
+  } catch (err) {
+    btn.textContent = 'Something went wrong. Try again.';
+    btn.style.background = '#C23B22';
+    btn.disabled = false;
+    setTimeout(() => { btn.textContent = origText; btn.style.background = ''; }, 3000);
+  }
+  return false;
+}
+
 // Quote form toggle
 function toggleForm() {
   const form = document.getElementById('quoteForm');
