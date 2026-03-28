@@ -81,7 +81,7 @@ body{font-family:var(--fb);font-size:17px;line-height:1.65;color:var(--iron);bac
 
 /* HERO */
 .hero{min-height:100vh;background:var(--black);display:flex;flex-direction:column;justify-content:center;align-items:center;text-align:center;padding:120px 48px 80px;position:relative;overflow:hidden}
-.hero::before{content:'';position:absolute;inset:0;background:radial-gradient(ellipse at 50% 45%,rgba(255,255,255,.04),transparent 60%);pointer-events:none;opacity:0;transition:opacity 2s ease;will-change:opacity;transform:translateZ(0)}
+.hero::before{content:'';position:absolute;inset:0;background:radial-gradient(ellipse at 50% 45%,rgba(255,255,255,.04),transparent 60%);pointer-events:none;opacity:0}
 body.hero-glow .hero::before{opacity:1}
 .hero-grid{position:absolute;inset:0;background:repeating-linear-gradient(90deg,transparent,transparent 119px,rgba(255,255,255,.06) 119px,rgba(255,255,255,.06) 120px),repeating-linear-gradient(0deg,transparent,transparent 119px,rgba(255,255,255,.06) 119px,rgba(255,255,255,.06) 120px);pointer-events:none;-webkit-mask-image:radial-gradient(circle 250px at var(--mx,50%) var(--my,50%),black,transparent);mask-image:radial-gradient(circle 250px at var(--mx,50%) var(--my,50%),black,transparent);opacity:0;transition:opacity .4s ease}
 .hero-overline{font-family:var(--fb);font-size:12px;font-weight:600;letter-spacing:4px;text-transform:uppercase;color:var(--steel);margin-bottom:24px;opacity:0;animation:fu 1.2s ease forwards 4.6s}
