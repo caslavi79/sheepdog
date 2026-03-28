@@ -81,9 +81,8 @@ body{font-family:var(--fb);font-size:17px;line-height:1.65;color:var(--iron);bac
 
 /* HERO */
 .hero{min-height:100vh;background:var(--black);display:flex;flex-direction:column;justify-content:center;align-items:center;text-align:center;padding:120px 48px 80px;position:relative;overflow:hidden}
-.hero::before{content:'';position:absolute;inset:0;background:radial-gradient(ellipse at 50% 45%,rgba(255,255,255,.04),transparent 60%);pointer-events:none;opacity:0}
-body.hero-glow .hero::before{animation:glowIn 2s ease forwards}
-@keyframes glowIn{from{opacity:0}to{opacity:1}}
+.hero::before{content:'';position:absolute;inset:0;background:radial-gradient(ellipse at 50% 45%,rgba(255,255,255,.04),transparent 60%);pointer-events:none;opacity:0;transition:opacity 2s ease}
+body.hero-glow .hero::before{opacity:1}
 .hero-grid{position:absolute;inset:0;background:repeating-linear-gradient(90deg,transparent,transparent 119px,rgba(255,255,255,.06) 119px,rgba(255,255,255,.06) 120px),repeating-linear-gradient(0deg,transparent,transparent 119px,rgba(255,255,255,.06) 119px,rgba(255,255,255,.06) 120px);pointer-events:none;-webkit-mask-image:radial-gradient(circle 250px at var(--mx,50%) var(--my,50%),black,transparent);mask-image:radial-gradient(circle 250px at var(--mx,50%) var(--my,50%),black,transparent);opacity:0;transition:opacity .4s ease}
 .hero-overline{font-family:var(--fb);font-size:12px;font-weight:600;letter-spacing:4px;text-transform:uppercase;color:var(--steel);margin-bottom:24px;opacity:0;animation:fu 1.2s ease forwards 4.6s}
 .hero-content{display:flex;flex-direction:column;align-items:center}
@@ -230,7 +229,7 @@ body.scroll-locked{overflow:hidden}
   .splash-img{transition:none}
   #splash{transition:none}
   .hero-overline,.hero h1,.hero-sub,.hero-ctas,.hero-scroll{animation:none;clip-path:none;opacity:1}
-  .hero::before{opacity:1;transition:none;animation:none}
+  .hero::before{opacity:1;transition:none}
   .hero h1 .cursor{display:none}
   .trust-icon{transform:none;opacity:1;transition:none}
   .card-enter{opacity:1;transform:none;transition:none}
@@ -570,9 +569,13 @@ document.body.classList.add('scroll-locked');
     document.querySelector('.nav-links').style.opacity = '1';
   }, 4600);
 
-  // Phase 5b: hero background glow
+  // Phase 5b: hero background glow (wait for browser idle so it doesn't jank)
   setTimeout(() => {
-    document.body.classList.add('hero-glow');
+    if (window.requestIdleCallback) {
+      requestIdleCallback(() => document.body.classList.add('hero-glow'));
+    } else {
+      requestAnimationFrame(() => document.body.classList.add('hero-glow'));
+    }
   }, 5200);
 
   // Phase 6: unlock scroll (after all hero animations complete)
