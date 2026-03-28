@@ -81,7 +81,7 @@ body{font-family:var(--fb);font-size:17px;line-height:1.65;color:var(--iron);bac
 
 /* HERO */
 .hero{min-height:100vh;background:var(--black);display:flex;flex-direction:column;justify-content:center;align-items:center;text-align:center;padding:120px 48px 80px;position:relative;overflow:hidden}
-.hero::before{content:'';position:absolute;inset:0;background:radial-gradient(ellipse at 50% 45%,rgba(255,255,255,.04),transparent 60%);pointer-events:none;opacity:0;transition:opacity 2s ease}
+.hero::before{content:'';position:absolute;inset:0;background:radial-gradient(ellipse at 50% 45%,rgba(255,255,255,.04),transparent 60%);pointer-events:none;opacity:0;transition:opacity 2s ease;will-change:opacity;transform:translateZ(0)}
 body.hero-glow .hero::before{opacity:1}
 .hero-grid{position:absolute;inset:0;background:repeating-linear-gradient(90deg,transparent,transparent 119px,rgba(255,255,255,.06) 119px,rgba(255,255,255,.06) 120px),repeating-linear-gradient(0deg,transparent,transparent 119px,rgba(255,255,255,.06) 119px,rgba(255,255,255,.06) 120px);pointer-events:none;-webkit-mask-image:radial-gradient(circle 250px at var(--mx,50%) var(--my,50%),black,transparent);mask-image:radial-gradient(circle 250px at var(--mx,50%) var(--my,50%),black,transparent);opacity:0;transition:opacity .4s ease}
 .hero-overline{font-family:var(--fb);font-size:12px;font-weight:600;letter-spacing:4px;text-transform:uppercase;color:var(--steel);margin-bottom:24px;opacity:0;animation:fu 1.2s ease forwards 4.6s}
@@ -214,7 +214,7 @@ body.hero-glow .hero::before{opacity:1}
 /* SPLASH */
 #splash{position:fixed;inset:0;z-index:200;background:var(--black);transition:opacity .4s ease}
 #splash.fade-out{opacity:0;pointer-events:none}
-.splash-img{position:fixed;z-index:201;object-fit:contain;opacity:0;transition:top .9s cubic-bezier(.4,0,.2,1),left .9s cubic-bezier(.4,0,.2,1),height .9s cubic-bezier(.4,0,.2,1),transform .9s cubic-bezier(.4,0,.2,1)}
+.splash-img{position:fixed;z-index:201;object-fit:contain;opacity:0;transform-origin:0 0;will-change:transform;transition:transform .9s cubic-bezier(.4,0,.2,1)}
 .nav-logo img{opacity:0;transition:opacity .15s}
 body.splash-done .nav-logo img{opacity:1}
 .nav-links{opacity:0;transition:opacity 1.2s ease}
@@ -507,17 +507,22 @@ document.body.classList.add('scroll-locked');
   const centerX = window.innerWidth / 2;
   const centerY = window.innerHeight / 2;
 
-  // Place at center immediately (no transition yet)
+  // Place at center position using top/left/height (static, no animation)
+  const markStartTop = centerY - totalH / 2;
+  const markStartLeft = centerX - markW / 2;
+  const wordStartTop = centerY - totalH / 2 + markH + gap;
+  const wordStartLeft = centerX - wordW / 2;
+
   sMark.style.transition = 'none';
   sWord.style.transition = 'none';
   sMark.style.height = markH + 'px';
-  sMark.style.top = (centerY - totalH / 2) + 'px';
-  sMark.style.left = (centerX - markW / 2) + 'px';
+  sMark.style.top = markStartTop + 'px';
+  sMark.style.left = markStartLeft + 'px';
   sWord.style.height = wordH + 'px';
-  sWord.style.top = (centerY - totalH / 2 + markH + gap) + 'px';
-  sWord.style.left = (centerX - wordW / 2) + 'px';
+  sWord.style.top = wordStartTop + 'px';
+  sWord.style.left = wordStartLeft + 'px';
 
-  // Force layout so positions apply before transition kicks in
+  // Force layout so positions apply
   sMark.offsetHeight;
   sWord.offsetHeight;
 
@@ -530,18 +535,20 @@ document.body.classList.add('scroll-locked');
     sWord.style.transition = '';
   });
 
-  // Phase 2: fly to nav positions (after 500ms hold)
+  // Phase 2: fly to nav using transform only (GPU-composited, no layout thrash)
   setTimeout(() => {
     const mRect = navMark.getBoundingClientRect();
     const wRect = navWord.getBoundingClientRect();
 
-    sMark.style.top = mRect.top + 'px';
-    sMark.style.left = mRect.left + 'px';
-    sMark.style.height = mRect.height + 'px';
+    const mScale = mRect.height / markH;
+    const mDx = mRect.left - markStartLeft;
+    const mDy = mRect.top - markStartTop;
+    sMark.style.transform = 'translate(' + mDx + 'px,' + mDy + 'px) scale(' + mScale + ')';
 
-    sWord.style.top = wRect.top + 'px';
-    sWord.style.left = wRect.left + 'px';
-    sWord.style.height = wRect.height + 'px';
+    const wScale = wRect.height / wordH;
+    const wDx = wRect.left - wordStartLeft;
+    const wDy = wRect.top - wordStartTop;
+    sWord.style.transform = 'translate(' + wDx + 'px,' + wDy + 'px) scale(' + wScale + ')';
   }, 500);
 
   // Phase 3: fade out splash, reveal page (after 1500ms)
