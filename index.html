@@ -467,13 +467,17 @@ document.body.classList.add('scroll-locked');
     sMark.remove();
     sWord.remove();
   }, 2100);
-})();
 
-// Unlock scroll + show nav links after hero animation completes
-setTimeout(() => {
-  document.body.classList.remove('scroll-locked');
-  document.querySelector('.nav-links').style.opacity = '1';
-}, 5800);
+  // Phase 5: show nav links (same time as hero content fade-in)
+  setTimeout(() => {
+    document.querySelector('.nav-links').style.opacity = '1';
+  }, 4600);
+
+  // Phase 6: unlock scroll (after all hero animations complete)
+  setTimeout(() => {
+    document.body.classList.remove('scroll-locked');
+  }, 5800);
+})();
 
 // #6 Hero typewriter
 (function() {
