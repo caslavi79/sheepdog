@@ -34,12 +34,16 @@ body{font-family:var(--fb);font-size:17px;line-height:1.65;color:var(--iron);bac
 
 /* HERO */
 .hero{min-height:100vh;background:var(--black);display:flex;flex-direction:column;justify-content:center;align-items:center;text-align:center;padding:120px 48px 80px;position:relative;overflow:hidden}
-.hero::before{content:'';position:absolute;inset:0;background:radial-gradient(ellipse at 50% 45%,rgba(255,255,255,.02),transparent 60%);pointer-events:none}
+.hero::before{content:'';position:absolute;inset:0;background:radial-gradient(ellipse at 50% 45%,rgba(255,255,255,.04),transparent 60%);pointer-events:none;opacity:0;animation:fu 2s ease forwards 5.2s}
 .hero-grid{position:absolute;inset:0;background:repeating-linear-gradient(90deg,transparent,transparent 119px,rgba(255,255,255,.06) 119px,rgba(255,255,255,.06) 120px),repeating-linear-gradient(0deg,transparent,transparent 119px,rgba(255,255,255,.06) 119px,rgba(255,255,255,.06) 120px);pointer-events:none;-webkit-mask-image:radial-gradient(circle 250px at var(--mx,50%) var(--my,50%),black,transparent);mask-image:radial-gradient(circle 250px at var(--mx,50%) var(--my,50%),black,transparent);opacity:0;transition:opacity .4s ease}
-.hero-overline{font-family:var(--fb);font-size:12px;font-weight:600;letter-spacing:4px;text-transform:uppercase;color:var(--steel);margin-bottom:24px;clip-path:inset(100% 0 0 0);animation:reveal .6s cubic-bezier(.16,1,.3,1) forwards 1.9s}
-.hero h1{font-family:var(--fd);font-weight:800;font-size:clamp(36px,6.5vw,56px);line-height:1.0;letter-spacing:-0.5px;text-transform:uppercase;color:var(--white);margin-bottom:20px;clip-path:inset(100% 0 0 0);animation:reveal .6s cubic-bezier(.16,1,.3,1) forwards 2.1s}
-.hero-sub{font-family:var(--fb);font-weight:400;font-size:clamp(16px,1.8vw,20px);color:var(--steel);margin-bottom:44px;max-width:480px;line-height:1.5;clip-path:inset(100% 0 0 0);animation:reveal .6s cubic-bezier(.16,1,.3,1) forwards 2.3s}
-.hero-ctas{display:flex;gap:16px;flex-wrap:wrap;justify-content:center;clip-path:inset(100% 0 0 0);animation:reveal .6s cubic-bezier(.16,1,.3,1) forwards 2.5s}
+.hero-overline{font-family:var(--fb);font-size:12px;font-weight:600;letter-spacing:4px;text-transform:uppercase;color:var(--steel);margin-bottom:24px;opacity:0;animation:fu 1.2s ease forwards 4.6s}
+.hero-content{display:flex;flex-direction:column;align-items:center}
+.hero h1{font-family:var(--fd);font-weight:800;font-size:clamp(36px,6.5vw,56px);line-height:1.0;letter-spacing:-0.5px;text-transform:uppercase;color:var(--white);margin-bottom:20px;opacity:0;height:2.1em}
+.hero h1 .cursor{display:inline-block;width:3px;height:.85em;background:var(--white);vertical-align:text-bottom;margin-left:2px;animation:blink .6s step-end infinite}
+.hero h1 .cursor.fade{animation:none;opacity:0;transition:opacity .4s ease}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:0}}
+.hero-sub{font-family:var(--fb);font-weight:400;font-size:clamp(16px,1.8vw,20px);color:var(--steel);margin-bottom:44px;max-width:480px;line-height:1.5;opacity:0;animation:fu 1.2s ease forwards 4.6s}
+.hero-ctas{display:flex;gap:16px;flex-wrap:wrap;justify-content:center;opacity:0;animation:fu 1.2s ease forwards 4.6s}
 .hero-btn{font-family:var(--fh);font-weight:700;font-size:13px;letter-spacing:1.5px;text-transform:uppercase;padding:14px 32px;border-radius:6px;text-decoration:none;transition:all .25s;display:inline-flex;align-items:center;gap:10px;position:relative;overflow:hidden}
 .hero-btn::after,.contact-btn::after{content:'';position:absolute;top:0;left:-100%;width:60%;height:100%;background:linear-gradient(90deg,transparent,rgba(255,255,255,.15),transparent);transition:none;pointer-events:none}
 @keyframes shimmer{0%{left:-100%}100%{left:200%}}
@@ -47,10 +51,9 @@ body{font-family:var(--fb);font-size:17px;line-height:1.65;color:var(--iron);bac
 .hero-btn--events:hover{background:#DFAF42}
 .hero-btn--staffing{color:var(--white);background:var(--navy)}
 .hero-btn--staffing:hover{background:var(--sblue)}
-.hero-scroll{position:absolute;bottom:32px;left:50%;transform:translateX(-50%);clip-path:inset(100% 0 0 0);animation:reveal .6s cubic-bezier(.16,1,.3,1) forwards 2.8s}
+.hero-scroll{position:absolute;bottom:32px;left:50%;transform:translateX(-50%);opacity:0;animation:fu 1.2s ease forwards 4.6s}
 .hero-scroll span{display:block;width:1px;height:40px;background:linear-gradient(to bottom,var(--steel),transparent);margin:0 auto}
 @keyframes fu{to{opacity:1}}
-@keyframes reveal{to{clip-path:inset(0 0 0 0)}}
 
 /* SERVICES */
 .services{padding:120px 48px;background:var(--bone)}
@@ -83,10 +86,10 @@ body{font-family:var(--fb);font-size:17px;line-height:1.65;color:var(--iron);bac
 .card--events .card-services{border-top:1px solid rgba(255,255,255,.06)}
 .card--staffing .card-services{border-top:1px solid rgba(27,42,74,.12)}
 .card-pill{font-family:var(--fb);font-size:12px;font-weight:600;padding:5px 12px;border-radius:20px;transition:box-shadow .3s ease}
-.card--events.card-enter{opacity:0;transform:translateX(-30px);transition:opacity .6s ease,transform .6s cubic-bezier(.16,1,.3,1)}
-.card--staffing.card-enter{opacity:0;transform:translateX(30px);transition:opacity .6s ease,transform .6s cubic-bezier(.16,1,.3,1)}
+.card--events.card-enter{opacity:0;transform:translateX(-80px);transition:opacity .9s ease,transform .9s cubic-bezier(.16,1,.3,1)}
+.card--staffing.card-enter{opacity:0;transform:translateX(80px);transition:opacity .9s ease,transform .9s cubic-bezier(.16,1,.3,1)}
 .card-enter.card-vis{opacity:1;transform:translateX(0)}
-@media(max-width:900px){.card--events.card-enter,.card--staffing.card-enter{transform:translateY(20px) translateX(0)}}
+@media(max-width:900px){.card--events.card-enter,.card--staffing.card-enter{transform:translateY(40px) translateX(0)}}
 .card--events .card-pill{background:rgba(201,146,46,.12);color:var(--amber);border:1px solid rgba(201,146,46,.2)}
 .card--staffing .card-pill{background:rgba(27,42,74,.08);color:var(--navy);border:1px solid rgba(27,42,74,.12)}
 
@@ -94,8 +97,8 @@ body{font-family:var(--fb);font-size:17px;line-height:1.65;color:var(--iron);bac
 .trust{padding:100px 48px;background:var(--white)}
 .trust-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:32px;max-width:1000px;margin:0 auto}
 .trust-item{text-align:center;padding:32px 16px}
-.trust-icon{width:48px;height:48px;border-radius:50%;display:flex;align-items:center;justify-content:center;margin:0 auto 16px;font-size:20px;transform:scale(.85);opacity:0;transition:transform .5s cubic-bezier(.16,1,.3,1),opacity .4s ease}
-.trust-icon.pop{transform:scale(1);opacity:1}
+.trust-icon{width:48px;height:48px;border-radius:50%;display:flex;align-items:center;justify-content:center;margin:0 auto 16px;font-size:20px;transform:scale(.5) translateY(16px);opacity:0;transition:transform .7s cubic-bezier(.16,1,.3,1),opacity .5s ease}
+.trust-icon.pop{transform:scale(1) translateY(0);opacity:1}
 .trust-icon--shield{background:rgba(194,59,34,.06)}
 .trust-icon--check{background:rgba(53,122,56,.06)}
 .trust-icon--pin{background:rgba(61,90,128,.06)}
@@ -168,9 +171,8 @@ body{font-family:var(--fb);font-size:17px;line-height:1.65;color:var(--iron);bac
 .splash-img{position:fixed;z-index:201;object-fit:contain;opacity:0;transition:top .9s cubic-bezier(.4,0,.2,1),left .9s cubic-bezier(.4,0,.2,1),height .9s cubic-bezier(.4,0,.2,1),transform .9s cubic-bezier(.4,0,.2,1)}
 .nav-logo img{opacity:0;transition:opacity .15s}
 body.splash-done .nav-logo img{opacity:1}
-.nav-links{opacity:0;transition:opacity .4s ease}
-body.splash-done .nav-links{opacity:1}
-.page-content{}
+.nav-links{opacity:0;transition:opacity 1.2s ease}
+body.scroll-locked{overflow:hidden}
 
 /* FADE IN */
 .fi{opacity:0;transform:translateY(20px);transition:opacity .6s ease,transform .6s ease}
@@ -181,6 +183,7 @@ body.splash-done .nav-links{opacity:1}
   .splash-img{transition:none}
   #splash{transition:none}
   .hero-overline,.hero h1,.hero-sub,.hero-ctas,.hero-scroll{animation:none;clip-path:none;opacity:1}
+  .hero h1 .cursor{display:none}
   .trust-icon{transform:none;opacity:1;transition:none}
   .card-enter{opacity:1;transform:none;transition:none}
   .hero-btn::after,.contact-btn::after{display:none}
@@ -247,12 +250,14 @@ body.splash-done .nav-links{opacity:1}
 <!-- HERO -->
 <section class="hero">
 <div class="hero-grid"></div>
+<div class="hero-content">
 <div class="hero-overline">Bryan-College Station, TX</div>
-<h1>Two Services.<br>One Team.</h1>
+<h1 id="heroTitle" data-text="Two Services.|One Team."></h1>
 <p class="hero-sub">Event security and mobile bartending for your next event. Contracted workforce solutions for your next project.</p>
 <div class="hero-ctas">
 <a href="/events" class="hero-btn hero-btn--events"><span>←</span> Sheepdog Events</a>
 <a href="/staffing" class="hero-btn hero-btn--staffing">Sheepdog Staffing <span>→</span></a>
+</div>
 </div>
 <div class="hero-scroll"><span></span></div>
 </section>
@@ -334,16 +339,16 @@ body.splash-done .nav-links{opacity:1}
 <a href="/cdn-cgi/l/email-protection#1c75727a735c6f7479796c78737b6879647d6f327f7371" class="contact-btn contact-btn--primary">Email Us</a>
 <button class="contact-btn contact-btn--secondary" onclick="toggleForm()" id="quoteToggle">Request a Quote</button>
 </div>
-<div class="quote-form" id="quoteForm">
+<form class="quote-form" id="quoteForm" action="https://formspree.io/f/placeholder" method="POST">
 <div class="qf-grid">
 <div class="qf-field"><label class="qf-label">Name</label><input type="text" class="qf-input" placeholder="Your name"></div>
 <div class="qf-field"><label class="qf-label">Phone</label><input type="tel" class="qf-input" placeholder="(979) 555-0000"></div>
 <div class="qf-field"><label class="qf-label">Email</label><input type="email" class="qf-input" placeholder="you@email.com"></div>
 <div class="qf-field"><label class="qf-label">Service Needed</label><select class="qf-select"><option value="">Select one</option><option value="events-security">Event Security</option><option value="events-bartending">Mobile Bartending</option><option value="events-both">Security + Bartending</option><option value="staffing">Contracted Staffing</option><option value="other">Not sure yet</option></select></div>
 <div class="qf-full qf-field"><label class="qf-label">Tell us about your event or project</label><textarea class="qf-textarea" placeholder="Date, venue, number of people, what you need - whatever helps us scope it."></textarea></div>
-<div class="qf-full"><button class="qf-submit">Submit Request</button></div>
+<div class="qf-full"><button type="submit" class="qf-submit">Submit Request</button></div>
 </div>
-</div>
+</form>
 <a href="tel:9792040945" class="contact-phone fi"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:middle;margin-right:8px"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg>979.204.0945</a>
 </section>
 
@@ -351,7 +356,7 @@ body.splash-done .nav-links{opacity:1}
 <footer class="footer">
 <div class="footer-inner">
 <div class="footer-brand">
-<img src="sheepdog-stacked-white.svg" alt="Sheepdog" style="height:64px;width:auto;object-fit:contain">
+<img src="sheepdog-stacked-white.svg" alt="Sheepdog - Event Security, Mobile Bartending & Workforce Solutions" style="height:64px;width:auto;object-fit:contain">
 </div>
 <div class="footer-links">
 <a href="/events" class="footer-link">Events</a>
@@ -384,6 +389,7 @@ function toggleForm() {
 // Scroll to top on load (prevent browser restoring scroll position)
 if ('scrollRestoration' in history) history.scrollRestoration = 'manual';
 window.scrollTo(0, 0);
+document.body.classList.add('scroll-locked');
 
 // Splash animation
 (function() {
@@ -459,6 +465,58 @@ window.scrollTo(0, 0);
   }, 2100);
 })();
 
+// Unlock scroll + show nav links after hero animation completes
+setTimeout(() => {
+  document.body.classList.remove('scroll-locked');
+  document.querySelector('.nav-links').style.opacity = '1';
+}, 5800);
+
+// #6 Hero typewriter
+(function() {
+  const el = document.getElementById('heroTitle');
+  if (!el) return;
+  const lines = el.dataset.text.split('|');
+  const delay = 1500; // start when splash fades
+  const charSpeed = 45;
+  let html = '';
+  let totalChars = 0;
+
+  setTimeout(() => {
+    el.style.opacity = '1';
+    let cursor = document.createElement('span');
+    cursor.className = 'cursor';
+    el.appendChild(cursor);
+
+    let lineIdx = 0;
+    let charIdx = 0;
+
+    function type() {
+      if (lineIdx >= lines.length) {
+        setTimeout(() => cursor.classList.add('fade'), 800);
+        return;
+      }
+      const line = lines[lineIdx];
+      if (charIdx < line.length) {
+        cursor.before(document.createTextNode(line[charIdx]));
+        charIdx++;
+        setTimeout(type, charSpeed);
+      } else {
+        lineIdx++;
+        charIdx = 0;
+        if (lineIdx < lines.length) {
+          cursor.before(document.createElement('br'));
+          setTimeout(type, 900); // blink blink pause between lines
+        } else {
+          type();
+        }
+      }
+    }
+
+    // blink a couple times before typing starts
+    setTimeout(type, 1000);
+  }, delay);
+})();
+
 // Nav background on scroll + scroll progress (#8, #10)
 const nav = document.getElementById('nav');
 const scrollBar = document.getElementById('scrollProgress');
@@ -504,7 +562,7 @@ const cardsObs = new IntersectionObserver(entries => {
     if (e.isIntersecting) {
       const cards = e.target.querySelectorAll('.card-enter');
       cards.forEach((c, i) => {
-        setTimeout(() => c.classList.add('card-vis'), i * 150);
+        setTimeout(() => c.classList.add('card-vis'), i * 250);
       });
       cardsObs.unobserve(e.target);
     }
@@ -519,7 +577,7 @@ const trustObs = new IntersectionObserver(entries => {
   entries.forEach(e => {
     if (e.isIntersecting) {
       trustIcons.forEach((icon, i) => {
-        setTimeout(() => icon.classList.add('pop'), i * 100);
+        setTimeout(() => icon.classList.add('pop'), i * 200);
       });
       trustObs.unobserve(e.target);
     }
