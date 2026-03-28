@@ -372,9 +372,8 @@ body.scroll-locked{overflow:hidden}
 </div><!-- /page-content -->
 
 <script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script>
-// Supabase config
+// Contact form submit via Supabase Edge Function
 const SUPABASE_URL = 'https://sezzqhmsfulclcqmfwja.supabase.co';
-const SUPABASE_ANON = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNlenpxaG1zZnVsY2xjcW1md2phIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQ3MjcyMTcsImV4cCI6MjA5MDMwMzIxN30.dimodXsa6C40hWhVqpt4nVpsM6t_gwCiKstxAJHaWmw';
 
 async function submitForm(e) {
   e.preventDefault();
@@ -393,14 +392,9 @@ async function submitForm(e) {
   };
 
   try {
-    const res = await fetch(SUPABASE_URL + '/rest/v1/contact_submissions', {
+    const res = await fetch(SUPABASE_URL + '/functions/v1/contact-submit', {
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'apikey': SUPABASE_ANON,
-        'Authorization': 'Bearer ' + SUPABASE_ANON,
-        'Prefer': 'return=minimal'
-      },
+      headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(data)
     });
     if (res.ok) {
