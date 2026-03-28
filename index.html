@@ -402,11 +402,8 @@ async function submitForm(e) {
       btn.textContent = 'Sent! We\'ll be in touch.';
       btn.style.background = '#357A38';
       form.reset();
-      setTimeout(() => {
-        form.classList.remove('open');
-        form.style.opacity = '0';
-        setTimeout(() => { form.style.maxHeight = '0'; form.style.margin = '0'; }, 400);
-      }, 2000);
+      form.style.opacity = '0';
+      setTimeout(() => { form.style.maxHeight = '0'; form.style.margin = '0'; }, 400);
     } else {
       throw new Error(result.error || 'Failed');
     }
