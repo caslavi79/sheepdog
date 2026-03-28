@@ -243,8 +243,8 @@ body.scroll-locked{overflow:hidden}
 <div class="nav-links">
 <a href="/events" class="nav-link">Events</a>
 <a href="/staffing" class="nav-link">Staffing</a>
-<a href="#about" class="nav-link">About</a>
-<a href="#contact" class="nav-cta">Contact Us</a>
+<a href="#about" class="nav-link" onclick="event.preventDefault();document.getElementById('about').scrollIntoView({behavior:'smooth'})">About</a>
+<a href="#contact" class="nav-cta" onclick="event.preventDefault();document.getElementById('contact').scrollIntoView({behavior:'smooth'})">Contact Us</a>
 </div>
 </nav>
 
@@ -363,8 +363,8 @@ body.scroll-locked{overflow:hidden}
 <div class="footer-links">
 <a href="/events" class="footer-link">Events</a>
 <a href="/staffing" class="footer-link">Staffing</a>
-<a href="#about" class="footer-link">About</a>
-<a href="#contact" class="footer-link">Contact</a>
+<a href="#about" class="footer-link" onclick="event.preventDefault();document.getElementById('about').scrollIntoView({behavior:'smooth'})">About</a>
+<a href="#contact" class="footer-link" onclick="event.preventDefault();document.getElementById('contact').scrollIntoView({behavior:'smooth'})">Contact</a>
 </div>
 <div class="footer-copy">&copy; 2026 Sheepdog Security LLC. All rights reserved.</div>
 </div>
