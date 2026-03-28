@@ -108,7 +108,7 @@ body.hero-glow .hero::before{opacity:1}
 .section-tag{font-family:var(--fb);font-size:12px;font-weight:600;letter-spacing:2.5px;text-transform:uppercase;color:var(--red);margin-bottom:12px}
 .section-title{font-family:var(--fh);font-weight:700;font-size:clamp(28px,4vw,36px);line-height:1.15;letter-spacing:-0.25px;color:var(--graphite);margin-bottom:16px}
 .section-lead{font-size:18px;line-height:1.6;color:var(--iron);max-width:620px;margin-bottom:64px}
-.cards{display:grid;grid-template-columns:1fr 1fr;gap:24px;max-width:1200px}
+.cards{display:grid;grid-template-columns:1fr 1fr;gap:24px;max-width:1200px;margin-left:auto;margin-right:auto}
 .card{border-radius:6px;padding:32px;position:relative;overflow:hidden;transition:transform .3s,box-shadow .3s,border-top-width .3s}
 .card:hover{transform:translateY(-4px);box-shadow:0 16px 48px rgba(0,0,0,.12);border-top-width:5px}
 .card--events:hover .card-pill{box-shadow:0 0 12px rgba(201,146,46,.3)}
@@ -293,7 +293,7 @@ body.scroll-locked{overflow:hidden}
 </div>
 </nav>
 
-<div class="page-content">
+<main class="page-content">
 <!-- HERO -->
 <section class="hero">
 <div class="hero-grid"></div>
@@ -384,7 +384,7 @@ body.scroll-locked{overflow:hidden}
 <p class="contact-sub fi">Tell us about your event or staffing need. We respond within 24 hours.</p>
 <div class="contact-actions fi">
 <a href="mailto:sheepdogsecurityllc@gmail.com" class="contact-btn contact-btn--primary">Email Us</a>
-<button class="contact-btn contact-btn--secondary" onclick="toggleForm()" id="quoteToggle">Request a Quote</button>
+<button type="button" class="contact-btn contact-btn--secondary" onclick="toggleForm()" id="quoteToggle">Request a Quote</button>
 </div>
 <form class="quote-form" id="quoteForm" onsubmit="return submitForm(event)">
 <div class="qf-grid">
@@ -415,7 +415,7 @@ body.scroll-locked{overflow:hidden}
 <div class="footer-copy">&copy; 2026 Sheepdog Security LLC. All rights reserved.</div>
 </div>
 </footer>
-</div><!-- /page-content -->
+</main><!-- /page-content -->
 
 <script>
 // Contact form submit via Supabase Edge Function
