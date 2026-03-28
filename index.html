@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Sheepdog Texas | Event Security, Mobile Bartending & Staffing in Bryan-College Station, TX</title>
-<meta name="description" content="Sheepdog provides professional event security, mobile bartending, and contracted workforce staffing in Bryan-College Station, TX. Licensed, insured, locally owned. Get a free quote today.">
+<meta name="description" content="Professional event security, mobile bartending & contracted staffing in Bryan-College Station, TX. Licensed, insured, locally owned. Get a free quote today.">
 <link rel="canonical" href="https://sheepdogtexas.com/">
 <meta name="robots" content="index, follow">
 <meta name="geo.region" content="US-TX">
@@ -17,7 +17,10 @@
 <meta property="og:image" content="https://sheepdogtexas.com/og-image.png">
 <meta property="og:image:width" content="1200">
 <meta property="og:image:height" content="630">
+<meta property="og:site_name" content="Sheepdog Texas">
 <meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Sheepdog Texas | Event Security, Mobile Bartending & Staffing in Bryan-College Station, TX">
+<meta name="twitter:description" content="Professional event security, mobile bartending & contracted staffing in Bryan-College Station, TX. Licensed, insured, locally owned. Get a free quote today.">
 <meta name="twitter:image" content="https://sheepdogtexas.com/og-image.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -167,7 +170,7 @@ body.hero-glow .hero::before{opacity:1}
 
 /* QUOTE FORM */
 .quote-form{max-height:0;overflow:hidden;transition:max-height .5s ease,margin .5s ease,opacity .4s ease;opacity:0;max-width:520px;margin:0 auto}
-.quote-form.open{max-height:600px;margin-top:40px;opacity:1}
+.quote-form.open{max-height:1200px;margin-top:40px;opacity:1}
 .qf-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px}
 .qf-full{grid-column:1/-1}
 .qf-label{display:block;font-family:var(--fb);font-size:11px;font-weight:600;letter-spacing:1.5px;text-transform:uppercase;color:var(--steel);margin-bottom:6px;text-align:left}
@@ -386,11 +389,11 @@ body.scroll-locked{overflow:hidden}
 <form class="quote-form" id="quoteForm" onsubmit="return submitForm(event)">
 <div class="qf-grid">
 <div style="position:absolute;left:-9999px"><input type="text" name="website" tabindex="-1" autocomplete="off"></div>
-<div class="qf-field"><label class="qf-label">Name</label><input type="text" name="name" class="qf-input" placeholder="Your name" required></div>
-<div class="qf-field"><label class="qf-label">Phone</label><input type="tel" name="phone" class="qf-input" placeholder="(979) 555-0000"></div>
-<div class="qf-field"><label class="qf-label">Email</label><input type="email" name="email" class="qf-input" placeholder="you@email.com" required></div>
-<div class="qf-field"><label class="qf-label">Service Needed</label><select name="service" class="qf-select" required><option value="">Select one</option><option value="events-security">Event Security</option><option value="events-bartending">Mobile Bartending</option><option value="events-both">Security + Bartending</option><option value="staffing">Contracted Staffing</option><option value="other">Not sure yet</option></select></div>
-<div class="qf-full qf-field"><label class="qf-label">Tell us about your event or project</label><textarea name="message" class="qf-textarea" placeholder="Date, venue, number of people, what you need - whatever helps us scope it." required oninput="this.style.height='auto';this.style.height=this.scrollHeight+'px'"></textarea></div>
+<div class="qf-field"><label class="qf-label" for="qf-name">Name</label><input type="text" id="qf-name" name="name" class="qf-input" placeholder="Your name" required></div>
+<div class="qf-field"><label class="qf-label" for="qf-phone">Phone</label><input type="tel" id="qf-phone" name="phone" class="qf-input" placeholder="(979) 555-0000"></div>
+<div class="qf-field"><label class="qf-label" for="qf-email">Email</label><input type="email" id="qf-email" name="email" class="qf-input" placeholder="you@email.com" required></div>
+<div class="qf-field"><label class="qf-label" for="qf-service">Service Needed</label><select id="qf-service" name="service" class="qf-select" required><option value="">Select one</option><option value="events-security">Event Security</option><option value="events-bartending">Mobile Bartending</option><option value="events-both">Security + Bartending</option><option value="staffing">Contracted Staffing</option><option value="other">Not sure yet</option></select></div>
+<div class="qf-full qf-field"><label class="qf-label" for="qf-message">Tell us about your event or project</label><textarea id="qf-message" name="message" class="qf-textarea" placeholder="Date, venue, number of people, what you need - whatever helps us scope it." required oninput="this.style.height='auto';this.style.height=this.scrollHeight+'px'"></textarea></div>
 <div class="qf-full"><button type="submit" class="qf-submit">Submit Request</button></div>
 </div>
 </form>
