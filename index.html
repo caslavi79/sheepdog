@@ -1,0 +1,420 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Sheepdog | Event Security, Mobile Bartending & Workforce Solutions</title>
+<meta name="description" content="Sheepdog provides event security, mobile bartending, and contracted workforce solutions across Bryan-College Station, TX. Two service lines, one trusted team.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Barlow:wght@400;500;600;700;800;900&family=Barlow+Semi+Condensed:wght@700;800;900&family=Source+Sans+3:ital,wght@0,300;0,400;0,600;0,700;1,400&display=swap" rel="stylesheet">
+<style>
+:root{--black:#0C0C0C;--char:#161616;--graphite:#2A2A2A;--iron:#4A4A4A;--slate:#6B6B6B;--steel:#7A8490;--silver:#A0A0A0;--fog:#D0D0D0;--bone:#F4F3F1;--white:#FFFFFF;--red:#C23B22;--amber:#C9922E;--navy:#1B2A4A;--sblue:#3D5A80;--fd:'Barlow Semi Condensed',sans-serif;--fh:'Barlow',sans-serif;--fb:'Source Sans 3',sans-serif}
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{font-family:var(--fb);font-size:17px;line-height:1.65;color:var(--iron);background:var(--white);-webkit-font-smoothing:antialiased}
+
+/* NAV */
+.nav{position:fixed;top:0;left:0;right:0;z-index:100;padding:0 48px;height:72px;display:flex;align-items:center;transition:background .4s,box-shadow .4s}
+.nav.scrolled{background:rgba(12,12,12,.97);backdrop-filter:blur(12px);box-shadow:0 1px 0 rgba(255,255,255,.04)}
+.nav-logo{display:flex;align-items:center;gap:0;text-decoration:none;margin-right:auto}
+.nav-logo svg{width:32px;height:32px}
+.nav-logo span{display:none}
+.nav-links{display:flex;gap:32px;align-items:center}
+.nav-link{font-family:var(--fh);font-weight:600;font-size:13px;letter-spacing:.5px;color:var(--steel);text-decoration:none;transition:color .2s}
+.nav-link:hover{color:var(--white)}
+.nav-cta{font-family:var(--fh);font-weight:700;font-size:12px;letter-spacing:1.5px;text-transform:uppercase;color:var(--white);background:var(--red);padding:10px 24px;border-radius:4px;text-decoration:none;transition:background .2s}
+.nav-cta:hover{background:#A83220}
+
+/* HERO */
+.hero{min-height:100vh;background:var(--black);display:flex;flex-direction:column;justify-content:center;align-items:center;text-align:center;padding:120px 48px 80px;position:relative;overflow:hidden}
+.hero::before{content:'';position:absolute;inset:0;background:radial-gradient(ellipse at 50% 45%,rgba(255,255,255,.02),transparent 60%);pointer-events:none}
+.hero-grid{position:absolute;inset:0;background:repeating-linear-gradient(90deg,transparent,transparent 119px,rgba(255,255,255,.008) 119px,rgba(255,255,255,.008) 120px),repeating-linear-gradient(0deg,transparent,transparent 119px,rgba(255,255,255,.008) 119px,rgba(255,255,255,.008) 120px);pointer-events:none}
+.hero-overline{font-family:var(--fb);font-size:12px;font-weight:600;letter-spacing:4px;text-transform:uppercase;color:var(--steel);margin-bottom:24px;opacity:0;animation:fu .6s ease forwards 1.9s}
+.hero h1{font-family:var(--fd);font-weight:800;font-size:clamp(40px,6.5vw,80px);line-height:.9;letter-spacing:-2px;text-transform:uppercase;color:var(--white);margin-bottom:20px;opacity:0;animation:fu .6s ease forwards 2.1s}
+.hero-sub{font-family:var(--fb);font-weight:400;font-size:clamp(16px,1.8vw,20px);color:var(--steel);margin-bottom:44px;max-width:480px;line-height:1.5;opacity:0;animation:fu .6s ease forwards 2.3s}
+.hero-ctas{display:flex;gap:16px;flex-wrap:wrap;justify-content:center;opacity:0;animation:fu .6s ease forwards 2.5s}
+.hero-btn{font-family:var(--fh);font-weight:700;font-size:13px;letter-spacing:1.5px;text-transform:uppercase;padding:14px 32px;border-radius:6px;text-decoration:none;transition:all .25s;display:inline-flex;align-items:center;gap:10px}
+.hero-btn--events{color:var(--black);background:var(--amber)}
+.hero-btn--events:hover{background:#DFAF42}
+.hero-btn--staffing{color:var(--white);background:var(--navy)}
+.hero-btn--staffing:hover{background:var(--sblue)}
+.hero-scroll{position:absolute;bottom:32px;left:50%;transform:translateX(-50%);opacity:0;animation:fu .6s ease forwards 2.8s}
+.hero-scroll span{display:block;width:1px;height:40px;background:linear-gradient(to bottom,var(--steel),transparent);margin:0 auto}
+@keyframes fu{to{opacity:1}}
+
+/* SERVICES */
+.services{padding:120px 48px;background:var(--bone)}
+.section-tag{font-family:var(--fb);font-size:12px;font-weight:600;letter-spacing:3px;text-transform:uppercase;color:var(--red);margin-bottom:12px}
+.section-title{font-family:var(--fh);font-weight:800;font-size:clamp(32px,4vw,48px);line-height:1.08;color:var(--graphite);margin-bottom:16px}
+.section-lead{font-size:18px;line-height:1.6;color:var(--iron);max-width:580px;margin-bottom:64px}
+.cards{display:grid;grid-template-columns:1fr 1fr;gap:24px;max-width:1200px}
+.card{border-radius:12px;padding:48px;position:relative;overflow:hidden;transition:transform .3s,box-shadow .3s}
+.card:hover{transform:translateY(-4px);box-shadow:0 16px 48px rgba(0,0,0,.12)}
+.card--events{background:var(--char);border:1px solid rgba(255,255,255,.06);border-top:3px solid var(--amber)}
+.card--staffing{background:var(--white);border:1px solid var(--fog);border-top:3px solid var(--navy);text-align:right}
+.card--staffing .card-link{justify-content:flex-end}
+.card--staffing .card-services{justify-content:flex-end}
+.card-overline{font-family:var(--fb);font-size:11px;font-weight:600;letter-spacing:2.5px;text-transform:uppercase;margin-bottom:16px}
+.card--events .card-overline{color:var(--amber)}
+.card--staffing .card-overline{color:var(--navy)}
+.card-title{font-family:var(--fh);font-weight:800;font-size:28px;margin-bottom:12px}
+.card--events .card-title{color:var(--white)}
+.card--staffing .card-title{color:var(--graphite)}
+.card-desc{font-size:16px;line-height:1.6;margin-bottom:28px}
+.card--events .card-desc{color:var(--steel)}
+.card--staffing .card-desc{color:var(--iron)}
+.card-link{font-family:var(--fh);font-weight:700;font-size:13px;letter-spacing:1.5px;text-transform:uppercase;text-decoration:none;display:inline-flex;align-items:center;gap:8px;transition:gap .2s}
+.card-link:hover{gap:14px}
+.card--events .card-link{color:var(--amber)}
+.card--staffing .card-link{color:var(--navy)}
+.card-services{margin-top:20px;padding-top:20px;display:flex;flex-wrap:wrap;gap:8px}
+.card--events .card-services{border-top:1px solid rgba(255,255,255,.06)}
+.card--staffing .card-services{border-top:1px solid rgba(27,42,74,.12)}
+.card-pill{font-family:var(--fb);font-size:12px;font-weight:600;padding:5px 12px;border-radius:20px}
+.card--events .card-pill{background:rgba(201,146,46,.12);color:var(--amber);border:1px solid rgba(201,146,46,.2)}
+.card--staffing .card-pill{background:rgba(27,42,74,.08);color:var(--navy);border:1px solid rgba(27,42,74,.12)}
+
+/* TRUST */
+.trust{padding:100px 48px;background:var(--white)}
+.trust-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:32px;max-width:1000px;margin:0 auto}
+.trust-item{text-align:center;padding:32px 16px}
+.trust-icon{width:48px;height:48px;border-radius:50%;display:flex;align-items:center;justify-content:center;margin:0 auto 16px;font-size:20px}
+.trust-icon--shield{background:rgba(194,59,34,.06)}
+.trust-icon--check{background:rgba(53,122,56,.06)}
+.trust-icon--pin{background:rgba(61,90,128,.06)}
+.trust-icon--clock{background:rgba(201,146,46,.06)}
+.trust-title{font-family:var(--fh);font-weight:700;font-size:17px;color:var(--graphite);margin-bottom:6px}
+.trust-desc{font-size:14px;color:var(--steel);line-height:1.5}
+
+/* CONTACT CTA */
+.contact{padding:100px 48px;background:var(--black);text-align:center;position:relative;overflow:hidden}
+.contact::before{content:'';position:absolute;inset:0;background:radial-gradient(ellipse at 50% 50%,rgba(194,59,34,.04),transparent 60%);pointer-events:none}
+.contact h2{font-family:var(--fd);font-weight:800;font-size:clamp(36px,5vw,56px);text-transform:uppercase;color:var(--white);margin-bottom:16px;position:relative}
+.contact-sub{font-family:var(--fb);font-size:18px;color:var(--steel);margin-bottom:40px;max-width:480px;margin-left:auto;margin-right:auto;position:relative}
+.contact-actions{display:flex;gap:16px;justify-content:center;flex-wrap:wrap;position:relative;transition:gap .5s ease}
+.contact-btn{font-family:var(--fh);font-weight:700;font-size:15px;letter-spacing:1.5px;text-transform:uppercase;padding:16px 40px;border-radius:4px;text-decoration:none;transition:all .25s}
+.contact-btn--primary{color:var(--white);background:var(--red);transition:all .5s ease}
+.contact-btn--primary:hover{background:#A83220}
+.contact-btn--secondary{color:var(--white);border:2px solid var(--white);background:transparent;cursor:pointer;font-family:var(--fh);font-weight:700;font-size:15px;letter-spacing:1.5px;text-transform:uppercase;padding:16px 40px;border-radius:4px;transition:all .5s ease;overflow:hidden;white-space:nowrap}
+.contact-btn--secondary:hover{background:rgba(255,255,255,.06)}
+.contact-phone{font-family:var(--fd);font-weight:800;font-size:24px;color:var(--white);margin-top:32px;text-decoration:none;display:inline-block;letter-spacing:1px;position:relative}
+
+/* QUOTE FORM */
+.quote-form{max-height:0;overflow:hidden;transition:max-height .5s ease,margin .5s ease,opacity .4s ease;opacity:0;max-width:520px;margin:0 auto}
+.quote-form.open{max-height:600px;margin-top:40px;opacity:1}
+.qf-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+.qf-full{grid-column:1/-1}
+.qf-label{display:block;font-family:var(--fb);font-size:11px;font-weight:600;letter-spacing:1.5px;text-transform:uppercase;color:var(--steel);margin-bottom:6px;text-align:left}
+.qf-input,.qf-select,.qf-textarea{width:100%;font-family:var(--fb);font-size:15px;padding:14px 16px;border-radius:4px;border:1px solid rgba(255,255,255,.1);background:rgba(255,255,255,.04);color:var(--white);outline:none;transition:border-color .2s}
+.qf-input::placeholder,.qf-textarea::placeholder{color:var(--slate)}
+.qf-input:focus,.qf-select:focus,.qf-textarea:focus{border-color:var(--red)}
+.qf-select{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%237A8490' stroke-width='1.5' fill='none'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 16px center;cursor:pointer}
+.qf-select option{background:var(--char);color:var(--white)}
+.qf-textarea{resize:vertical;min-height:100px}
+.qf-submit{width:100%;font-family:var(--fh);font-weight:700;font-size:14px;letter-spacing:1.5px;text-transform:uppercase;color:var(--white);background:var(--red);border:none;padding:16px;border-radius:4px;cursor:pointer;transition:background .2s;margin-top:8px}
+.qf-submit:hover{background:#A83220}
+
+/* FOOTER */
+.footer{padding:48px;background:var(--char);border-top:1px solid rgba(255,255,255,.04)}
+.footer-inner{max-width:1000px;margin:0 auto;display:flex;align-items:center;justify-content:space-between}
+.footer-brand{display:flex;align-items:center;gap:10px}
+.footer-brand svg{width:24px;height:24px}
+.footer-brand span{display:none}
+.footer-links{display:flex;gap:24px}
+.footer-link{font-family:var(--fb);font-size:13px;color:var(--steel);text-decoration:none;transition:color .2s}
+.footer-link:hover{color:var(--white)}
+.footer-copy{font-family:var(--fb);font-size:12px;color:var(--slate)}
+
+/* SPLASH */
+#splash{position:fixed;inset:0;z-index:200;background:var(--black);transition:opacity .4s ease}
+#splash.fade-out{opacity:0;pointer-events:none}
+.splash-img{position:fixed;z-index:201;object-fit:contain;opacity:0;transition:top .9s cubic-bezier(.4,0,.2,1),left .9s cubic-bezier(.4,0,.2,1),height .9s cubic-bezier(.4,0,.2,1),transform .9s cubic-bezier(.4,0,.2,1)}
+.nav-logo img{opacity:0;transition:opacity .15s}
+body.splash-done .nav-logo img{opacity:1}
+.nav-links{opacity:0;transition:opacity .4s ease}
+body.splash-done .nav-links{opacity:1}
+.page-content{}
+
+/* FADE IN */
+.fi{opacity:0;transform:translateY(24px);transition:opacity .7s ease,transform .7s ease}
+.fi.vis{opacity:1;transform:translateY(0)}
+
+@media(max-width:900px){
+  .nav{padding:0 24px;height:64px}
+  .nav-links{gap:20px}
+  .hero{padding:100px 24px 60px}
+  .services,.trust,.contact{padding:80px 24px}
+  .cards{grid-template-columns:1fr}
+  .trust-grid{grid-template-columns:1fr 1fr;gap:20px}
+  .footer-inner{flex-direction:column;gap:20px;text-align:center}
+  .footer-links{justify-content:center}
+}
+@media(max-width:600px){
+  .hero-ctas{flex-direction:column;width:100%;max-width:320px}
+  .hero-btn{justify-content:center}
+  .trust-grid{grid-template-columns:1fr}
+  .nav-links .nav-link{display:none}
+  .contact-actions{flex-direction:column;align-items:center}
+  .qf-grid{grid-template-columns:1fr}
+}
+</style>
+</head>
+<body>
+
+<!-- SPLASH -->
+<div id="splash"></div>
+<img src="sheepdog-mark-white.svg" alt="" class="splash-img" id="splashMark">
+<img src="sheepdog-wordmark-white.svg" alt="" class="splash-img" id="splashWord">
+
+<!-- NAV -->
+<nav class="nav" id="nav">
+<a href="/" class="nav-logo">
+<img src="sheepdog-mark-white.svg" alt="" style="height:40px;width:auto;object-fit:contain">
+<img src="sheepdog-wordmark-white.svg" alt="Sheepdog" style="height:22px;width:auto;object-fit:contain;margin-left:6px">
+</a>
+<div class="nav-links">
+<a href="/events" class="nav-link">Events</a>
+<a href="/staffing" class="nav-link">Staffing</a>
+<a href="#about" class="nav-link">About</a>
+<a href="#contact" class="nav-cta">Contact Us</a>
+</div>
+</nav>
+
+<div class="page-content">
+<!-- HERO -->
+<section class="hero">
+<div class="hero-grid"></div>
+<div class="hero-overline">Bryan-College Station, TX</div>
+<h1>Two Services.<br>One Team.</h1>
+<p class="hero-sub">Event security and mobile bartending for your next event. Contracted workforce solutions for your next project.</p>
+<div class="hero-ctas">
+<a href="/events" class="hero-btn hero-btn--events"><span>←</span> Sheepdog Events</a>
+<a href="/staffing" class="hero-btn hero-btn--staffing">Sheepdog Staffing <span>→</span></a>
+</div>
+<div class="hero-scroll"><span></span></div>
+</section>
+
+<!-- SERVICES -->
+<section class="services" id="about">
+<div class="fi">
+<div class="section-tag">What We Do</div>
+<div class="section-title">Built for Two Kinds of Work</div>
+<p class="section-lead">Sheepdog runs two service lines under one roof. Both are locally owned, fully insured, and built on the same standard: vetted people who show up ready.</p>
+</div>
+
+<div class="cards fi">
+<div class="card card--events">
+<div class="card-overline">Sheepdog Events</div>
+<div class="card-title">Security & Bartending</div>
+<div class="card-desc">Professional event security and mobile bartending for bars, weddings, concerts, festivals, Greek life, and private parties. One team handles both - one point of contact, one invoice.</div>
+<a href="/events" class="card-link"><span>←</span> Explore Events</a>
+<div class="card-services">
+<span class="card-pill">Bar Security</span>
+<span class="card-pill">Weddings</span>
+<span class="card-pill">Concerts</span>
+<span class="card-pill">Festivals</span>
+<span class="card-pill">Mobile Bartending</span>
+<span class="card-pill">Private Events</span>
+</div>
+</div>
+<div class="card card--staffing">
+<div class="card-overline">Sheepdog Staffing</div>
+<div class="card-title">Contract Workforce</div>
+<div class="card-desc">Vetted, managed contracted workers for companies that need labor at scale. Field operations, logistics, facility maintenance, warehouse staffing, and project-based labor. You define the scope - we deliver the people.</div>
+<a href="/staffing" class="card-link">Explore Staffing <span>→</span></a>
+<div class="card-services">
+<span class="card-pill">Field Ops</span>
+<span class="card-pill">Logistics</span>
+<span class="card-pill">Facilities</span>
+<span class="card-pill">Warehouse</span>
+<span class="card-pill">Project Labor</span>
+</div>
+</div>
+</div>
+</section>
+
+<!-- TRUST -->
+<section class="trust">
+<div class="fi" style="text-align:center;margin-bottom:56px;">
+<div class="section-tag">Why Sheepdog</div>
+<div class="section-title">The Standard We Hold</div>
+</div>
+<div class="trust-grid fi">
+<div class="trust-item">
+<div class="trust-icon trust-icon--shield">🛡</div>
+<div class="trust-title">Licensed & Insured</div>
+<div class="trust-desc">Level II and Level III security licensed under TX DPS. Fully insured for every job.</div>
+</div>
+<div class="trust-item">
+<div class="trust-icon trust-icon--check">✓</div>
+<div class="trust-title">Background Checked</div>
+<div class="trust-desc">Every team member is vetted, documented, and cleared before they're assigned to a job.</div>
+</div>
+<div class="trust-item">
+<div class="trust-icon trust-icon--pin">📍</div>
+<div class="trust-title">Locally Owned</div>
+<div class="trust-desc">Based in Bryan-College Station. We know the venues, the community, and the standards.</div>
+</div>
+<div class="trust-item">
+<div class="trust-icon trust-icon--clock">⏱</div>
+<div class="trust-title">We Show Up Ready</div>
+<div class="trust-desc">Trained, uniformed, on time. Briefed on the job before we arrive. No scrambling.</div>
+</div>
+</div>
+</section>
+
+<!-- CONTACT -->
+<section class="contact" id="contact">
+<h2 class="fi">Ready to Get Started?</h2>
+<p class="contact-sub fi">Tell us about your event or staffing need. We respond within 24 hours.</p>
+<div class="contact-actions fi">
+<a href="/cdn-cgi/l/email-protection#1c75727a735c6f7479796c78737b6879647d6f327f7371" class="contact-btn contact-btn--primary">Email Us</a>
+<button class="contact-btn contact-btn--secondary" onclick="toggleForm()" id="quoteToggle">Request a Quote</button>
+</div>
+<div class="quote-form" id="quoteForm">
+<div class="qf-grid">
+<div><label class="qf-label">Name</label><input type="text" class="qf-input" placeholder="Your name"></div>
+<div><label class="qf-label">Phone</label><input type="tel" class="qf-input" placeholder="(979) 555-0000"></div>
+<div><label class="qf-label">Email</label><input type="email" class="qf-input" placeholder="you@email.com"></div>
+<div><label class="qf-label">Service Needed</label><select class="qf-select"><option value="">Select one</option><option value="events-security">Event Security</option><option value="events-bartending">Mobile Bartending</option><option value="events-both">Security + Bartending</option><option value="staffing">Contracted Staffing</option><option value="other">Not sure yet</option></select></div>
+<div class="qf-full"><label class="qf-label">Tell us about your event or project</label><textarea class="qf-textarea" placeholder="Date, venue, number of people, what you need - whatever helps us scope it."></textarea></div>
+<div class="qf-full"><button class="qf-submit">Submit Request</button></div>
+</div>
+</div>
+<a href="tel:9792040945" class="contact-phone fi">979.204.0945</a>
+</section>
+
+<!-- FOOTER -->
+<footer class="footer">
+<div class="footer-inner">
+<div class="footer-brand">
+<img src="sheepdog-mark-white.svg" alt="" style="height:24px;width:auto;object-fit:contain">
+<img src="sheepdog-wordmark-white.svg" alt="Sheepdog" style="height:12px;width:auto;object-fit:contain">
+</div>
+<div class="footer-links">
+<a href="/events" class="footer-link">Events</a>
+<a href="/staffing" class="footer-link">Staffing</a>
+<a href="#about" class="footer-link">About</a>
+<a href="#contact" class="footer-link">Contact</a>
+</div>
+<div class="footer-copy">&copy; 2026 Sheepdog Security LLC. All rights reserved.</div>
+</div>
+</footer>
+</div><!-- /page-content -->
+
+<script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script>
+// Quote form toggle
+function toggleForm() {
+  const form = document.getElementById('quoteForm');
+  const btn = document.getElementById('quoteToggle');
+  const actions = btn.parentElement;
+  form.classList.add('open');
+  btn.style.opacity = '0';
+  btn.style.width = '0';
+  btn.style.padding = '0';
+  btn.style.border = '0';
+  btn.style.fontSize = '0';
+  btn.style.letterSpacing = '0';
+  btn.style.pointerEvents = 'none';
+  actions.style.gap = '0';
+}
+
+// Scroll to top on load (prevent browser restoring scroll position)
+if ('scrollRestoration' in history) history.scrollRestoration = 'manual';
+window.scrollTo(0, 0);
+
+// Splash animation
+(function() {
+  const splash = document.getElementById('splash');
+  const sMark = document.getElementById('splashMark');
+  const sWord = document.getElementById('splashWord');
+  const navMark = document.querySelector('.nav-logo img:first-child');
+  const navWord = document.querySelector('.nav-logo img:last-child');
+
+  // Starting sizes
+  const markH = 200;
+  const wordH = 48;
+  const gap = 14;
+
+  // Calculate center start positions (stacked: mark on top, word below)
+  const totalH = markH + gap + wordH;
+  const markAspect = sMark.naturalWidth / sMark.naturalHeight || 1.19;
+  const wordAspect = sWord.naturalWidth / sWord.naturalHeight || 8.22;
+  const markW = markH * markAspect;
+  const wordW = wordH * wordAspect;
+
+  const centerX = window.innerWidth / 2;
+  const centerY = window.innerHeight / 2;
+
+  // Place at center immediately (no transition yet)
+  sMark.style.transition = 'none';
+  sWord.style.transition = 'none';
+  sMark.style.height = markH + 'px';
+  sMark.style.top = (centerY - totalH / 2) + 'px';
+  sMark.style.left = (centerX - markW / 2) + 'px';
+  sWord.style.height = wordH + 'px';
+  sWord.style.top = (centerY - totalH / 2 + markH + gap) + 'px';
+  sWord.style.left = (centerX - wordW / 2) + 'px';
+
+  // Force layout so positions apply before transition kicks in
+  sMark.offsetHeight;
+  sWord.offsetHeight;
+
+  // Show images now that they're positioned, then re-enable transitions
+  sMark.style.opacity = '1';
+  sWord.style.opacity = '1';
+
+  requestAnimationFrame(() => {
+    sMark.style.transition = '';
+    sWord.style.transition = '';
+  });
+
+  // Phase 2: fly to nav positions (after 500ms hold)
+  setTimeout(() => {
+    const mRect = navMark.getBoundingClientRect();
+    const wRect = navWord.getBoundingClientRect();
+
+    sMark.style.top = mRect.top + 'px';
+    sMark.style.left = mRect.left + 'px';
+    sMark.style.height = mRect.height + 'px';
+
+    sWord.style.top = wRect.top + 'px';
+    sWord.style.left = wRect.left + 'px';
+    sWord.style.height = wRect.height + 'px';
+  }, 500);
+
+  // Phase 3: fade out splash, reveal page (after 1500ms)
+  setTimeout(() => {
+    splash.classList.add('fade-out');
+    document.body.classList.add('splash-done');
+  }, 1500);
+
+  // Phase 4: cleanup (after 2100ms)
+  setTimeout(() => {
+    splash.remove();
+    sMark.remove();
+    sWord.remove();
+  }, 2100);
+})();
+
+// Nav background on scroll
+const nav = document.getElementById('nav');
+window.addEventListener('scroll', () => {
+  nav.classList.toggle('scrolled', window.scrollY > 60);
+});
+
+// Fade-in observer
+const fis = document.querySelectorAll('.fi');
+const obs = new IntersectionObserver(entries => {
+  entries.forEach(e => {
+    if (e.isIntersecting) {
+      e.target.classList.add('vis');
+      obs.unobserve(e.target);
+    }
+  });
+}, { threshold: 0.1, rootMargin: '0px 0px -40px 0px' });
+fis.forEach(el => obs.observe(el));
+</script>
+</body>
+</html>
