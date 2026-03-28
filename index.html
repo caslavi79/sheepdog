@@ -338,11 +338,12 @@ body.scroll-locked{overflow:hidden}
 <h2 class="fi">Ready to Get Started?</h2>
 <p class="contact-sub fi">Tell us about your event or staffing need. We respond within 24 hours.</p>
 <div class="contact-actions fi">
-<a href="/cdn-cgi/l/email-protection#1c75727a735c6f7479796c78737b6879647d6f327f7371" class="contact-btn contact-btn--primary">Email Us</a>
+<a href="mailto:sheepdogsecurityllc@gmail.com" class="contact-btn contact-btn--primary">Email Us</a>
 <button class="contact-btn contact-btn--secondary" onclick="toggleForm()" id="quoteToggle">Request a Quote</button>
 </div>
 <form class="quote-form" id="quoteForm" onsubmit="return submitForm(event)">
 <div class="qf-grid">
+<div style="position:absolute;left:-9999px"><input type="text" name="website" tabindex="-1" autocomplete="off"></div>
 <div class="qf-field"><label class="qf-label">Name</label><input type="text" name="name" class="qf-input" placeholder="Your name" required></div>
 <div class="qf-field"><label class="qf-label">Phone</label><input type="tel" name="phone" class="qf-input" placeholder="(979) 555-0000"></div>
 <div class="qf-field"><label class="qf-label">Email</label><input type="email" name="email" class="qf-input" placeholder="you@email.com" required></div>
@@ -371,7 +372,7 @@ body.scroll-locked{overflow:hidden}
 </footer>
 </div><!-- /page-content -->
 
-<script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script>
+<script>
 // Contact form submit via Supabase Edge Function
 const SUPABASE_URL = 'https://sezzqhmsfulclcqmfwja.supabase.co';
 
@@ -388,7 +389,8 @@ async function submitForm(e) {
     phone: form.phone.value,
     email: form.email.value,
     service: form.service.value,
-    message: form.message.value
+    message: form.message.value,
+    website: form.website.value
   };
 
   try {
