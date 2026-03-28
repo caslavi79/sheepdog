@@ -28,17 +28,16 @@ body{font-family:var(--fb);font-size:17px;line-height:1.65;color:var(--iron);bac
 .nav{position:fixed;top:0;left:0;right:0;z-index:100;padding:0 48px;height:72px;display:flex;align-items:center;transition:background .4s,box-shadow .4s,backdrop-filter .4s,border-color .4s;backdrop-filter:blur(0);border-bottom:1px solid transparent}
 .nav.scrolled{background:rgba(12,12,12,.97);backdrop-filter:blur(12px);box-shadow:0 1px 0 rgba(255,255,255,.04);border-bottom-color:rgba(255,255,255,.06)}
 .nav-logo{display:flex;align-items:center;gap:0;text-decoration:none;margin-right:auto}
-.nav-logo svg{width:32px;height:32px}
-.nav-logo span{display:none}
 .nav-links{display:flex;gap:32px;align-items:center}
-.nav-link{font-family:var(--fh);font-weight:600;font-size:15px;letter-spacing:1px;color:var(--steel);text-decoration:none;transition:color .2s}
+.nav-link{font-family:var(--fh);font-weight:600;font-size:15px;letter-spacing:1px;text-transform:uppercase;color:var(--steel);text-decoration:none;transition:color .2s}
 .nav-link:hover{color:var(--white)}
 .nav-cta{font-family:var(--fh);font-weight:700;font-size:12px;letter-spacing:1.5px;text-transform:uppercase;color:var(--white);background:var(--red);padding:10px 24px;border-radius:6px;text-decoration:none;transition:background .2s}
 .nav-cta:hover{background:#A83220}
 
 /* HERO */
 .hero{min-height:100vh;background:var(--black);display:flex;flex-direction:column;justify-content:center;align-items:center;text-align:center;padding:120px 48px 80px;position:relative;overflow:hidden}
-.hero::before{content:'';position:absolute;inset:0;background:radial-gradient(ellipse at 50% 45%,rgba(255,255,255,.04),transparent 60%);pointer-events:none;opacity:0;animation:fu 2s ease forwards 5.2s}
+.hero::before{content:'';position:absolute;inset:0;background:radial-gradient(ellipse at 50% 45%,rgba(255,255,255,.04),transparent 60%);pointer-events:none;opacity:0;transition:opacity 2s ease}
+body.hero-glow .hero::before{opacity:1}
 .hero-grid{position:absolute;inset:0;background:repeating-linear-gradient(90deg,transparent,transparent 119px,rgba(255,255,255,.06) 119px,rgba(255,255,255,.06) 120px),repeating-linear-gradient(0deg,transparent,transparent 119px,rgba(255,255,255,.06) 119px,rgba(255,255,255,.06) 120px);pointer-events:none;-webkit-mask-image:radial-gradient(circle 250px at var(--mx,50%) var(--my,50%),black,transparent);mask-image:radial-gradient(circle 250px at var(--mx,50%) var(--my,50%),black,transparent);opacity:0;transition:opacity .4s ease}
 .hero-overline{font-family:var(--fb);font-size:12px;font-weight:600;letter-spacing:4px;text-transform:uppercase;color:var(--steel);margin-bottom:24px;opacity:0;animation:fu 1.2s ease forwards 4.6s}
 .hero-content{display:flex;flex-direction:column;align-items:center}
@@ -148,8 +147,6 @@ body{font-family:var(--fb);font-size:17px;line-height:1.65;color:var(--iron);bac
 .footer{padding:48px;background:var(--char);border-top:1px solid rgba(255,255,255,.04)}
 .footer-inner{max-width:1000px;margin:0 auto;display:flex;align-items:center;justify-content:space-between}
 .footer-brand{display:flex;align-items:center;gap:10px}
-.footer-brand svg{width:24px;height:24px}
-.footer-brand span{display:none}
 .footer-links{display:flex;gap:24px}
 .footer-link{font-family:var(--fb);font-size:13px;color:var(--steel);text-decoration:none;transition:color .2s}
 .footer-link:hover{color:var(--white)}
@@ -187,6 +184,7 @@ body.scroll-locked{overflow:hidden}
   .splash-img{transition:none}
   #splash{transition:none}
   .hero-overline,.hero h1,.hero-sub,.hero-ctas,.hero-scroll{animation:none;clip-path:none;opacity:1}
+  .hero::before{opacity:1;transition:none}
   .hero h1 .cursor{display:none}
   .trust-icon{transform:none;opacity:1;transition:none}
   .card-enter{opacity:1;transform:none;transition:none}
@@ -345,11 +343,11 @@ body.scroll-locked{overflow:hidden}
 </div>
 <form class="quote-form" id="quoteForm" action="https://formspree.io/f/placeholder" method="POST">
 <div class="qf-grid">
-<div class="qf-field"><label class="qf-label">Name</label><input type="text" class="qf-input" placeholder="Your name"></div>
-<div class="qf-field"><label class="qf-label">Phone</label><input type="tel" class="qf-input" placeholder="(979) 555-0000"></div>
-<div class="qf-field"><label class="qf-label">Email</label><input type="email" class="qf-input" placeholder="you@email.com"></div>
-<div class="qf-field"><label class="qf-label">Service Needed</label><select class="qf-select"><option value="">Select one</option><option value="events-security">Event Security</option><option value="events-bartending">Mobile Bartending</option><option value="events-both">Security + Bartending</option><option value="staffing">Contracted Staffing</option><option value="other">Not sure yet</option></select></div>
-<div class="qf-full qf-field"><label class="qf-label">Tell us about your event or project</label><textarea class="qf-textarea" placeholder="Date, venue, number of people, what you need - whatever helps us scope it."></textarea></div>
+<div class="qf-field"><label class="qf-label">Name</label><input type="text" name="name" class="qf-input" placeholder="Your name"></div>
+<div class="qf-field"><label class="qf-label">Phone</label><input type="tel" name="phone" class="qf-input" placeholder="(979) 555-0000"></div>
+<div class="qf-field"><label class="qf-label">Email</label><input type="email" name="email" class="qf-input" placeholder="you@email.com"></div>
+<div class="qf-field"><label class="qf-label">Service Needed</label><select name="service" class="qf-select"><option value="">Select one</option><option value="events-security">Event Security</option><option value="events-bartending">Mobile Bartending</option><option value="events-both">Security + Bartending</option><option value="staffing">Contracted Staffing</option><option value="other">Not sure yet</option></select></div>
+<div class="qf-full qf-field"><label class="qf-label">Tell us about your event or project</label><textarea name="message" class="qf-textarea" placeholder="Date, venue, number of people, what you need - whatever helps us scope it."></textarea></div>
 <div class="qf-full"><button type="submit" class="qf-submit">Submit Request</button></div>
 </div>
 </form>
@@ -472,6 +470,11 @@ document.body.classList.add('scroll-locked');
   setTimeout(() => {
     document.querySelector('.nav-links').style.opacity = '1';
   }, 4600);
+
+  // Phase 5b: hero background glow
+  setTimeout(() => {
+    document.body.classList.add('hero-glow');
+  }, 5200);
 
   // Phase 6: unlock scroll (after all hero animations complete)
   setTimeout(() => {
