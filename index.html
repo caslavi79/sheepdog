@@ -54,7 +54,7 @@
       {"@type": "Offer", "itemOffered": {"@type": "Service", "name": "Event Security"}},
       {"@type": "Offer", "itemOffered": {"@type": "Service", "name": "Bar Security"}},
       {"@type": "Offer", "itemOffered": {"@type": "Service", "name": "Mobile Bartending"}},
-      {"@type": "Offer", "itemOffered": {"@type": "Service", "name": "Wedding Security & Bartending"}},
+      {"@type": "Offer", "itemOffered": {"@type": "Service", "name": "Wedding Event Security & Mobile Bartending"}},
       {"@type": "Offer", "itemOffered": {"@type": "Service", "name": "Concert & Festival Security"}},
       {"@type": "Offer", "itemOffered": {"@type": "Service", "name": "Contracted Workforce Staffing"}},
       {"@type": "Offer", "itemOffered": {"@type": "Service", "name": "Field Operations Staffing"}},
@@ -70,7 +70,7 @@ html{scroll-behavior:smooth}
 body{font-family:var(--fb);font-size:17px;line-height:1.65;color:var(--iron);background:var(--white);-webkit-font-smoothing:antialiased}
 
 /* NAV */
-.nav{position:fixed;top:0;left:0;right:0;z-index:100;padding:0 48px;height:72px;display:flex;align-items:center;transition:background .4s,box-shadow .4s,backdrop-filter .4s,border-color .4s;backdrop-filter:none;border-bottom:1px solid transparent}
+.nav{position:fixed;top:0;left:0;right:0;z-index:100;padding:0 48px;height:72px;display:flex;align-items:center;transition:background .4s,box-shadow .4s,backdrop-filter .4s,border-color .4s;backdrop-filter:blur(0);border-bottom:1px solid transparent}
 .nav.scrolled{background:rgba(12,12,12,.97);backdrop-filter:blur(12px);box-shadow:0 1px 0 rgba(255,255,255,.04);border-bottom-color:rgba(255,255,255,.06)}
 .nav-logo{display:flex;align-items:center;gap:0;text-decoration:none;margin-right:auto}
 .nav-links{display:flex;gap:32px;align-items:center}
@@ -81,7 +81,7 @@ body{font-family:var(--fb);font-size:17px;line-height:1.65;color:var(--iron);bac
 
 /* HERO */
 .hero{min-height:100vh;background:var(--black);display:flex;flex-direction:column;justify-content:center;align-items:center;text-align:center;padding:120px 48px 80px;position:relative;overflow:hidden}
-.hero::before{content:'';position:absolute;inset:-40px;background:radial-gradient(ellipse at 50% 45%,rgba(255,255,255,.04),transparent 60%);pointer-events:none;opacity:0;transition:opacity 2s ease;filter:blur(40px)}
+.hero::before{content:'';position:absolute;inset:0;background:radial-gradient(ellipse at 50% 45%,rgba(255,255,255,.04),transparent 60%);pointer-events:none;opacity:0;transition:opacity 2s ease}
 body.hero-glow .hero::before{opacity:1}
 .hero-grid{position:absolute;inset:0;background:repeating-linear-gradient(90deg,transparent,transparent 119px,rgba(255,255,255,.06) 119px,rgba(255,255,255,.06) 120px),repeating-linear-gradient(0deg,transparent,transparent 119px,rgba(255,255,255,.06) 119px,rgba(255,255,255,.06) 120px);pointer-events:none;-webkit-mask-image:radial-gradient(circle 250px at var(--mx,50%) var(--my,50%),black,transparent);mask-image:radial-gradient(circle 250px at var(--mx,50%) var(--my,50%),black,transparent);opacity:0;transition:opacity .4s ease}
 .hero-overline{font-family:var(--fb);font-size:12px;font-weight:600;letter-spacing:4px;text-transform:uppercase;color:var(--steel);margin-bottom:24px;opacity:0;animation:fu 1.2s ease forwards 4.6s}
@@ -214,7 +214,7 @@ body.hero-glow .hero::before{opacity:1}
 /* SPLASH */
 #splash{position:fixed;inset:0;z-index:200;background:var(--black);transition:opacity .4s ease}
 #splash.fade-out{opacity:0;pointer-events:none}
-.splash-img{position:fixed;z-index:201;object-fit:contain;opacity:0;transform-origin:0 0;will-change:transform;transition:transform .9s cubic-bezier(.4,0,.2,1)}
+.splash-img{position:fixed;z-index:201;object-fit:contain;opacity:0;transition:top .9s cubic-bezier(.4,0,.2,1),left .9s cubic-bezier(.4,0,.2,1),height .9s cubic-bezier(.4,0,.2,1),transform .9s cubic-bezier(.4,0,.2,1)}
 .nav-logo img{opacity:0;transition:opacity .15s}
 body.splash-done .nav-logo img{opacity:1}
 .nav-links{opacity:0;transition:opacity 1.2s ease}
@@ -507,22 +507,17 @@ document.body.classList.add('scroll-locked');
   const centerX = window.innerWidth / 2;
   const centerY = window.innerHeight / 2;
 
-  // Place at center position using top/left/height (static, no animation)
-  const markStartTop = centerY - totalH / 2;
-  const markStartLeft = centerX - markW / 2;
-  const wordStartTop = centerY - totalH / 2 + markH + gap;
-  const wordStartLeft = centerX - wordW / 2;
-
+  // Place at center immediately (no transition yet)
   sMark.style.transition = 'none';
   sWord.style.transition = 'none';
   sMark.style.height = markH + 'px';
-  sMark.style.top = markStartTop + 'px';
-  sMark.style.left = markStartLeft + 'px';
+  sMark.style.top = (centerY - totalH / 2) + 'px';
+  sMark.style.left = (centerX - markW / 2) + 'px';
   sWord.style.height = wordH + 'px';
-  sWord.style.top = wordStartTop + 'px';
-  sWord.style.left = wordStartLeft + 'px';
+  sWord.style.top = (centerY - totalH / 2 + markH + gap) + 'px';
+  sWord.style.left = (centerX - wordW / 2) + 'px';
 
-  // Force layout so positions apply
+  // Force layout so positions apply before transition kicks in
   sMark.offsetHeight;
   sWord.offsetHeight;
 
@@ -535,20 +530,18 @@ document.body.classList.add('scroll-locked');
     sWord.style.transition = '';
   });
 
-  // Phase 2: fly to nav using transform only (GPU-composited, no layout thrash)
+  // Phase 2: fly to nav positions (after 500ms hold)
   setTimeout(() => {
     const mRect = navMark.getBoundingClientRect();
     const wRect = navWord.getBoundingClientRect();
 
-    const mScale = mRect.height / markH;
-    const mDx = mRect.left - markStartLeft;
-    const mDy = mRect.top - markStartTop;
-    sMark.style.transform = 'translate(' + mDx + 'px,' + mDy + 'px) scale(' + mScale + ')';
+    sMark.style.top = mRect.top + 'px';
+    sMark.style.left = mRect.left + 'px';
+    sMark.style.height = mRect.height + 'px';
 
-    const wScale = wRect.height / wordH;
-    const wDx = wRect.left - wordStartLeft;
-    const wDy = wRect.top - wordStartTop;
-    sWord.style.transform = 'translate(' + wDx + 'px,' + wDy + 'px) scale(' + wScale + ')';
+    sWord.style.top = wRect.top + 'px';
+    sWord.style.left = wRect.left + 'px';
+    sWord.style.height = wRect.height + 'px';
   }, 500);
 
   // Phase 3: fade out splash, reveal page (after 1500ms)
