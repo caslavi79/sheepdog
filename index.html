@@ -215,8 +215,6 @@ body{font-family:var(--fb);font-size:17px;line-height:1.65;color:var(--iron);bac
 /* SPLASH */
 #splash{position:fixed;inset:0;z-index:200;background:var(--black);transition:opacity .4s ease}
 #splash.fade-out{opacity:0;pointer-events:none}
-.splash-img{position:fixed;z-index:201;object-fit:contain;opacity:0}
-.nav-logo img{opacity:1}
 .nav-links{opacity:0;transition:opacity 1.2s ease}
 body.scroll-locked{overflow:hidden}
 
@@ -275,8 +273,6 @@ body.scroll-locked{overflow:hidden}
 
 <!-- SPLASH -->
 <div id="splash"></div>
-<img src="sheepdog-mark-white.svg" alt="" class="splash-img" id="splashMark">
-<img src="sheepdog-wordmark-white.svg" alt="" class="splash-img" id="splashWord">
 
 <!-- NAV -->
 <nav class="nav" id="nav">
@@ -483,57 +479,32 @@ if ('scrollRestoration' in history) history.scrollRestoration = 'manual';
 window.scrollTo(0, 0);
 document.body.classList.add('scroll-locked');
 
-// Splash animation — pure transforms, GPU composited
+// Splash animation — uses nav logos directly, no swap needed
 (function() {
   const splash = document.getElementById('splash');
-  const sMark = document.getElementById('splashMark');
-  const sWord = document.getElementById('splashWord');
   const navMark = document.querySelector('.nav-logo img:first-child');
   const navWord = document.querySelector('.nav-logo img:last-child');
 
-  // Hide nav logos until splash images finish animating
-  navMark.style.transition = 'none';
-  navWord.style.transition = 'none';
-  navMark.style.opacity = '0';
-  navWord.style.opacity = '0';
-
   document.fonts.ready.then(() => {
-    // Measure nav logo positions
+    // Step 1: measure where the nav logos naturally sit (the END state)
     const mNav = navMark.getBoundingClientRect();
     const wNav = navWord.getBoundingClientRect();
-
-    // Place splash images at nav position (final state)
-    sMark.style.position = 'fixed';
-    sWord.style.position = 'fixed';
-    sMark.style.top = mNav.top + 'px';
-    sMark.style.left = mNav.left + 'px';
-    sMark.style.height = mNav.height + 'px';
-    sMark.style.width = 'auto';
-    sWord.style.top = wNav.top + 'px';
-    sWord.style.left = wNav.left + 'px';
-    sWord.style.height = wNav.height + 'px';
-    sWord.style.width = 'auto';
-
-    // Proportions from stacked logo SVG: dog=77%, word=18%, gap=5% of total height
     const cx = window.innerWidth / 2;
     const cy = window.innerHeight / 2;
     const vh = window.innerHeight;
     const vw = window.innerWidth;
 
-    // Aspect ratios of each SVG (measured from nav elements)
+    // Step 2: compute splash layout from stacked logo SVG proportions (77/18/5)
     const markAR = mNav.width / mNav.height;
     const wordAR = wNav.width / wNav.height;
 
-    // Start from 50% of viewport height, split by stacked logo ratios
     let scaledMarkH = vh * 0.50 * 0.77;
     let scaledWordH = vh * 0.50 * 0.18;
     let gap = vh * 0.50 * 0.05;
-
-    // Width each element would occupy at these heights
     let scaledMarkW = scaledMarkH * markAR;
     let scaledWordW = scaledWordH * wordAR;
 
-    // Cap: widest element must fit within 85% of viewport width
+    // Cap widest element to 85% of viewport
     const maxW = vw * 0.85;
     const widest = Math.max(scaledMarkW, scaledWordW);
     if (widest > maxW) {
@@ -545,68 +516,70 @@ document.body.classList.add('scroll-locked');
       scaledWordW *= shrink;
     }
 
-    const markScale = scaledMarkH / mNav.height;
-    const wordScale = scaledWordH / wNav.height;
     const totalH = scaledMarkH + gap + scaledWordH;
 
-    // Mark → center of screen, offset up
-    const mCx = mNav.left + mNav.width / 2;
-    const mCy = mNav.top + mNav.height / 2;
-    const mDx = cx - mCx;
-    const mDy = (cy - totalH / 2 + scaledMarkH / 2) - mCy;
+    // Step 3: compute the transform that moves each nav logo FROM its natural
+    // position TO the centered splash position (scale up + translate)
+    const markScale = scaledMarkH / mNav.height;
+    const wordScale = scaledWordH / wNav.height;
 
-    // Word → center of screen, below mark
-    const wCx = wNav.left + wNav.width / 2;
-    const wCy = wNav.top + wNav.height / 2;
-    const wDx = cx - wCx;
-    const wDy = (cy - totalH / 2 + scaledMarkH + gap + scaledWordH / 2) - wCy;
+    // Where each element's center needs to be in the splash layout
+    const markSplashCx = cx;
+    const markSplashCy = cy - totalH / 2 + scaledMarkH / 2;
+    const wordSplashCx = cx;
+    const wordSplashCy = cy - totalH / 2 + scaledMarkH + gap + scaledWordH / 2;
 
-    // Apply starting transform (big, centered)
-    sMark.style.transition = 'none';
-    sWord.style.transition = 'none';
-    sMark.style.transformOrigin = 'center center';
-    sWord.style.transformOrigin = 'center center';
-    sMark.style.transform = 'translate(' + mDx + 'px,' + mDy + 'px) scale(' + markScale + ')';
-    sWord.style.transform = 'translate(' + wDx + 'px,' + wDy + 'px) scale(' + wordScale + ')';
-    sMark.style.opacity = '1';
-    sWord.style.opacity = '1';
+    // Where each element's center currently is (nav position)
+    const mNavCx = mNav.left + mNav.width / 2;
+    const mNavCy = mNav.top + mNav.height / 2;
+    const wNavCx = wNav.left + wNav.width / 2;
+    const wNavCy = wNav.top + wNav.height / 2;
 
-    void sMark.offsetHeight;
+    // Transform: translate to splash center, then scale up
+    const mDx = markSplashCx - mNavCx;
+    const mDy = markSplashCy - mNavCy;
+    const wDx = wordSplashCx - wNavCx;
+    const wDy = wordSplashCy - wNavCy;
 
-    // Phase 2: fly to nav + fade the black overlay simultaneously
+    // Step 4: apply starting transform (big, centered) — no transition
+    // Lift entire nav above splash overlay (z-200) — children can't escape parent stacking context
+    const nav = document.getElementById('nav');
+    nav.style.zIndex = '201';
+    navMark.style.transition = 'none';
+    navWord.style.transition = 'none';
+    navMark.style.transformOrigin = 'center center';
+    navWord.style.transformOrigin = 'center center';
+    navMark.style.transform = 'translate(' + mDx + 'px,' + mDy + 'px) scale(' + markScale + ')';
+    navWord.style.transform = 'translate(' + wDx + 'px,' + wDy + 'px) scale(' + wordScale + ')';
+    navMark.style.opacity = '1';
+    navWord.style.opacity = '1';
+
+    void navMark.offsetHeight;
+
+    // Step 5: animate to transform:none — they land at their natural nav position
+    // No swap, no second set of elements, no blink. Ever.
     setTimeout(() => {
       const FLY = 'transform 0.8s cubic-bezier(0.16,1,0.3,1)';
-      sMark.style.transition = FLY;
-      sWord.style.transition = FLY;
-      sMark.style.transform = 'translate(0,0) scale(1)';
-      sWord.style.transform = 'translate(0,0) scale(1)';
-      // Start fading the black overlay as the logos fly
+      navMark.style.transition = FLY;
+      navWord.style.transition = FLY;
+      navMark.style.transform = 'none';
+      navWord.style.transform = 'none';
       splash.classList.add('fade-out');
     }, 500);
 
-    // Phase 3: images have landed, overlay is gone — instant swap, no blink
+    // Step 6: clean up — restore nav logos to normal flow
     setTimeout(() => {
       document.body.classList.add('splash-done');
-      // Snap: hide splash images, show nav logos in same frame
-      sMark.style.transition = 'none';
-      sWord.style.transition = 'none';
-      sMark.style.opacity = '0';
-      sWord.style.opacity = '0';
       navMark.style.transition = 'none';
       navWord.style.transition = 'none';
-      navMark.style.opacity = '1';
-      navWord.style.opacity = '1';
-    }, 1350);
-
-    // Phase 4: cleanup
-    setTimeout(() => {
-      sMark.remove();
-      sWord.remove();
+      navMark.style.transformOrigin = '';
+      navWord.style.transformOrigin = '';
+      nav.style.zIndex = '';
       splash.remove();
-    }, 1550);
+    }, 1400);
   });
 
-  // Phase 5: show nav links (same time as hero content fade-in)
+  // Show nav links (same time as hero content fade-in)
   setTimeout(() => {
     document.querySelector('.nav-links').style.opacity = '1';
   }, 4600);
