@@ -276,7 +276,7 @@ body{font-family:var(--fb);font-size:17px;line-height:1.65;color:var(--mid);back
   .nav{padding:0 24px}
   .hero,.s{padding-left:24px;padding-right:24px}
   .hero{grid-template-columns:1fr;min-height:auto;gap:16px;padding:80px 16px 16px}
-  .hero-card{padding:36px 24px 0;max-height:320px;overflow:hidden;position:relative;border-radius:10px}
+  .hero-card{padding:36px 24px 0;max-height:420px;overflow:hidden;position:relative;border-radius:10px}
   .hero-card::after{content:'';position:absolute;bottom:0;left:0;right:0;height:100px;pointer-events:none;z-index:2}
   .hero-card--sec::after{background:linear-gradient(transparent,var(--char))}
   .hero-card--bar::after{background:linear-gradient(transparent,var(--cream))}
@@ -285,6 +285,10 @@ body{font-family:var(--fb);font-size:17px;line-height:1.65;color:var(--mid);back
   .hero-card::before{content:'· · ·';position:absolute;bottom:12px;left:50%;transform:translateX(-50%);z-index:3;font-size:18px;letter-spacing:4px}
   .hero-card--sec::before{color:var(--amber)}
   .hero-card--bar::before{color:var(--amber-d)}
+  .hero-card{animation:cardFloat 3s ease-in-out infinite}
+  .hero-card:nth-child(2){animation-delay:1.5s}
+  .hero-card.m-open{animation:none}
+  @keyframes cardFloat{0%,100%{transform:translateY(0)}50%{transform:translateY(-6px)}}
   /* tapped = expanded vertically */
   .hero-card.m-open{max-height:none;padding-bottom:36px;overflow:visible}
   .hero-card.m-open::after{display:none}
@@ -321,7 +325,7 @@ body{font-family:var(--fb);font-size:17px;line-height:1.65;color:var(--mid);back
   .proof-stats{grid-template-columns:1fr 1fr}
   .qf-grid{grid-template-columns:1fr}
   .nav-cta{padding:8px 18px;font-size:11px}
-  .hero-card{max-height:280px}
+  .hero-card{max-height:380px}
 }
 </style>
 </head>
