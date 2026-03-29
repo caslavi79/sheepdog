@@ -484,7 +484,7 @@ if ('scrollRestoration' in history) history.scrollRestoration = 'manual';
 window.scrollTo(0, 0);
 document.body.classList.add('scroll-locked');
 
-// Splash animation
+// Splash animation — pure transforms, GPU composited
 (function() {
   const splash = document.getElementById('splash');
   const sMark = document.getElementById('splashMark');
@@ -492,81 +492,83 @@ document.body.classList.add('scroll-locked');
   const navMark = document.querySelector('.nav-logo img:first-child');
   const navWord = document.querySelector('.nav-logo img:last-child');
 
-  // Starting sizes — scale to viewport
-  const vw = window.innerWidth;
-  const markH = Math.min(200, vw * 0.4);
-  const wordH = Math.min(48, vw * 0.1);
-  const gap = Math.min(14, vw * 0.03);
-
-  // Calculate center start positions (stacked: mark on top, word below)
-  const totalH = markH + gap + wordH;
-  const markAspect = sMark.naturalWidth / sMark.naturalHeight || 1.19;
-  const wordAspect = sWord.naturalWidth / sWord.naturalHeight || 8.22;
-  const markW = markH * markAspect;
-  const wordW = wordH * wordAspect;
-
-  const centerX = window.innerWidth / 2;
-  const centerY = window.innerHeight / 2;
-
-  // Place at center immediately (no transition yet)
-  sMark.style.transition = 'none';
-  sWord.style.transition = 'none';
-  sMark.style.height = markH + 'px';
-  sMark.style.top = (centerY - totalH / 2) + 'px';
-  sMark.style.left = (centerX - markW / 2) + 'px';
-  sWord.style.height = wordH + 'px';
-  sWord.style.top = (centerY - totalH / 2 + markH + gap) + 'px';
-  sWord.style.left = (centerX - wordW / 2) + 'px';
-
-  // Force layout so positions apply before transition kicks in
-  sMark.offsetHeight;
-  sWord.offsetHeight;
-
-  // Show images now that they're positioned
-  sMark.style.opacity = '1';
-  sWord.style.opacity = '1';
-
-  // Hide nav logo — we'll snap it visible after fly completes
+  // Hide nav logo until swap
   navMark.style.transition = 'none';
   navWord.style.transition = 'none';
   navMark.style.opacity = '0';
   navWord.style.opacity = '0';
 
-  // Phase 2: fly to nav positions (after 500ms hold)
-  setTimeout(() => {
-    // Measure nav logo positions right before flying
-    const mRect = navMark.getBoundingClientRect();
-    const wRect = navWord.getBoundingClientRect();
+  document.fonts.ready.then(() => {
+    // Place splash images at their nav positions first (final state)
+    const mNav = navMark.getBoundingClientRect();
+    const wNav = navWord.getBoundingClientRect();
 
-    const FLY = 'top .7s cubic-bezier(.4,0,.2,1),left .7s cubic-bezier(.4,0,.2,1),height .7s cubic-bezier(.4,0,.2,1)';
-    sMark.style.transition = FLY;
-    sWord.style.transition = FLY;
+    sMark.style.position = 'fixed';
+    sWord.style.position = 'fixed';
+    sMark.style.top = mNav.top + 'px';
+    sMark.style.left = mNav.left + 'px';
+    sMark.style.height = mNav.height + 'px';
+    sMark.style.width = 'auto';
+    sWord.style.top = wNav.top + 'px';
+    sWord.style.left = wNav.left + 'px';
+    sWord.style.height = wNav.height + 'px';
+    sWord.style.width = 'auto';
 
-    sMark.style.top = mRect.top + 'px';
-    sMark.style.left = mRect.left + 'px';
-    sMark.style.height = mRect.height + 'px';
+    // Now compute the transform to move them to center-of-screen at large size
+    const cx = window.innerWidth / 2;
+    const cy = window.innerHeight / 2;
+    const scaleFactor = Math.min(5, window.innerWidth * 0.012);
 
-    sWord.style.top = wRect.top + 'px';
-    sWord.style.left = wRect.left + 'px';
-    sWord.style.height = wRect.height + 'px';
-  }, 500);
+    // Mark: scale up and translate to center
+    const mCx = mNav.left + mNav.width / 2;
+    const mCy = mNav.top + mNav.height / 2;
+    const mDx = cx - mCx;
+    const mDy = cy - mCy - mNav.height * scaleFactor * 0.15;
 
-  // Phase 3: snap-swap — show real nav logo, kill splash elements (after fly completes)
-  setTimeout(() => {
-    navMark.style.transition = 'none';
-    navWord.style.transition = 'none';
-    navMark.style.opacity = '1';
-    navWord.style.opacity = '1';
-    sMark.remove();
-    sWord.remove();
-    splash.classList.add('fade-out');
-    document.body.classList.add('splash-done');
-  }, 1250);
+    // Word: scale up and translate to center, below mark
+    const wCx = wNav.left + wNav.width / 2;
+    const wCy = wNav.top + wNav.height / 2;
+    const wDx = cx - wCx;
+    const wDy = cy - wCy + mNav.height * scaleFactor * 0.45;
 
-  // Phase 4: cleanup splash overlay
-  setTimeout(() => {
-    splash.remove();
-  }, 1700);
+    // Start at center, large
+    sMark.style.transition = 'none';
+    sWord.style.transition = 'none';
+    sMark.style.transformOrigin = 'center center';
+    sWord.style.transformOrigin = 'center center';
+    sMark.style.transform = 'translate(' + mDx + 'px,' + mDy + 'px) scale(' + scaleFactor + ')';
+    sWord.style.transform = 'translate(' + wDx + 'px,' + wDy + 'px) scale(' + scaleFactor + ')';
+    sMark.style.opacity = '1';
+    sWord.style.opacity = '1';
+
+    void sMark.offsetHeight;
+
+    // Phase 2: fly to nav (transform back to identity) after hold
+    setTimeout(() => {
+      const FLY = 'transform 0.8s cubic-bezier(0.16,1,0.3,1)';
+      sMark.style.transition = FLY;
+      sWord.style.transition = FLY;
+      sMark.style.transform = 'translate(0,0) scale(1)';
+      sWord.style.transform = 'translate(0,0) scale(1)';
+    }, 500);
+
+    // Phase 3: snap-swap after fly completes
+    setTimeout(() => {
+      navMark.style.transition = 'none';
+      navWord.style.transition = 'none';
+      navMark.style.opacity = '1';
+      navWord.style.opacity = '1';
+      sMark.remove();
+      sWord.remove();
+      splash.classList.add('fade-out');
+      document.body.classList.add('splash-done');
+    }, 1350);
+
+    // Phase 4: cleanup
+    setTimeout(() => {
+      splash.remove();
+    }, 1800);
+  });
 
   // Phase 5: show nav links (same time as hero content fade-in)
   setTimeout(() => {
