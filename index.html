@@ -185,6 +185,9 @@ body{font-family:var(--fb);font-size:17px;line-height:1.65;color:var(--iron);bac
 .qf-textarea{resize:none;min-height:100px;overflow:hidden}
 .qf-submit{width:100%;font-family:var(--fh);font-weight:700;font-size:14px;letter-spacing:1.5px;text-transform:uppercase;color:var(--white);background:var(--red);border:none;padding:16px;border-radius:4px;cursor:pointer;transition:background .2s;margin-top:8px}
 .qf-submit:hover{background:#A83220}
+.qf-error{display:block;font-family:var(--fb);font-size:12px;color:var(--red);margin-top:4px;min-height:0;transition:all .2s ease}
+.qf-error:empty{margin:0}
+.qf-input.qf-invalid{border-color:var(--red)}
 
 /* FOOTER */
 .footer{padding:48px;background:var(--char);border-top:1px solid rgba(255,255,255,.04)}
@@ -387,7 +390,7 @@ body.scroll-locked{overflow:hidden}
 <div class="qf-grid">
 <div style="position:absolute;left:-9999px"><input type="text" name="website" tabindex="-1" autocomplete="off"></div>
 <div class="qf-field"><label class="qf-label" for="qf-name">Name</label><input type="text" id="qf-name" name="name" class="qf-input" placeholder="Your name" required></div>
-<div class="qf-field"><label class="qf-label" for="qf-phone">Phone</label><input type="tel" id="qf-phone" name="phone" class="qf-input" placeholder="(979) 555-0000"></div>
+<div class="qf-field"><label class="qf-label" for="qf-phone">Phone</label><input type="tel" id="qf-phone" name="phone" class="qf-input" placeholder="(979) 555-0000" oninput="handlePhone(this)" maxlength="14"><span class="qf-error" id="phone-error"></span></div>
 <div class="qf-field"><label class="qf-label" for="qf-email">Email</label><input type="email" id="qf-email" name="email" class="qf-input" placeholder="you@email.com" required></div>
 <div class="qf-field"><label class="qf-label" for="qf-service">Service Needed</label><select id="qf-service" name="service" class="qf-select" required><option value="">Select one</option><option value="events-security">Event Security</option><option value="events-bartending">Mobile Bartending</option><option value="events-both">Security + Bartending</option><option value="staffing">Contracted Staffing</option><option value="other">Not sure yet</option></select></div>
 <div class="qf-full qf-field"><label class="qf-label" for="qf-message">Tell us about your event or project</label><textarea id="qf-message" name="message" class="qf-textarea" placeholder="Date, venue, number of people, what you need - whatever helps us scope it." required oninput="this.style.height='auto';this.style.height=this.scrollHeight+'px'"></textarea></div>
@@ -707,6 +710,26 @@ if (!isTouch) {
     });
   }, { threshold: 0.5 });
   magBtns.forEach(b => btnObs.observe(b));
+}
+
+// Phone formatting and validation
+function handlePhone(el) {
+  var error = document.getElementById('phone-error');
+  var digits = el.value.replace(/\D/g, '');
+  el.value = formatPhone(digits);
+  if (digits.length > 0 && digits.length !== 10) {
+    error.textContent = 'Enter a 10-digit phone number';
+    el.classList.add('qf-invalid');
+  } else {
+    error.textContent = '';
+    el.classList.remove('qf-invalid');
+  }
+}
+function formatPhone(d) {
+  if (!d) return '';
+  if (d.length <= 3) return '(' + d;
+  if (d.length <= 6) return '(' + d.substring(0,3) + ') ' + d.substring(3);
+  return '(' + d.substring(0,3) + ') ' + d.substring(3,6) + '-' + d.substring(6,10);
 }
 </script>
 </body>
