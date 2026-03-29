@@ -559,23 +559,24 @@ document.body.classList.add('scroll-locked');
 
     void sMark.offsetHeight;
 
-    // Phase 2: fly to nav (transform → identity)
+    // Phase 2: fly to nav + fade the black overlay simultaneously
     setTimeout(() => {
       const FLY = 'transform 0.8s cubic-bezier(0.16,1,0.3,1)';
       sMark.style.transition = FLY;
       sWord.style.transition = FLY;
       sMark.style.transform = 'translate(0,0) scale(1)';
       sWord.style.transform = 'translate(0,0) scale(1)';
+      // Start fading the black overlay as the logos fly
+      splash.classList.add('fade-out');
     }, 500);
 
-    // Phase 3: fade splash images out — nav is already visible underneath
+    // Phase 3: images have landed, overlay is gone, fade splash images out
     setTimeout(() => {
       document.body.classList.add('splash-done');
-      sMark.style.transition = 'opacity 0.2s ease';
-      sWord.style.transition = 'opacity 0.2s ease';
+      sMark.style.transition = 'opacity 0.15s ease';
+      sWord.style.transition = 'opacity 0.15s ease';
       sMark.style.opacity = '0';
       sWord.style.opacity = '0';
-      splash.classList.add('fade-out');
     }, 1350);
 
     // Phase 4: cleanup
@@ -583,7 +584,7 @@ document.body.classList.add('scroll-locked');
       sMark.remove();
       sWord.remove();
       splash.remove();
-    }, 1600);
+    }, 1550);
   });
 
   // Phase 5: show nav links (same time as hero content fade-in)
