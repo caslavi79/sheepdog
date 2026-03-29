@@ -569,14 +569,10 @@ document.body.classList.add('scroll-locked');
     document.querySelector('.nav-links').style.opacity = '1';
   }, 4600);
 
-  // Phase 5b: hero background glow (wait for browser idle so it doesn't jank)
+  // Phase 5b: hero background glow (after typewriter finishes to avoid jank)
   setTimeout(() => {
-    if (window.requestIdleCallback) {
-      requestIdleCallback(() => document.body.classList.add('hero-glow'));
-    } else {
-      requestAnimationFrame(() => document.body.classList.add('hero-glow'));
-    }
-  }, 5200);
+    document.body.classList.add('hero-glow');
+  }, 6800);
 
   // Phase 6: unlock scroll (after all hero animations complete)
   setTimeout(() => {
