@@ -521,23 +521,25 @@ document.body.classList.add('scroll-locked');
   sMark.offsetHeight;
   sWord.offsetHeight;
 
-  // Show images now that they're positioned, then re-enable transitions
+  // Show images now that they're positioned
   sMark.style.opacity = '1';
   sWord.style.opacity = '1';
 
-  sMark.style.willChange = 'top,left,height';
-  sWord.style.willChange = 'top,left,height';
-
-  requestAnimationFrame(() => {
-    var t = 'top .9s cubic-bezier(.4,0,.2,1),left .9s cubic-bezier(.4,0,.2,1),height .9s cubic-bezier(.4,0,.2,1)';
-    sMark.style.transition = t;
-    sWord.style.transition = t;
-  });
+  // Hide nav logo — we'll snap it visible after fly completes
+  navMark.style.transition = 'none';
+  navWord.style.transition = 'none';
+  navMark.style.opacity = '0';
+  navWord.style.opacity = '0';
 
   // Phase 2: fly to nav positions (after 500ms hold)
   setTimeout(() => {
+    // Measure nav logo positions right before flying
     const mRect = navMark.getBoundingClientRect();
     const wRect = navWord.getBoundingClientRect();
+
+    const FLY = 'top .7s cubic-bezier(.4,0,.2,1),left .7s cubic-bezier(.4,0,.2,1),height .7s cubic-bezier(.4,0,.2,1)';
+    sMark.style.transition = FLY;
+    sWord.style.transition = FLY;
 
     sMark.style.top = mRect.top + 'px';
     sMark.style.left = mRect.left + 'px';
@@ -548,18 +550,22 @@ document.body.classList.add('scroll-locked');
     sWord.style.height = wRect.height + 'px';
   }, 500);
 
-  // Phase 3: fade out splash, reveal page (after 1500ms)
+  // Phase 3: snap-swap — show real nav logo, kill splash elements (after fly completes)
   setTimeout(() => {
-    splash.classList.add('fade-out');
-    document.body.classList.add('splash-done');
-  }, 1500);
-
-  // Phase 4: cleanup (after 2100ms)
-  setTimeout(() => {
-    splash.remove();
+    navMark.style.transition = 'none';
+    navWord.style.transition = 'none';
+    navMark.style.opacity = '1';
+    navWord.style.opacity = '1';
     sMark.remove();
     sWord.remove();
-  }, 2100);
+    splash.classList.add('fade-out');
+    document.body.classList.add('splash-done');
+  }, 1250);
+
+  // Phase 4: cleanup splash overlay
+  setTimeout(() => {
+    splash.remove();
+  }, 1700);
 
   // Phase 5: show nav links (same time as hero content fade-in)
   setTimeout(() => {
