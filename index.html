@@ -491,18 +491,11 @@ document.body.classList.add('scroll-locked');
   const navMark = document.querySelector('.nav-logo img:first-child');
   const navWord = document.querySelector('.nav-logo img:last-child');
 
-  // Hide nav logo until swap
+  // Hide nav logos until splash images finish animating
   navMark.style.transition = 'none';
   navWord.style.transition = 'none';
   navMark.style.opacity = '0';
   navWord.style.opacity = '0';
-
-  // Show nav logo immediately but behind splash (z-index handles layering)
-  // This way nav is ALWAYS visible — splash just covers it, then fades out
-  navMark.style.transition = 'none';
-  navWord.style.transition = 'none';
-  navMark.style.opacity = '1';
-  navWord.style.opacity = '1';
 
   document.fonts.ready.then(() => {
     // Measure nav logo positions
@@ -521,18 +514,39 @@ document.body.classList.add('scroll-locked');
     sWord.style.height = wNav.height + 'px';
     sWord.style.width = 'auto';
 
-    // Scale each element independently
-    // Mark: target 15% of viewport height
+    // Proportions from stacked logo SVG: dog=77%, word=18%, gap=5% of total height
     const cx = window.innerWidth / 2;
     const cy = window.innerHeight / 2;
-    const markScale = (window.innerHeight * 0.15) / mNav.height;
-    // Word: target 55% of viewport width, but cap at same scale as mark
-    const wordScale = Math.min(markScale, (window.innerWidth * 0.55) / wNav.width);
+    const vh = window.innerHeight;
+    const vw = window.innerWidth;
 
-    // Scaled sizes for layout
-    const scaledMarkH = mNav.height * markScale;
-    const scaledWordH = wNav.height * wordScale;
-    const gap = 8;
+    // Aspect ratios of each SVG (measured from nav elements)
+    const markAR = mNav.width / mNav.height;
+    const wordAR = wNav.width / wNav.height;
+
+    // Start from 50% of viewport height, split by stacked logo ratios
+    let scaledMarkH = vh * 0.50 * 0.77;
+    let scaledWordH = vh * 0.50 * 0.18;
+    let gap = vh * 0.50 * 0.05;
+
+    // Width each element would occupy at these heights
+    let scaledMarkW = scaledMarkH * markAR;
+    let scaledWordW = scaledWordH * wordAR;
+
+    // Cap: widest element must fit within 85% of viewport width
+    const maxW = vw * 0.85;
+    const widest = Math.max(scaledMarkW, scaledWordW);
+    if (widest > maxW) {
+      const shrink = maxW / widest;
+      scaledMarkH *= shrink;
+      scaledWordH *= shrink;
+      gap *= shrink;
+      scaledMarkW *= shrink;
+      scaledWordW *= shrink;
+    }
+
+    const markScale = scaledMarkH / mNav.height;
+    const wordScale = scaledWordH / wNav.height;
     const totalH = scaledMarkH + gap + scaledWordH;
 
     // Mark → center of screen, offset up
@@ -570,13 +584,18 @@ document.body.classList.add('scroll-locked');
       splash.classList.add('fade-out');
     }, 500);
 
-    // Phase 3: images have landed, overlay is gone, fade splash images out
+    // Phase 3: images have landed, overlay is gone — instant swap, no blink
     setTimeout(() => {
       document.body.classList.add('splash-done');
-      sMark.style.transition = 'opacity 0.15s ease';
-      sWord.style.transition = 'opacity 0.15s ease';
+      // Snap: hide splash images, show nav logos in same frame
+      sMark.style.transition = 'none';
+      sWord.style.transition = 'none';
       sMark.style.opacity = '0';
       sWord.style.opacity = '0';
+      navMark.style.transition = 'none';
+      navWord.style.transition = 'none';
+      navMark.style.opacity = '1';
+      navWord.style.opacity = '1';
     }, 1350);
 
     // Phase 4: cleanup
