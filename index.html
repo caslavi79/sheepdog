@@ -492,10 +492,11 @@ document.body.classList.add('scroll-locked');
   const navMark = document.querySelector('.nav-logo img:first-child');
   const navWord = document.querySelector('.nav-logo img:last-child');
 
-  // Starting sizes
-  const markH = 200;
-  const wordH = 48;
-  const gap = 14;
+  // Starting sizes — scale to viewport
+  const vw = window.innerWidth;
+  const markH = Math.min(200, vw * 0.4);
+  const wordH = Math.min(48, vw * 0.1);
+  const gap = Math.min(14, vw * 0.03);
 
   // Calculate center start positions (stacked: mark on top, word below)
   const totalH = markH + gap + wordH;
