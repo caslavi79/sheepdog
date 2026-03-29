@@ -316,11 +316,12 @@ body{font-family:var(--fb);font-size:17px;line-height:1.65;color:var(--mid);back
   @keyframes cardFloat{0%,100%{transform:translateY(0)}50%{transform:translateY(-5px)}}
 
   /* scale down text to fit */
-  .hero-card h2{font-size:32px}
-  .hero-mood{font-size:10px;letter-spacing:2px;margin-bottom:10px}
-  .hero-desc{font-size:14px;margin-bottom:16px}
-  .hero-points li{font-size:15px}
-  .hero-points{gap:4px;margin-bottom:16px}
+  .hero-card h2{font-size:32px;margin-bottom:8px}
+  .hero-mood{font-size:10px;letter-spacing:2px;margin-bottom:8px}
+  .hero-desc{display:none}
+  .hero-points li{font-size:14px}
+  .hero-points{gap:2px;margin-bottom:0}
+  .hero-points li:nth-child(n+5){display:none}
 
   /* tapped open */
   .hero-card.m-open{flex:none;height:auto;overflow:visible;padding-bottom:32px;animation:none}
@@ -342,10 +343,10 @@ body{font-family:var(--fb);font-size:17px;line-height:1.65;color:var(--mid);back
 
 /* ── SMALL PHONES (SE, etc) ── */
 @media(max-width:600px) and (max-height:700px){
-  .hero-card h2{font-size:26px}
-  .hero-desc{font-size:13px;margin-bottom:12px}
-  .hero-points li{font-size:13px}
-  .hero-card{padding:20px 16px 0}
+  .hero-card h2{font-size:24px}
+  .hero-points li{font-size:12px}
+  .hero-points li:nth-child(n+4){display:none}
+  .hero-card{padding:16px 14px 0}
 }
 
 @media(max-width:768px){
