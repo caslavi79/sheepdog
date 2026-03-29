@@ -275,25 +275,22 @@ body{font-family:var(--fb);font-size:17px;line-height:1.65;color:var(--mid);back
 @media(max-width:900px){
   .nav{padding:0 24px}
   .hero,.s{padding-left:24px;padding-right:24px}
-  .hero{grid-template-columns:1fr;min-height:auto;gap:16px;padding:80px 16px 16px}
-  .hero-card{padding:32px 24px 0;max-height:44vh;overflow:hidden;position:relative;border-radius:10px}
-  .hero-card::after{content:'';position:absolute;bottom:0;left:0;right:0;height:100px;pointer-events:none;z-index:2}
+  .hero{grid-template-columns:1fr;grid-template-rows:1fr 1fr;min-height:calc(100vh - 64px);min-height:calc(100dvh - 64px);gap:12px;padding:76px 12px 12px}
+  .hero-card{padding:28px 20px 0;overflow:hidden;position:relative;border-radius:10px;min-height:0}
+  .hero-card::after{content:'';position:absolute;bottom:0;left:0;right:0;height:80px;pointer-events:none;z-index:2}
   .hero-card--sec::after{background:linear-gradient(transparent,var(--char))}
   .hero-card--bar::after{background:linear-gradient(transparent,var(--cream))}
-  .hero-card .hero-btn{display:none}
-  /* "..." tap indicator */
-  .hero-card::before{content:'· · ·';position:absolute;bottom:12px;left:50%;transform:translateX(-50%);z-index:3;font-size:18px;letter-spacing:4px}
-  .hero-card--sec::before{color:var(--amber)}
-  .hero-card--bar::before{color:var(--amber-d)}
+  .hero-card .hero-btn{position:absolute;bottom:14px;left:50%;transform:translateX(-50%);z-index:3;font-size:12px;border-bottom-width:1px}
+  .hero-card--sec .hero-btn{color:var(--amber);border-color:var(--amber)}
+  .hero-card--bar .hero-btn{color:var(--amber-d);border-color:var(--amber-d)}
   .hero-card{animation:cardFloat 3s ease-in-out infinite}
   .hero-card:nth-child(2){animation-delay:1.5s}
   .hero-card.m-open{animation:none}
   @keyframes cardFloat{0%,100%{transform:translateY(0)}50%{transform:translateY(-6px)}}
   /* tapped = expanded vertically */
-  .hero-card.m-open{max-height:none;padding-bottom:36px;overflow:visible}
+  .hero-card.m-open{max-height:none;height:auto;padding-bottom:36px;overflow:visible}
   .hero-card.m-open::after{display:none}
-  .hero-card.m-open::before{display:none}
-  .hero-card.m-open .hero-btn{display:inline-flex}
+  .hero-card.m-open .hero-btn{position:static;transform:none;font-size:14px;border-bottom-width:2px}
   /* expanded card inner content */
   .hero-card.active{display:flex;flex-direction:column;text-align:center;align-items:center;padding:36px 24px 36px}
   .hero-card.active .hero-intro{text-align:center;align-items:center}
@@ -325,7 +322,7 @@ body{font-family:var(--fb);font-size:17px;line-height:1.65;color:var(--mid);back
   .proof-stats{grid-template-columns:1fr 1fr}
   .qf-grid{grid-template-columns:1fr}
   .nav-cta{padding:8px 18px;font-size:11px}
-  .hero-card{max-height:42vh}
+  .hero-card{min-height:0}
 }
 </style>
 </head>
