@@ -216,8 +216,7 @@ body{font-family:var(--fb);font-size:17px;line-height:1.65;color:var(--iron);bac
 #splash{position:fixed;inset:0;z-index:200;background:var(--black);transition:opacity .4s ease}
 #splash.fade-out{opacity:0;pointer-events:none}
 .splash-img{position:fixed;z-index:201;object-fit:contain;opacity:0}
-.nav-logo img{opacity:0;transition:opacity .15s}
-body.splash-done .nav-logo img{opacity:1}
+.nav-logo img{opacity:1}
 .nav-links{opacity:0;transition:opacity 1.2s ease}
 body.scroll-locked{overflow:hidden}
 
@@ -498,11 +497,19 @@ document.body.classList.add('scroll-locked');
   navMark.style.opacity = '0';
   navWord.style.opacity = '0';
 
+  // Show nav logo immediately but behind splash (z-index handles layering)
+  // This way nav is ALWAYS visible — splash just covers it, then fades out
+  navMark.style.transition = 'none';
+  navWord.style.transition = 'none';
+  navMark.style.opacity = '1';
+  navWord.style.opacity = '1';
+
   document.fonts.ready.then(() => {
-    // Place splash images at their nav positions first (final state)
+    // Measure nav logo positions
     const mNav = navMark.getBoundingClientRect();
     const wNav = navWord.getBoundingClientRect();
 
+    // Place splash images at nav position (final state)
     sMark.style.position = 'fixed';
     sWord.style.position = 'fixed';
     sMark.style.top = mNav.top + 'px';
@@ -514,41 +521,45 @@ document.body.classList.add('scroll-locked');
     sWord.style.height = wNav.height + 'px';
     sWord.style.width = 'auto';
 
-    // Scale: make the mark 22% of viewport width — works on any screen
+    // Scale each element independently
+    // Mark: target 15% of viewport height
     const cx = window.innerWidth / 2;
     const cy = window.innerHeight / 2;
-    const targetMarkW = window.innerWidth * 0.22;
-    const scaleFactor = targetMarkW / mNav.width;
-    const scaledMarkH = mNav.height * scaleFactor;
-    const scaledWordH = wNav.height * scaleFactor;
-    const gap = scaledMarkH * 0.12;
+    const markScale = (window.innerHeight * 0.15) / mNav.height;
+    // Word: target 55% of viewport width, but cap at same scale as mark
+    const wordScale = Math.min(markScale, (window.innerWidth * 0.55) / wNav.width);
+
+    // Scaled sizes for layout
+    const scaledMarkH = mNav.height * markScale;
+    const scaledWordH = wNav.height * wordScale;
+    const gap = 8;
     const totalH = scaledMarkH + gap + scaledWordH;
 
-    // Mark: nav center → viewport center (offset up for word below)
+    // Mark → center of screen, offset up
     const mCx = mNav.left + mNav.width / 2;
     const mCy = mNav.top + mNav.height / 2;
     const mDx = cx - mCx;
     const mDy = (cy - totalH / 2 + scaledMarkH / 2) - mCy;
 
-    // Word: nav center → viewport center (below mark)
+    // Word → center of screen, below mark
     const wCx = wNav.left + wNav.width / 2;
     const wCy = wNav.top + wNav.height / 2;
     const wDx = cx - wCx;
     const wDy = (cy - totalH / 2 + scaledMarkH + gap + scaledWordH / 2) - wCy;
 
-    // Start at center, large
+    // Apply starting transform (big, centered)
     sMark.style.transition = 'none';
     sWord.style.transition = 'none';
     sMark.style.transformOrigin = 'center center';
     sWord.style.transformOrigin = 'center center';
-    sMark.style.transform = 'translate(' + mDx + 'px,' + mDy + 'px) scale(' + scaleFactor + ')';
-    sWord.style.transform = 'translate(' + wDx + 'px,' + wDy + 'px) scale(' + scaleFactor + ')';
+    sMark.style.transform = 'translate(' + mDx + 'px,' + mDy + 'px) scale(' + markScale + ')';
+    sWord.style.transform = 'translate(' + wDx + 'px,' + wDy + 'px) scale(' + wordScale + ')';
     sMark.style.opacity = '1';
     sWord.style.opacity = '1';
 
     void sMark.offsetHeight;
 
-    // Phase 2: fly to nav (transform back to identity) after hold
+    // Phase 2: fly to nav (transform → identity)
     setTimeout(() => {
       const FLY = 'transform 0.8s cubic-bezier(0.16,1,0.3,1)';
       sMark.style.transition = FLY;
@@ -557,22 +568,17 @@ document.body.classList.add('scroll-locked');
       sWord.style.transform = 'translate(0,0) scale(1)';
     }, 500);
 
-    // Phase 3: show nav underneath, then crossfade splash out
+    // Phase 3: fade splash images out — nav is already visible underneath
     setTimeout(() => {
-      navMark.style.transition = 'none';
-      navWord.style.transition = 'none';
-      navMark.style.opacity = '1';
-      navWord.style.opacity = '1';
       document.body.classList.add('splash-done');
-      // Crossfade: splash images fade out over 150ms while nav is already visible
-      sMark.style.transition = 'opacity 0.15s ease';
-      sWord.style.transition = 'opacity 0.15s ease';
+      sMark.style.transition = 'opacity 0.2s ease';
+      sWord.style.transition = 'opacity 0.2s ease';
       sMark.style.opacity = '0';
       sWord.style.opacity = '0';
       splash.classList.add('fade-out');
     }, 1350);
 
-    // Phase 4: cleanup after crossfade
+    // Phase 4: cleanup
     setTimeout(() => {
       sMark.remove();
       sWord.remove();
