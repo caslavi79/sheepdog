@@ -77,7 +77,8 @@ body{font-family:var(--fb);font-size:17px;line-height:1.65;color:var(--mid);back
 .hero-card--bar.active .hero-intro{order:2;text-align:right;align-items:flex-end}
 .hero-card--bar.active .hero-expanded{order:1}
 .hero-card.active:hover{transform:none;box-shadow:none}
-.hero-card.active .hero-intro{display:flex;flex-direction:column}
+.hero-intro{text-align:center;align-items:center;display:flex;flex-direction:column;justify-content:center;flex:1}
+.hero-card.active .hero-intro{text-align:left;align-items:flex-start}
 .hero-card.active .hero-btn{display:none}
 
 /* collapsed card */
@@ -98,7 +99,7 @@ body{font-family:var(--fb);font-size:17px;line-height:1.65;color:var(--mid);back
 .hero-card h2{font-family:var(--fd);font-weight:800;font-size:clamp(28px,3.5vw,44px);line-height:.92;text-transform:uppercase;letter-spacing:-0.5px;margin-bottom:12px}
 .hero-card--sec h2{color:var(--white)}
 .hero-card--bar h2{color:var(--black)}
-.hero-mood{font-family:var(--fh);font-weight:700;font-size:16px;margin-bottom:16px}
+.hero-mood{font-family:var(--fb);font-weight:600;font-size:12px;letter-spacing:3px;text-transform:uppercase;margin-bottom:16px}
 .hero-card--sec .hero-mood{color:var(--steel)}
 .hero-card--bar .hero-mood{color:var(--mid)}
 .hero-desc{font-size:17px;line-height:1.6;margin-bottom:24px}
@@ -322,9 +323,8 @@ body{font-family:var(--fb);font-size:17px;line-height:1.65;color:var(--mid);back
 <section class="hero">
 <div class="hero-card hero-card--sec si-left" id="cardSec" onclick="expandCard('sec')">
 <div class="hero-intro">
-<div class="hero-label">Event Security</div>
-<h2>A Presence<br>That Protects</h2>
-<div class="hero-mood">Fight night. The door. Authority.</div>
+<h2 style="color:var(--amber)">Event<br>Security</h2>
+<div class="hero-mood">A presence that protects</div>
 <p class="hero-desc">Professional, licensed security for bars, concerts, festivals, weddings, and private events. Visible enough to deter, subtle enough not to disrupt.</p>
 <ul class="hero-points">
 <li>TX DPS Level II &amp; III licensed guards</li>
@@ -358,9 +358,8 @@ body{font-family:var(--fb);font-size:17px;line-height:1.65;color:var(--mid);back
 </div>
 <div class="hero-card hero-card--bar si-right" id="cardBar" onclick="if(this.classList.contains('collapsed'))collapseCards();else expandCard('bar')">
 <div class="hero-intro">
-<div class="hero-label">Mobile Bartending</div>
-<h2>Best Bar<br>at the Party</h2>
-<div class="hero-mood">Wedding bar. Cocktail hour.</div>
+<h2 style="color:var(--red)">Mobile<br>Bartending</h2>
+<div class="hero-mood">Best bar at the party</div>
 <p class="hero-desc">TABC-certified bartenders who know how to keep a bar moving. Full setup, professional equipment, and a service standard your guests will remember.</p>
 <ul class="hero-points">
 <li>TABC-certified, fully equipped bartenders</li>
