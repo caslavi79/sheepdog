@@ -514,27 +514,27 @@ document.body.classList.add('scroll-locked');
     sWord.style.height = wNav.height + 'px';
     sWord.style.width = 'auto';
 
-    // Compute transform to center-of-screen at reasonable size
+    // Scale: make the mark 22% of viewport width — works on any screen
     const cx = window.innerWidth / 2;
     const cy = window.innerHeight / 2;
-    // Target: mark ~120px tall on mobile, ~200px on desktop
-    const targetMarkH = Math.min(200, window.innerWidth * 0.35);
-    const scaleFactor = targetMarkH / mNav.height;
-    const targetWordH = wNav.height * scaleFactor;
-    const gap = 10;
+    const targetMarkW = window.innerWidth * 0.22;
+    const scaleFactor = targetMarkW / mNav.width;
+    const scaledMarkH = mNav.height * scaleFactor;
+    const scaledWordH = wNav.height * scaleFactor;
+    const gap = scaledMarkH * 0.12;
+    const totalH = scaledMarkH + gap + scaledWordH;
 
-    // Mark center → screen center, offset up to make room for wordmark below
+    // Mark: nav center → viewport center (offset up for word below)
     const mCx = mNav.left + mNav.width / 2;
     const mCy = mNav.top + mNav.height / 2;
-    const totalH = targetMarkH + gap + targetWordH;
     const mDx = cx - mCx;
-    const mDy = cy - totalH / 2 + targetMarkH / 2 - mCy;
+    const mDy = (cy - totalH / 2 + scaledMarkH / 2) - mCy;
 
-    // Word center → screen center, below mark
+    // Word: nav center → viewport center (below mark)
     const wCx = wNav.left + wNav.width / 2;
     const wCy = wNav.top + wNav.height / 2;
     const wDx = cx - wCx;
-    const wDy = cy - totalH / 2 + targetMarkH + gap + targetWordH / 2 - wCy;
+    const wDy = (cy - totalH / 2 + scaledMarkH + gap + scaledWordH / 2) - wCy;
 
     // Start at center, large
     sMark.style.transition = 'none';
@@ -557,27 +557,27 @@ document.body.classList.add('scroll-locked');
       sWord.style.transform = 'translate(0,0) scale(1)';
     }, 500);
 
-    // Phase 3: snap-swap — show nav first, then remove splash next frame
+    // Phase 3: show nav underneath, then crossfade splash out
     setTimeout(() => {
       navMark.style.transition = 'none';
       navWord.style.transition = 'none';
       navMark.style.opacity = '1';
       navWord.style.opacity = '1';
-      splash.classList.add('fade-out');
       document.body.classList.add('splash-done');
-      // Wait one frame so nav is painted, then remove splash images
-      requestAnimationFrame(() => {
-        requestAnimationFrame(() => {
-          sMark.remove();
-          sWord.remove();
-        });
-      });
+      // Crossfade: splash images fade out over 150ms while nav is already visible
+      sMark.style.transition = 'opacity 0.15s ease';
+      sWord.style.transition = 'opacity 0.15s ease';
+      sMark.style.opacity = '0';
+      sWord.style.opacity = '0';
+      splash.classList.add('fade-out');
     }, 1350);
 
-    // Phase 4: cleanup
+    // Phase 4: cleanup after crossfade
     setTimeout(() => {
+      sMark.remove();
+      sWord.remove();
       splash.remove();
-    }, 1800);
+    }, 1600);
   });
 
   // Phase 5: show nav links (same time as hero content fade-in)
