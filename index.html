@@ -569,10 +569,10 @@ document.body.classList.add('scroll-locked');
     document.querySelector('.nav-links').style.opacity = '1';
   }, 4600);
 
-  // Phase 5b: hero background glow (after typewriter finishes to avoid jank)
+  // Phase 5b: hero background glow
   setTimeout(() => {
     document.body.classList.add('hero-glow');
-  }, 6800);
+  }, 5200);
 
   // Phase 6: unlock scroll (after all hero animations complete)
   setTimeout(() => {
