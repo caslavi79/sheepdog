@@ -315,13 +315,12 @@ body{font-family:var(--fb);font-size:17px;line-height:1.65;color:var(--mid);back
   .hero-card:nth-child(2){animation-delay:1.5s}
   @keyframes cardFloat{0%,100%{transform:translateY(0)}50%{transform:translateY(-5px)}}
 
-  /* scale down text to fit */
+  /* scale down text to fit card — content overflows and gets faded */
   .hero-card h2{font-size:32px;margin-bottom:8px}
   .hero-mood{font-size:10px;letter-spacing:2px;margin-bottom:8px}
-  .hero-desc{display:none}
+  .hero-desc{font-size:13px;margin-bottom:12px}
   .hero-points li{font-size:14px}
   .hero-points{gap:2px;margin-bottom:0}
-  .hero-points li:nth-child(n+5){display:none}
 
   /* tapped open */
   .hero-card.m-open{flex:none;height:auto;overflow:visible;padding-bottom:32px;animation:none}
@@ -345,7 +344,6 @@ body{font-family:var(--fb);font-size:17px;line-height:1.65;color:var(--mid);back
 @media(max-width:600px) and (max-height:700px){
   .hero-card h2{font-size:24px}
   .hero-points li{font-size:12px}
-  .hero-points li:nth-child(n+4){display:none}
   .hero-card{padding:16px 14px 0}
 }
 
