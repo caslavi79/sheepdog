@@ -275,10 +275,31 @@ body{font-family:var(--fb);font-size:17px;line-height:1.65;color:var(--mid);back
 @media(max-width:900px){
   .nav{padding:0 24px}
   .hero,.s{padding-left:24px;padding-right:24px}
-  .hero{grid-template-columns:1fr;min-height:auto}
-  .hero-card{padding:48px 24px 40px}
-  .hero-exp-grid{grid-template-columns:1fr 1fr}
+  .hero{grid-template-columns:1fr;min-height:auto;gap:16px;padding:80px 16px 16px}
+  .hero-card{padding:36px 24px 0;max-height:320px;overflow:hidden;position:relative;border-radius:10px}
+  .hero-card::after{content:'';position:absolute;bottom:0;left:0;right:0;height:100px;pointer-events:none;z-index:2}
+  .hero-card--sec::after{background:linear-gradient(transparent,var(--char))}
+  .hero-card--bar::after{background:linear-gradient(transparent,var(--cream))}
+  .hero-card .hero-btn{display:none}
+  /* "..." tap indicator */
+  .hero-card::before{content:'· · ·';position:absolute;bottom:12px;left:50%;transform:translateX(-50%);z-index:3;font-size:18px;letter-spacing:4px}
+  .hero-card--sec::before{color:var(--amber)}
+  .hero-card--bar::before{color:var(--amber-d)}
+  /* tapped = expanded vertically */
+  .hero-card.m-open{max-height:none;padding-bottom:36px;overflow:visible}
+  .hero-card.m-open::after{display:none}
+  .hero-card.m-open::before{display:none}
+  .hero-card.m-open .hero-btn{display:inline-flex}
+  /* expanded card inner content */
+  .hero-card.active{display:flex;flex-direction:column;text-align:center;align-items:center;padding:36px 24px 36px}
+  .hero-card.active .hero-intro{text-align:center;align-items:center}
+  .hero-card--bar.active .hero-intro{order:0;text-align:center;align-items:center}
+  .hero-exp-grid{grid-template-columns:1fr}
   .hero-exp-steps{flex-direction:column;gap:16px}
+  /* collapsed card on mobile */
+  .hero-card.collapsed{max-height:60px;padding:16px 24px 16px;flex-direction:row}
+  .hero-card.collapsed::after,.hero-card.collapsed::before{display:none}
+  .hero-expanded{text-align:left;align-items:flex-start}
   .svc-grid{grid-template-columns:1fr 1fr}
   .pil-grid{grid-template-columns:1fr}
   .steps{grid-template-columns:1fr;gap:40px;text-align:center}
@@ -291,7 +312,7 @@ body{font-family:var(--fb);font-size:17px;line-height:1.65;color:var(--mid);back
   .footer{padding:40px 24px}
 }
 @media(max-width:768px){
-  .hero h1{font-size:40px}
+  .hero h2{font-size:36px}
   .title,.cta-copy h2{font-size:28px}
 }
 @media(max-width:600px){
@@ -300,6 +321,7 @@ body{font-family:var(--fb);font-size:17px;line-height:1.65;color:var(--mid);back
   .proof-stats{grid-template-columns:1fr 1fr}
   .qf-grid{grid-template-columns:1fr}
   .nav-cta{padding:8px 18px;font-size:11px}
+  .hero-card{max-height:280px}
 }
 </style>
 </head>
@@ -480,10 +502,29 @@ const slides = document.querySelectorAll('.si-down,.si-left,.si-right,.si-up');
 const obs = new IntersectionObserver(es => { es.forEach(e => { if (e.isIntersecting) { e.target.classList.add('vis'); obs.unobserve(e.target); } }); }, { threshold: .1, rootMargin: '0px 0px -40px 0px' });
 slides.forEach(el => obs.observe(el));
 // Card expand/collapse
+var isMobile = window.matchMedia('(max-width:900px)').matches;
+window.matchMedia('(max-width:900px)').addEventListener('change', function(e) { isMobile = e.matches; });
+
 function expandCard(which) {
   var hero = document.querySelector('.hero');
   var sec = document.getElementById('cardSec');
   var bar = document.getElementById('cardBar');
+  var card = which === 'sec' ? sec : bar;
+
+  // Mobile: toggle vertical expand
+  if (isMobile) {
+    if (card.classList.contains('m-open')) {
+      card.classList.remove('m-open', 'active');
+      card.querySelector('.hero-expanded').style.display = '';
+    } else {
+      card.classList.add('m-open', 'active');
+      card.querySelector('.hero-expanded').style.display = 'flex';
+      card.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+    return;
+  }
+
+  // Desktop: two-column expand
   if (hero.classList.contains('expanded')) { collapseCards(); return; }
   hero.classList.add('expanded');
   if (which === 'sec') {
