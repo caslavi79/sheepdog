@@ -525,24 +525,34 @@ document.body.classList.add('scroll-locked');
   sMark.style.opacity = '1';
   sWord.style.opacity = '1';
 
+  // Compute where each element needs to fly to
+  const mRect = navMark.getBoundingClientRect();
+  const wRect = navWord.getBoundingClientRect();
+
+  // Calculate transform deltas from center position to nav position
+  const markStartTop = centerY - totalH / 2;
+  const markStartLeft = centerX - markW / 2;
+  const wordStartTop = centerY - totalH / 2 + markH + gap;
+  const wordStartLeft = centerX - wordW / 2;
+
+  const markScale = mRect.height / markH;
+  const wordScale = wRect.height / wordH;
+  const markDx = mRect.left + mRect.width / 2 - (markStartLeft + markW / 2);
+  const markDy = mRect.top + mRect.height / 2 - (markStartTop + markH / 2);
+  const wordDx = wRect.left + wRect.width / 2 - (wordStartLeft + wordW / 2);
+  const wordDy = wRect.top + wRect.height / 2 - (wordStartTop + wordH / 2);
+
   requestAnimationFrame(() => {
-    var t = 'top .9s cubic-bezier(.4,0,.2,1),left .9s cubic-bezier(.4,0,.2,1),height .9s cubic-bezier(.4,0,.2,1),transform .9s cubic-bezier(.4,0,.2,1)';
-    sMark.style.transition = t;
-    sWord.style.transition = t;
+    sMark.style.transition = 'transform .9s cubic-bezier(.4,0,.2,1)';
+    sWord.style.transition = 'transform .9s cubic-bezier(.4,0,.2,1)';
+    sMark.style.willChange = 'transform';
+    sWord.style.willChange = 'transform';
   });
 
-  // Phase 2: fly to nav positions (after 500ms hold)
+  // Phase 2: fly to nav positions using transform (GPU composited)
   setTimeout(() => {
-    const mRect = navMark.getBoundingClientRect();
-    const wRect = navWord.getBoundingClientRect();
-
-    sMark.style.top = mRect.top + 'px';
-    sMark.style.left = mRect.left + 'px';
-    sMark.style.height = mRect.height + 'px';
-
-    sWord.style.top = wRect.top + 'px';
-    sWord.style.left = wRect.left + 'px';
-    sWord.style.height = wRect.height + 'px';
+    sMark.style.transform = 'translate(' + markDx + 'px,' + markDy + 'px) scale(' + markScale + ')';
+    sWord.style.transform = 'translate(' + wordDx + 'px,' + wordDy + 'px) scale(' + wordScale + ')';
   }, 500);
 
   // Phase 3: fade out splash, reveal page (after 1500ms)
