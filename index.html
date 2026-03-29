@@ -514,22 +514,27 @@ document.body.classList.add('scroll-locked');
     sWord.style.height = wNav.height + 'px';
     sWord.style.width = 'auto';
 
-    // Now compute the transform to move them to center-of-screen at large size
+    // Compute transform to center-of-screen at reasonable size
     const cx = window.innerWidth / 2;
     const cy = window.innerHeight / 2;
-    const scaleFactor = Math.min(5, window.innerWidth * 0.012);
+    // Target: mark ~120px tall on mobile, ~200px on desktop
+    const targetMarkH = Math.min(200, window.innerWidth * 0.35);
+    const scaleFactor = targetMarkH / mNav.height;
+    const targetWordH = wNav.height * scaleFactor;
+    const gap = 10;
 
-    // Mark: scale up and translate to center
+    // Mark center → screen center, offset up to make room for wordmark below
     const mCx = mNav.left + mNav.width / 2;
     const mCy = mNav.top + mNav.height / 2;
+    const totalH = targetMarkH + gap + targetWordH;
     const mDx = cx - mCx;
-    const mDy = cy - mCy - mNav.height * scaleFactor * 0.15;
+    const mDy = cy - totalH / 2 + targetMarkH / 2 - mCy;
 
-    // Word: scale up and translate to center, below mark
+    // Word center → screen center, below mark
     const wCx = wNav.left + wNav.width / 2;
     const wCy = wNav.top + wNav.height / 2;
     const wDx = cx - wCx;
-    const wDy = cy - wCy + mNav.height * scaleFactor * 0.45;
+    const wDy = cy - totalH / 2 + targetMarkH + gap + targetWordH / 2 - wCy;
 
     // Start at center, large
     sMark.style.transition = 'none';
@@ -552,16 +557,21 @@ document.body.classList.add('scroll-locked');
       sWord.style.transform = 'translate(0,0) scale(1)';
     }, 500);
 
-    // Phase 3: snap-swap after fly completes
+    // Phase 3: snap-swap — show nav first, then remove splash next frame
     setTimeout(() => {
       navMark.style.transition = 'none';
       navWord.style.transition = 'none';
       navMark.style.opacity = '1';
       navWord.style.opacity = '1';
-      sMark.remove();
-      sWord.remove();
       splash.classList.add('fade-out');
       document.body.classList.add('splash-done');
+      // Wait one frame so nav is painted, then remove splash images
+      requestAnimationFrame(() => {
+        requestAnimationFrame(() => {
+          sMark.remove();
+          sWord.remove();
+        });
+      });
     }, 1350);
 
     // Phase 4: cleanup
