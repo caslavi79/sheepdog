@@ -1,4 +1,0 @@
-User-agent: *
-Allow: /
-
-Sitemap: https://sheepdogtexas.com/sitemap.xml
