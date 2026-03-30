@@ -1,0 +1,420 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Sheepdog — #01 Color Palette</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Barlow:wght@600;700;800;900&family=Barlow+Semi+Condensed:wght@700;800;900&family=Source+Sans+3:ital,wght@0,300;0,400;0,600;0,700;1,400;1,600&display=swap" rel="stylesheet">
+<style>
+:root{--black:#0C0C0C;--char:#161616;--graphite:#2A2A2A;--iron:#4A4A4A;--slate:#6B6B6B;--steel:#7A8490;--silver:#A0A0A0;--fog:#D0D0D0;--bone:#F4F3F1;--white:#FFF;--red:#C23B22;--amber:#C9922E;--amber-l:#DFAF42;--amber-d:#8B6212;--copper:#B5634B;--cream:#FAF6EE;--warmgray:#E8E2D8;--navy:#1B2A4A;--sblue:#3D5A80;--bdr:#D6D6D6;--grn:#357A38;--fd:'Barlow Semi Condensed','Barlow',sans-serif;--fh:'Barlow',sans-serif;--fb:'Source Sans 3','Source Sans Pro',sans-serif}
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{font-family:var(--fb);font-size:17px;line-height:1.65;color:var(--graphite);background:var(--white);-webkit-font-smoothing:antialiased;overflow-x:hidden}
+
+.snav{position:fixed;top:0;left:0;right:0;z-index:100;background:rgba(12,12,12,.95);backdrop-filter:blur(12px);padding:0 40px;display:flex;align-items:center;height:56px;transform:translateY(-100%);transition:transform .35s ease}
+.snav.show{transform:translateY(0)}
+.snav-brand{font-family:var(--fd);font-weight:800;font-size:15px;color:var(--white);text-transform:uppercase;letter-spacing:1.5px;margin-right:auto}
+.snav a{font-family:var(--fb);font-size:11px;font-weight:600;letter-spacing:1.5px;text-transform:uppercase;color:var(--steel);text-decoration:none;margin-left:20px;transition:color .2s}
+.snav a:hover,.snav a.active{color:var(--white)}
+
+.cover{min-height:100vh;background:var(--black);color:var(--white);display:flex;flex-direction:column;justify-content:flex-end;padding:64px;position:relative;overflow:hidden}
+.cover::before{content:'';position:absolute;inset:0;background:radial-gradient(ellipse at 50% 40%,rgba(194,59,34,.06),transparent 55%),radial-gradient(ellipse at 80% 70%,rgba(201,146,46,.05),transparent 50%),radial-gradient(ellipse at 20% 60%,rgba(27,42,74,.06),transparent 50%);pointer-events:none}
+.cover-grid{position:absolute;inset:0;background:repeating-linear-gradient(90deg,transparent,transparent 79px,rgba(255,255,255,.02) 79px,rgba(255,255,255,.02) 80px),repeating-linear-gradient(0deg,transparent,transparent 79px,rgba(255,255,255,.02) 79px,rgba(255,255,255,.02) 80px);pointer-events:none}
+.cover-tag{font-family:var(--fb);font-size:12px;font-weight:600;letter-spacing:3px;text-transform:uppercase;color:var(--red);margin-bottom:24px;opacity:0;animation:fu .6s ease forwards .2s}
+.cover h1{font-family:var(--fd);font-weight:800;font-size:clamp(48px,8vw,100px);line-height:.88;letter-spacing:-2px;text-transform:uppercase;margin-bottom:32px}
+.cover h1 .line{display:block;opacity:0;transform:translateY(30px);animation:cr .7s cubic-bezier(.16,1,.3,1) forwards}
+.cover h1 .line:nth-child(1){animation-delay:.4s}
+.cover h1 .line:nth-child(2){animation-delay:.55s;color:var(--red)}
+.cover-desc{font-size:16px;line-height:1.6;color:var(--silver);max-width:560px;border-top:1px solid rgba(255,255,255,.12);padding-top:24px;opacity:0;animation:fu .6s ease forwards .8s}
+.cover-desc strong{color:var(--white);font-weight:600}
+.cover-num{position:absolute;top:50%;right:64px;transform:translateY(-50%);font-family:var(--fd);font-weight:900;font-size:min(30vw,320px);color:rgba(255,255,255,.02);line-height:1;pointer-events:none}
+@keyframes cr{to{opacity:1;transform:translateY(0)}}
+@keyframes fu{to{opacity:1}}
+
+.s{padding:96px 64px;border-bottom:1px solid var(--bdr)}
+.s--dk{background:var(--char);color:var(--white);border-bottom-color:rgba(255,255,255,.06)}
+.s--blk{background:var(--black);color:var(--white);border-bottom-color:rgba(255,255,255,.06)}
+.s--tint{background:var(--bone)}
+.s--cream{background:var(--cream);border-bottom-color:var(--warmgray)}
+.tag{font-family:var(--fb);font-size:11px;font-weight:600;letter-spacing:3px;text-transform:uppercase;color:var(--red);margin-bottom:10px}
+.s--dk .tag,.s--blk .tag{color:var(--red)}
+.title{font-family:var(--fh);font-weight:800;font-size:42px;line-height:1.08;color:var(--black);margin-bottom:16px}
+.s--dk .title,.s--blk .title{color:var(--white)}
+.lead{font-size:18px;line-height:1.6;color:var(--iron);max-width:660px;margin-bottom:56px}
+.s--dk .lead,.s--blk .lead{color:var(--steel)}
+.sub{font-family:var(--fh);font-weight:700;font-size:22px;color:var(--black);margin-bottom:24px}
+.s--dk .sub,.s--blk .sub{color:var(--white)}
+
+/* SWATCHES */
+.sw-section{margin-bottom:56px}
+.sw-label{font-family:var(--fh);font-weight:700;font-size:13px;letter-spacing:2px;text-transform:uppercase;margin-bottom:16px}
+.sw-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(155px,1fr));gap:14px}
+.sw{border-radius:10px;overflow:hidden;border:1px solid rgba(0,0,0,.08);transition:transform .2s}
+.sw:hover{transform:translateY(-3px)}
+.sw-color{height:90px;position:relative}
+.sw-name{position:absolute;bottom:8px;left:12px;font-family:var(--fh);font-weight:700;font-size:12px}
+.sw-info{padding:12px 14px}
+.sw-hex{font-family:'SFMono-Regular','Consolas',monospace;font-size:13px;font-weight:600;color:var(--iron)}
+.sw-rgb{font-family:'SFMono-Regular','Consolas',monospace;font-size:10px;color:var(--silver);margin-top:2px}
+.sw-use{font-family:var(--fb);font-size:11px;color:var(--steel);margin-top:6px;line-height:1.4}
+
+/* CONTRAST TABLE */
+.ct{width:100%;border-collapse:collapse;margin-bottom:32px;font-size:14px}
+.ct th{font-family:var(--fh);font-weight:700;font-size:11px;letter-spacing:1.5px;text-transform:uppercase;text-align:left;padding:12px 16px;border-bottom:2px solid var(--graphite);color:var(--white)}
+.ct td{padding:10px 16px;border-bottom:1px solid rgba(255,255,255,.06);color:var(--silver);font-family:var(--fb)}
+.ct-pair{display:flex;align-items:center;gap:10px}
+.ct-dot{width:20px;height:20px;border-radius:4px;flex-shrink:0}
+.ct-pass{color:#6FCF6F;font-weight:700}
+.ct-warn{color:#E8B84A;font-weight:700}
+.ct-fail{color:#E85B5B;font-weight:700}
+.ct-badge{display:inline-block;font-family:var(--fh);font-weight:700;font-size:10px;letter-spacing:1px;text-transform:uppercase;padding:3px 8px;border-radius:3px}
+.ct-badge.pass{background:rgba(111,207,111,.12);color:#6FCF6F}
+.ct-badge.warn{background:rgba(232,184,74,.12);color:#E8B84A}
+.ct-badge.fail{background:rgba(232,91,91,.12);color:#E85B5B}
+
+/* DANGER PAIRS */
+.danger{background:#1E1214;border:1px solid rgba(232,91,91,.2);border-radius:8px;padding:24px;margin-bottom:16px;display:flex;align-items:flex-start;gap:14px}
+.danger-icon{font-size:18px;flex-shrink:0;margin-top:2px}
+.danger p{font-size:14px;line-height:1.6;color:var(--silver)}
+.danger strong{color:var(--white)}
+.danger code{background:rgba(255,255,255,.08);padding:2px 6px;border-radius:3px;font-size:12px;font-family:'SFMono-Regular','Consolas',monospace;color:var(--fog)}
+
+/* COMPONENTS */
+.comp{border-radius:10px;overflow:hidden;margin-bottom:24px;border:1px solid rgba(255,255,255,.08)}
+.comp-label{font-family:var(--fb);font-size:11px;font-weight:600;letter-spacing:2px;text-transform:uppercase;color:var(--steel);padding:12px 20px;border-bottom:1px solid rgba(255,255,255,.06);background:rgba(255,255,255,.02)}
+
+/* NOTE */
+.note{display:flex;gap:16px;padding:24px;border-radius:0 8px 8px 0;margin-bottom:40px}
+.note--r{background:rgba(194,59,34,.06);border-left:3px solid var(--red)}
+.note--a{background:rgba(201,146,46,.06);border-left:3px solid var(--amber)}
+.note--b{background:rgba(27,42,74,.06);border-left:3px solid var(--navy)}
+.note--g{background:rgba(53,122,56,.06);border-left:3px solid var(--grn)}
+.note-i{flex-shrink:0;width:22px;height:22px;border-radius:50%;color:var(--white);font-size:12px;font-weight:700;display:flex;align-items:center;justify-content:center}
+.note--r .note-i{background:var(--red)}
+.note--a .note-i{background:var(--amber)}
+.note--b .note-i{background:var(--navy)}
+.note--g .note-i{background:var(--grn)}
+.note p{font-size:14px;line-height:1.6;color:var(--iron)}
+.note strong{color:var(--graphite)}
+.note code{background:rgba(0,0,0,.04);padding:2px 6px;border-radius:3px;font-size:12px;font-family:'SFMono-Regular','Consolas',monospace}
+
+
+.s--dk .note p,.s--blk .note p{color:var(--silver)}
+.s--dk .note strong,.s--blk .note strong{color:var(--white)}
+.s--dk .note code,.s--blk .note code{background:rgba(255,255,255,.08);color:var(--fog)}
+
+/* ARCHITECTURE */
+.arch-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:20px;margin-bottom:48px}
+@media(max-width:900px){.arch-grid{grid-template-columns:1fr}}
+.arch-card{padding:28px;border-radius:10px;border:1px solid rgba(255,255,255,.08)}
+.arch-card h4{font-family:var(--fh);font-weight:700;font-size:18px;margin-bottom:8px}
+.arch-card p{font-size:14px;line-height:1.6}
+.arch-card ul{list-style:none;padding:0;margin-top:12px}
+.arch-card li{font-size:13px;line-height:1.6;padding-left:14px;position:relative;margin-bottom:3px}
+.arch-card li::before{content:'·';position:absolute;left:0;font-weight:900}
+
+.foot{padding:56px 64px;background:var(--black);text-align:center}
+.foot-brand{font-family:var(--fd);font-weight:800;font-size:18px;text-transform:uppercase;letter-spacing:2px;color:var(--white);margin-bottom:8px}
+.foot p{font-size:14px;color:var(--steel);line-height:1.6}
+.foot strong{color:var(--white)}
+.fi{opacity:0;transform:translateY(20px);transition:opacity .6s ease,transform .6s ease}
+.fi.vis{opacity:1;transform:translateY(0)}
+@media print{.cover{min-height:auto;page-break-after:always}.s{page-break-inside:avoid;padding:40px}body{font-size:10.5pt}.snav{display:none}}
+@media(max-width:768px){.s{padding:48px 24px}.cover{padding:40px}.cover h1{font-size:48px}.sw-grid{grid-template-columns:1fr 1fr}.arch-grid{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+
+<nav class="snav" id="snav"><div class="snav-brand">Sheepdog</div><a href="#parent">Parent</a><a href="#events">Events</a><a href="#staffing">Staffing</a><a href="#contrast">Contrast</a><a href="#applied">Applied</a><a href="#rules">Rules</a><a href="#cssref">CSS</a></nav>
+
+<div class="cover"><div class="cover-grid"></div><div class="cover-num">01</div>
+<div class="cover-tag">Deliverable #01 · Foundation › Brand Architecture</div>
+<h1><span class="line">Color</span><span class="line">Palette</span></h1>
+<div class="cover-desc"><strong>Sheepdog</strong> — The master color system for the entire brand. Parent palette (shared neutrals), Events extension (amber dual-mode), and Staffing extension (navy corporate). Every hex verified for WCAG accessibility.</div>
+</div>
+
+<!-- 01 PARENT PALETTE -->
+<div class="s" id="parent">
+<div class="fi">
+<div class="tag">01 — Parent Brand Palette</div>
+<div class="title">The Foundation</div>
+<p class="lead">These colors belong to the Sheepdog hub brand and are shared across both sub-brands. Pulled from the logo: white line art on black. The neutral scale runs from midnight to white. Signal Red is the primary accent.</p>
+</div>
+
+<div class="sw-section fi">
+<div class="sw-label" style="color:var(--iron);">Neutral Scale — Dark to Light</div>
+<div class="sw-grid">
+<div class="sw"><div class="sw-color" style="background:#0C0C0C"><div class="sw-name" style="color:#fff">Midnight</div></div><div class="sw-info"><div class="sw-hex">#0C0C0C</div><div class="sw-rgb">RGB 12, 12, 12</div><div class="sw-use">Primary dark. Backgrounds, nav bars, hero sections.</div></div></div>
+<div class="sw"><div class="sw-color" style="background:#161616"><div class="sw-name" style="color:#fff">Charcoal</div></div><div class="sw-info"><div class="sw-hex">#161616</div><div class="sw-rgb">RGB 22, 22, 22</div><div class="sw-use">Secondary dark. Cards, footers, dark sections.</div></div></div>
+<div class="sw"><div class="sw-color" style="background:#2A2A2A"><div class="sw-name" style="color:#fff">Graphite</div></div><div class="sw-info"><div class="sw-hex">#2A2A2A</div><div class="sw-rgb">RGB 42, 42, 42</div><div class="sw-use">Primary text on light backgrounds. 14.4:1 on white.</div></div></div>
+<div class="sw"><div class="sw-color" style="background:#4A4A4A"><div class="sw-name" style="color:#fff">Iron</div></div><div class="sw-info"><div class="sw-hex">#4A4A4A</div><div class="sw-rgb">RGB 74, 74, 74</div><div class="sw-use">Body text on light. 8.9:1 on white — AA+ safe.</div></div></div>
+<div class="sw"><div class="sw-color" style="background:#6B6B6B"><div class="sw-name" style="color:#fff">Slate</div></div><div class="sw-info"><div class="sw-hex">#6B6B6B</div><div class="sw-rgb">RGB 107, 107, 107</div><div class="sw-use">Secondary text. Captions, labels. 5.3:1 on white.</div></div></div>
+<div class="sw"><div class="sw-color" style="background:#7A8490"><div class="sw-name" style="color:#fff">Steel</div></div><div class="sw-info"><div class="sw-hex">#7A8490</div><div class="sw-rgb">RGB 122, 132, 144</div><div class="sw-use">Tertiary text on dark (4.8:1 on charcoal). Large text only on white (3.8:1).</div></div></div>
+<div class="sw"><div class="sw-color" style="background:#A0A0A0"><div class="sw-name" style="color:#000">Silver</div></div><div class="sw-info"><div class="sw-hex">#A0A0A0</div><div class="sw-rgb">RGB 160, 160, 160</div><div class="sw-use">Disabled states, placeholder text, decorative only on light.</div></div></div>
+<div class="sw"><div class="sw-color" style="background:#D0D0D0"><div class="sw-name" style="color:#000">Fog</div></div><div class="sw-info"><div class="sw-hex">#D0D0D0</div><div class="sw-rgb">RGB 208, 208, 208</div><div class="sw-use">Borders, dividers, subtle rules on light backgrounds.</div></div></div>
+<div class="sw"><div class="sw-color" style="background:#F4F3F1"><div class="sw-name" style="color:#555">Bone</div></div><div class="sw-info"><div class="sw-hex">#F4F3F1</div><div class="sw-rgb">RGB 244, 243, 241</div><div class="sw-use">Off-white tint. Section backgrounds, alternating rows.</div></div></div>
+<div class="sw"><div class="sw-color" style="background:#FFFFFF;border:1px solid #ddd"><div class="sw-name" style="color:#555">White</div></div><div class="sw-info"><div class="sw-hex">#FFFFFF</div><div class="sw-rgb">RGB 255, 255, 255</div><div class="sw-use">Primary light background. Text on dark surfaces.</div></div></div>
+</div></div>
+
+<div class="sw-section fi">
+<div class="sw-label" style="color:var(--iron);">Accent</div>
+<div class="sw-grid" style="grid-template-columns:repeat(auto-fill,minmax(200px,1fr))">
+<div class="sw"><div class="sw-color" style="background:#C23B22"><div class="sw-name" style="color:#fff">Signal Red</div></div><div class="sw-info"><div class="sw-hex">#C23B22</div><div class="sw-rgb">RGB 194, 59, 34</div><div class="sw-use">Hub brand accent. CTAs, overlines, accent text on light (5.3:1 on white — AA). Error states. Not for extended body paragraphs — use for short labels and emphasis only.</div></div></div>
+</div></div>
+<div class="note note--r fi"><div class="note-i">i</div><div><p><strong>Signal Red is the shared accent.</strong> It appears on the hub brand (sheepdogtexas.com), in the operations app, and anywhere the parent brand speaks. Sub-brands extend with their own accents (amber for Events, navy for Staffing) but Signal Red stays available for alerts, errors, and parent-level CTAs.</p></div></div>
+</div>
+
+<!-- 02 EVENTS PALETTE -->
+<div class="s s--dk" id="events">
+<div class="fi">
+<div class="tag" style="color:var(--amber)">02 — Sheepdog Events Extension</div>
+<div class="title">Amber + Warmth</div>
+<p class="lead">Six colors added to the parent palette for Sheepdog Events. The dual-mode system: same colors, different hierarchy. Black dominant for security, cream dominant for bartending. Amber is the bridge.</p>
+</div>
+
+<div class="sw-section fi">
+<div class="sw-label" style="color:var(--steel);">Events-Exclusive Colors</div>
+<div class="sw-grid">
+<div class="sw" style="border-color:rgba(255,255,255,.08)"><div class="sw-color" style="background:#C9922E"><div class="sw-name" style="color:#fff">Amber</div></div><div class="sw-info" style="background:var(--char)"><div class="sw-hex" style="color:#ddd">#C9922E</div><div class="sw-rgb" style="color:var(--steel)">RGB 201, 146, 46</div><div class="sw-use" style="color:var(--amber)">THE BRIDGE. CTAs (as fill), accents on dark (7.1:1 AAA). Fails on light — never as text on white/cream.</div></div></div>
+<div class="sw" style="border-color:rgba(255,255,255,.08)"><div class="sw-color" style="background:#DFAF42"><div class="sw-name" style="color:#000">Amber Light</div></div><div class="sw-info" style="background:var(--char)"><div class="sw-hex" style="color:#ddd">#DFAF42</div><div class="sw-rgb" style="color:var(--steel)">RGB 223, 175, 66</div><div class="sw-use" style="color:var(--steel)">Hover states, highlights, decorative warmth. 9.6:1 AAA on black.</div></div></div>
+<div class="sw" style="border-color:rgba(255,255,255,.08)"><div class="sw-color" style="background:#8B6212"><div class="sw-name" style="color:#fff">Amber Dark</div></div><div class="sw-info" style="background:var(--char)"><div class="sw-hex" style="color:#ddd">#8B6212</div><div class="sw-rgb" style="color:var(--steel)">RGB 139, 98, 18</div><div class="sw-use" style="color:var(--steel)">Overline text on light backgrounds. 5.4:1 AA on white. Use instead of Amber for text on cream/white.</div></div></div>
+<div class="sw" style="border-color:rgba(255,255,255,.08)"><div class="sw-color" style="background:#B5634B"><div class="sw-name" style="color:#fff">Copper</div></div><div class="sw-info" style="background:var(--char)"><div class="sw-hex" style="color:#ddd">#B5634B</div><div class="sw-rgb" style="color:var(--steel)">RGB 181, 99, 75</div><div class="sw-use" style="color:var(--steel)">Secondary accent. Warmth, spice. Large text only on light (4.3:1). Safe on dark.</div></div></div>
+<div class="sw" style="border-color:rgba(255,255,255,.08)"><div class="sw-color" style="background:#FAF6EE"><div class="sw-name" style="color:#555">Cream</div></div><div class="sw-info" style="background:var(--char)"><div class="sw-hex" style="color:#ddd">#FAF6EE</div><div class="sw-rgb" style="color:var(--steel)">RGB 250, 246, 238</div><div class="sw-use" style="color:var(--steel)">Bartending mode background. Warm white. 18.1:1 vs Midnight.</div></div></div>
+<div class="sw" style="border-color:rgba(255,255,255,.08)"><div class="sw-color" style="background:#E8E2D8"><div class="sw-name" style="color:#555">Warm Gray</div></div><div class="sw-info" style="background:var(--char)"><div class="sw-hex" style="color:#ddd">#E8E2D8</div><div class="sw-rgb" style="color:var(--steel)">RGB 232, 226, 216</div><div class="sw-use" style="color:var(--steel)">Borders, dividers, card tints in bartending mode.</div></div></div>
+</div></div>
+
+<div class="note note--a fi"><div class="note-i">!</div><div><p><strong>Amber accessibility rule:</strong> Amber <code>#C9922E</code> <strong>fails WCAG AA on white</strong> (2.8:1) and <strong>fails on cream</strong> (2.6:1). Never use Amber as text on light backgrounds. Use <strong>Amber Dark</strong> <code>#8B6212</code> for overline text on light (5.4:1 AA on white, 5.1:1 AA on cream). Amber is safe as text on dark (7.1:1 AAA on black) and as button fill with black or white text on top.</p></div></div>
+</div>
+
+<!-- 03 STAFFING PALETTE -->
+<div class="s" id="staffing">
+<div class="fi">
+<div class="tag" style="color:var(--navy)">03 — Sheepdog Staffing Extension</div>
+<div class="title">Navy + Structure</div>
+<p class="lead">Two colors added to the parent palette for Sheepdog Staffing. Cooler, more corporate. No amber, no cream — the two sub-brands should be visually distinct at a glance.</p>
+</div>
+
+<div class="sw-section fi">
+<div class="sw-label" style="color:var(--iron);">Staffing-Exclusive Colors</div>
+<div class="sw-grid" style="grid-template-columns:repeat(auto-fill,minmax(200px,1fr))">
+<div class="sw"><div class="sw-color" style="background:#1B2A4A"><div class="sw-name" style="color:#fff">Navy</div></div><div class="sw-info"><div class="sw-hex">#1B2A4A</div><div class="sw-rgb">RGB 27, 42, 74</div><div class="sw-use">Primary Staffing accent. CTAs, hero sections, data headers. 14.2:1 AAA on white.</div></div></div>
+<div class="sw"><div class="sw-color" style="background:#3D5A80"><div class="sw-name" style="color:#fff">Slate Blue</div></div><div class="sw-info"><div class="sw-hex">#3D5A80</div><div class="sw-rgb">RGB 61, 90, 128</div><div class="sw-use">Secondary Staffing accent. Tags, links, secondary CTAs. 7.1:1 AAA on white.</div></div></div>
+</div></div>
+
+<div class="note note--b fi"><div class="note-i">i</div><div><p><strong>Staffing stays cool.</strong> Navy and Slate Blue are the only Staffing-exclusive additions. Combined with the parent neutrals (Midnight through White + Signal Red for alerts), this gives Staffing a clean, corporate identity. No warm tones — if you see amber or cream, it's Events territory.</p></div></div>
+</div>
+
+<!-- 04 CONTRAST RATIOS -->
+<div class="s s--blk" id="contrast">
+<div class="fi">
+<div class="tag">04 — WCAG Contrast Verification</div>
+<div class="title">Every Pair. Mathematically Verified.</div>
+<p class="lead">These are calculated, not estimated. Ratios use the WCAG 2.1 relative luminance formula. AA requires 4.5:1 for normal text, 3:1 for large text (18px bold or 24px regular).</p>
+</div>
+
+<div class="sub fi" style="color:var(--white);">Parent Brand Pairs</div>
+<div style="overflow-x:auto;-webkit-overflow-scrolling:touch;" class="fi"><table class="ct">
+<thead><tr><th>Pair</th><th>Ratio</th><th>Grade</th><th>Use</th></tr></thead>
+<tbody>
+<tr><td><div class="ct-pair"><div class="ct-dot" style="background:#2A2A2A;border:1px solid rgba(255,255,255,.1)"></div>Graphite on White</div></td><td class="ct-pass">14.4:1</td><td><span class="ct-badge pass">AAA</span></td><td>Primary text on light backgrounds</td></tr>
+<tr><td><div class="ct-pair"><div class="ct-dot" style="background:#4A4A4A;border:1px solid rgba(255,255,255,.1)"></div>Iron on White</div></td><td class="ct-pass">8.9:1</td><td><span class="ct-badge pass">AAA</span></td><td>Body text on light backgrounds</td></tr>
+<tr><td><div class="ct-pair"><div class="ct-dot" style="background:#6B6B6B;border:1px solid rgba(255,255,255,.1)"></div>Slate on White</div></td><td class="ct-pass">5.3:1</td><td><span class="ct-badge pass">AA</span></td><td>Secondary text, captions on light</td></tr>
+<tr><td><div class="ct-pair"><div class="ct-dot" style="background:#7A8490;border:1px solid rgba(255,255,255,.1)"></div>Steel on White</div></td><td class="ct-warn">3.8:1</td><td><span class="ct-badge warn">AA-LG</span></td><td>Large text only (18px bold+). Not body.</td></tr>
+<tr><td><div class="ct-pair"><div class="ct-dot" style="background:#A0A0A0;border:1px solid rgba(255,255,255,.1)"></div>Silver on White</div></td><td class="ct-fail">2.6:1</td><td><span class="ct-badge fail">FAIL</span></td><td>Decorative only. Never readable text.</td></tr>
+<tr><td><div class="ct-pair"><div class="ct-dot" style="background:#FFF;border:1px solid rgba(255,255,255,.2)"></div>White on Midnight</div></td><td class="ct-pass">19.6:1</td><td><span class="ct-badge pass">AAA</span></td><td>Primary text on dark backgrounds</td></tr>
+<tr><td><div class="ct-pair"><div class="ct-dot" style="background:#FFF;border:1px solid rgba(255,255,255,.2)"></div>White on Charcoal</div></td><td class="ct-pass">18.1:1</td><td><span class="ct-badge pass">AAA</span></td><td>Text on dark sections and cards</td></tr>
+<tr><td><div class="ct-pair"><div class="ct-dot" style="background:#7A8490;border:1px solid rgba(255,255,255,.2)"></div>Steel on Charcoal</div></td><td class="ct-pass">4.8:1</td><td><span class="ct-badge pass">AA</span></td><td>Secondary text on dark backgrounds</td></tr>
+<tr><td><div class="ct-pair"><div class="ct-dot" style="background:#A0A0A0;border:1px solid rgba(255,255,255,.2)"></div>Silver on Midnight</div></td><td class="ct-pass">7.5:1</td><td><span class="ct-badge pass">AAA</span></td><td>Secondary text on dark backgrounds</td></tr>
+<tr><td><div class="ct-pair"><div class="ct-dot" style="background:#2A2A2A;border:1px solid rgba(255,255,255,.2)"></div>Graphite on Bone</div></td><td class="ct-pass">12.9:1</td><td><span class="ct-badge pass">AAA</span></td><td>Primary text on tinted sections</td></tr>
+<tr><td><div class="ct-pair"><div class="ct-dot" style="background:#C23B22;border:1px solid rgba(255,255,255,.2)"></div>Signal Red on White</div></td><td class="ct-pass">5.3:1</td><td><span class="ct-badge pass">AA</span></td><td>Accent text, CTAs, overlines on light</td></tr>
+<tr><td><div class="ct-pair"><div class="ct-dot" style="background:#C23B22;border:1px solid rgba(255,255,255,.2)"></div>Signal Red on Midnight</div></td><td class="ct-warn">3.7:1</td><td><span class="ct-badge warn">AA-LG</span></td><td>Large text only on dark. Not body.</td></tr>
+</tbody>
+</table></div>
+
+<div class="sub fi" style="color:var(--white);margin-top:40px;">Events Palette Pairs</div>
+<div style="overflow-x:auto;-webkit-overflow-scrolling:touch;" class="fi"><table class="ct">
+<thead><tr><th>Pair</th><th>Ratio</th><th>Grade</th><th>Use</th></tr></thead>
+<tbody>
+<tr><td><div class="ct-pair"><div class="ct-dot" style="background:#C9922E"></div>Amber on Midnight</div></td><td class="ct-pass">7.1:1</td><td><span class="ct-badge pass">AAA</span></td><td>Accent text, overlines on dark</td></tr>
+<tr><td><div class="ct-pair"><div class="ct-dot" style="background:#C9922E"></div>Amber on Charcoal</div></td><td class="ct-pass">6.6:1</td><td><span class="ct-badge pass">AA</span></td><td>Text on dark cards/sections</td></tr>
+<tr><td><div class="ct-pair"><div class="ct-dot" style="background:#C9922E"></div>Amber on White</div></td><td class="ct-fail">2.8:1</td><td><span class="ct-badge fail">FAIL</span></td><td>NEVER use as text on light</td></tr>
+<tr><td><div class="ct-pair"><div class="ct-dot" style="background:#C9922E"></div>Amber on Cream</div></td><td class="ct-fail">2.6:1</td><td><span class="ct-badge fail">FAIL</span></td><td>NEVER use as text on cream</td></tr>
+<tr><td><div class="ct-pair"><div class="ct-dot" style="background:#8B6212"></div>Amber Dark on White</div></td><td class="ct-pass">5.4:1</td><td><span class="ct-badge pass">AA</span></td><td>Overline text on light backgrounds</td></tr>
+<tr><td><div class="ct-pair"><div class="ct-dot" style="background:#8B6212"></div>Amber Dark on Cream</div></td><td class="ct-pass">5.1:1</td><td><span class="ct-badge pass">AA</span></td><td>Overline text on cream backgrounds</td></tr>
+<tr><td><div class="ct-pair"><div class="ct-dot" style="background:#0C0C0C"></div>Midnight on Cream</div></td><td class="ct-pass">18.1:1</td><td><span class="ct-badge pass">AAA</span></td><td>Primary text in bartending mode</td></tr>
+<tr><td><div class="ct-pair"><div class="ct-dot" style="background:#DFAF42"></div>Amber Light on Midnight</div></td><td class="ct-pass">9.6:1</td><td><span class="ct-badge pass">AAA</span></td><td>Highlights, decorative on dark</td></tr>
+<tr><td><div class="ct-pair"><div class="ct-dot" style="background:#B5634B"></div>Copper on White</div></td><td class="ct-warn">4.3:1</td><td><span class="ct-badge warn">AA-LG</span></td><td>Large text only on light</td></tr>
+<tr><td><div class="ct-pair"><div class="ct-dot" style="background:#B5634B"></div>Copper on Midnight</div></td><td class="ct-pass">4.5:1</td><td><span class="ct-badge pass">AA</span></td><td>Accent text on dark — passes AA exactly</td></tr>
+</tbody>
+</table></div>
+
+<div class="sub fi" style="color:var(--white);margin-top:40px;">Staffing Palette Pairs</div>
+<div style="overflow-x:auto;-webkit-overflow-scrolling:touch;" class="fi"><table class="ct">
+<thead><tr><th>Pair</th><th>Ratio</th><th>Grade</th><th>Use</th></tr></thead>
+<tbody>
+<tr><td><div class="ct-pair"><div class="ct-dot" style="background:#1B2A4A"></div>Navy on White</div></td><td class="ct-pass">14.2:1</td><td><span class="ct-badge pass">AAA</span></td><td>Text, CTAs, headers on light</td></tr>
+<tr><td><div class="ct-pair"><div class="ct-dot" style="background:#1B2A4A"></div>Navy on Bone</div></td><td class="ct-pass">12.8:1</td><td><span class="ct-badge pass">AAA</span></td><td>Text on off-white sections</td></tr>
+<tr><td><div class="ct-pair"><div class="ct-dot" style="background:#3D5A80"></div>Slate Blue on White</div></td><td class="ct-pass">7.1:1</td><td><span class="ct-badge pass">AAA</span></td><td>Secondary text, links, tags on light</td></tr>
+<tr><td><div class="ct-pair"><div class="ct-dot" style="background:#FFF"></div>White on Navy</div></td><td class="ct-pass">14.2:1</td><td><span class="ct-badge pass">AAA</span></td><td>Text on navy hero/CTA sections</td></tr>
+</tbody>
+</table></div>
+
+<div class="fi" style="margin-top:48px;">
+<div class="sub" style="color:var(--white);">Dangerous Pairs</div>
+</div>
+<div class="danger fi"><div class="danger-icon">⛔</div><div><p><strong>Silver <code>#A0A0A0</code> on White <code>#FFFFFF</code></strong> — 2.6:1. Fails all levels. Never use as readable text. Decorative borders/fills only.</p></div></div>
+<div class="danger fi"><div class="danger-icon">⛔</div><div><p><strong>Steel <code>#7A8490</code> on White <code>#FFFFFF</code></strong> — 3.8:1. Fails AA for body text. OK for large text (18px bold / 24px) like nav items or section labels. Never for body copy.</p></div></div>
+<div class="danger fi"><div class="danger-icon">⛔</div><div><p><strong>Amber <code>#C9922E</code> on White <code>#FFFFFF</code></strong> — 2.8:1. Fails all levels. Use Amber Dark <code>#8B6212</code> (5.4:1 AA) for text on light, or use Amber only as button fill.</p></div></div>
+<div class="danger fi"><div class="danger-icon">⛔</div><div><p><strong>Amber <code>#C9922E</code> on Cream <code>#FAF6EE</code></strong> — 2.6:1. Fails all levels. Same rule: Amber Dark for text, Amber for fills/buttons only.</p></div></div>
+<div class="danger fi"><div class="danger-icon">⛔</div><div><p><strong>Signal Red <code>#C23B22</code> on Midnight <code>#0C0C0C</code></strong> — 3.7:1. Fails AA for body text. OK for large text (overlines, nav, badges). Not for body copy on dark.</p></div></div>
+</div>
+
+<!-- 05 APPLIED -->
+<div class="s s--dk" id="applied">
+<div class="fi">
+<div class="tag">05 — Applied Examples</div>
+<div class="title">Palette in Context</div>
+<p class="lead">The same palette system applied to real components. Hub brand, Events (both modes), and Staffing.</p>
+</div>
+
+<div class="sub fi" style="color:var(--white);">Hub Brand — sheepdogtexas.com</div>
+<div class="comp fi"><div class="comp-label">Hub Navigation</div>
+<div style="background:var(--black);padding:20px 28px;display:flex;align-items:center;justify-content:space-between;">
+<span style="font-family:var(--fd);font-weight:800;font-size:16px;color:var(--white);text-transform:uppercase;letter-spacing:1px;">Sheepdog</span>
+<div style="display:flex;gap:24px;align-items:center;">
+<span style="font-family:var(--fh);font-weight:600;font-size:12px;letter-spacing:1px;text-transform:uppercase;color:var(--steel);">Events</span>
+<span style="font-family:var(--fh);font-weight:600;font-size:12px;letter-spacing:1px;text-transform:uppercase;color:var(--steel);">Staffing</span>
+<span style="font-family:var(--fh);font-weight:700;font-size:11px;letter-spacing:1.5px;text-transform:uppercase;color:var(--white);background:var(--red);padding:8px 18px;border-radius:4px;">Get Started</span>
+</div>
+</div></div>
+
+<div class="sub fi" style="color:var(--white);margin-top:48px;">Sheepdog Events — Security Mode</div>
+<div class="comp fi"><div class="comp-label">Events Hero (Security Mode)</div>
+<div style="background:var(--char);padding:48px 28px;text-align:center;">
+<div style="font-family:var(--fb);font-size:11px;font-weight:600;letter-spacing:2.5px;text-transform:uppercase;color:var(--amber);margin-bottom:12px;">Sheepdog Events</div>
+<div style="font-family:var(--fd);font-weight:800;font-size:32px;text-transform:uppercase;line-height:.96;color:var(--white);margin-bottom:12px;">Security &amp; Bartending<br>For Every Event</div>
+<div style="font-family:var(--fb);font-size:15px;color:var(--steel);margin-bottom:20px;max-width:400px;margin-left:auto;margin-right:auto;">Experienced security and professional mobile bartenders across Bryan–College Station.</div>
+<span style="display:inline-block;font-family:var(--fh);font-weight:700;font-size:13px;letter-spacing:1.5px;text-transform:uppercase;color:var(--black);background:var(--amber);padding:12px 28px;border-radius:4px;">Get a Quote</span>
+</div></div>
+
+<div class="sub fi" style="color:var(--white);margin-top:48px;">Sheepdog Events — Bartending Mode</div>
+<div class="comp fi"><div class="comp-label">Events Hero (Bartending Mode)</div>
+<div style="background:var(--cream);padding:48px 28px;text-align:center;">
+<div style="font-family:var(--fb);font-size:11px;font-weight:600;letter-spacing:2.5px;text-transform:uppercase;color:var(--amber-d);margin-bottom:12px;">Sheepdog Events</div>
+<div style="font-family:var(--fd);font-weight:800;font-size:32px;text-transform:uppercase;line-height:.96;color:var(--black);margin-bottom:12px;">Full-Service Bar<br>For Your Event</div>
+<div style="font-family:var(--fb);font-size:15px;color:var(--iron);margin-bottom:20px;max-width:400px;margin-left:auto;margin-right:auto;">Licensed bartenders, full equipment, and setup for weddings, private parties, and corporate events.</div>
+<span style="display:inline-block;font-family:var(--fh);font-weight:700;font-size:13px;letter-spacing:1.5px;text-transform:uppercase;color:var(--black);background:var(--amber);padding:12px 28px;border-radius:4px;">Book Bartending</span>
+</div></div>
+
+<div class="sub fi" style="color:var(--white);margin-top:48px;">Sheepdog Staffing</div>
+<div class="comp fi"><div class="comp-label">Staffing Hero</div>
+<div style="background:var(--white);padding:48px 28px;text-align:center;">
+<div style="font-family:var(--fb);font-size:11px;font-weight:600;letter-spacing:2.5px;text-transform:uppercase;color:var(--sblue);margin-bottom:12px;">Sheepdog Staffing</div>
+<div style="font-family:var(--fd);font-weight:800;font-size:30px;line-height:1;color:var(--black);margin-bottom:12px;">Contract Workforce Solutions,<br>On Demand</div>
+<div style="font-family:var(--fb);font-size:15px;color:var(--iron);margin-bottom:20px;max-width:420px;margin-left:auto;margin-right:auto;">Vetted, managed contracted workers for companies that need labor at scale. You define the scope — we deliver the people.</div>
+<span style="display:inline-block;font-family:var(--fh);font-weight:700;font-size:13px;letter-spacing:1.5px;text-transform:uppercase;color:var(--white);background:var(--navy);padding:12px 28px;border-radius:4px;">Request Staff</span>
+</div></div>
+
+<div class="comp fi"><div class="comp-label">Staffing CTA Banner</div>
+<div style="background:var(--navy);padding:40px 28px;text-align:center;">
+<div style="font-family:var(--fd);font-weight:800;font-size:28px;text-transform:uppercase;color:var(--white);margin-bottom:8px;">Ready to Scale Your Team?</div>
+<div style="font-family:var(--fb);font-size:15px;color:var(--steel);margin-bottom:20px;">Tell us your staffing needs. We respond within 24 hours.</div>
+<span style="display:inline-block;font-family:var(--fh);font-weight:700;font-size:13px;letter-spacing:1.5px;text-transform:uppercase;color:var(--navy);background:var(--white);padding:12px 28px;border-radius:4px;">Get a Proposal</span>
+</div></div>
+</div>
+
+<!-- 06 RULES -->
+<div class="s" id="rules">
+<div class="fi">
+<div class="tag">06 — Usage Rules &amp; Architecture</div>
+<div class="title">How the System Works</div>
+<p class="lead">The palette is layered: parent base shared everywhere, sub-brand extensions only on sub-brand materials. The two sub-brands never share accent colors.</p>
+</div>
+
+<div class="arch-grid fi">
+<div class="arch-card" style="background:var(--bone);border:1px solid var(--fog);">
+<h4 style="color:var(--graphite);">Parent / Hub</h4>
+<p style="color:var(--iron);">Used on sheepdogtexas.com hub page, shared materials (about, contact), ops app, internal docs.</p>
+<ul style="color:var(--slate);">
+<li>Neutrals: Midnight → White (full scale)</li>
+<li>Accent: Signal Red <code style="background:rgba(0,0,0,.04);padding:1px 4px;border-radius:2px;font-size:11px">#C23B22</code></li>
+<li>No amber, no navy</li>
+</ul>
+</div>
+<div class="arch-card" style="background:var(--char);border-color:rgba(255,255,255,.08);">
+<h4 style="color:var(--amber);">Sheepdog Events</h4>
+<p style="color:var(--steel);">Used on /events page, Events social, Events proposals, event-day materials.</p>
+<ul style="color:var(--steel);">
+<li>Parent neutrals + Signal Red (errors only)</li>
+<li>+ Amber, Amber Light, Amber Dark, Copper</li>
+<li>+ Cream, Warm Gray</li>
+<li>Dual-mode: Security (dark) ↔ Bartending (cream)</li>
+</ul>
+</div>
+<div class="arch-card" style="background:var(--bone);border:1px solid var(--fog);">
+<h4 style="color:var(--navy);">Sheepdog Staffing</h4>
+<p style="color:var(--iron);">Used on /staffing page, Staffing social, proposals, B2B materials.</p>
+<ul style="color:var(--slate);">
+<li>Parent neutrals + Signal Red (errors only)</li>
+<li>+ Navy, Slate Blue</li>
+<li>No amber, no cream, no warm tones</li>
+<li>Clean, cool, corporate feel</li>
+</ul>
+</div>
+</div>
+
+<div class="note note--g fi"><div class="note-i">✓</div><div><p><strong>Quick test:</strong> If you see amber and cream → Events. If you see navy and slate blue → Staffing. If you see only neutrals and red → Hub. If two sub-brand palettes appear on the same page, something is wrong.</p></div></div>
+
+<div class="note note--r fi"><div class="note-i">!</div><div><p><strong>Never use off-black as pure black.</strong> The brand black is Midnight <code>#0C0C0C</code>, not <code>#000000</code>. Pure black is harsher on screens and creates excessive contrast. Midnight is softer while still reading as black. Same applies to backgrounds — use Charcoal <code>#161616</code> for secondary dark surfaces, not a random dark gray.</p></div></div>
+</div>
+
+<!-- 07 CSS REFERENCE -->
+<div class="s s--blk" id="cssref">
+<div class="fi">
+<div class="tag">07 — Developer Reference</div>
+<div class="title">Copy-Paste CSS Variables</div>
+<p class="lead">Drop this block into any project stylesheet. Parent variables are always included. Add the Events or Staffing extension based on which sub-brand the project serves.</p>
+</div>
+
+<div class="fi" style="margin-bottom:32px;">
+<div style="font-family:var(--fh);font-weight:700;font-size:13px;letter-spacing:2px;text-transform:uppercase;color:var(--steel);margin-bottom:12px;">Parent Brand (always include)</div>
+<pre style="background:var(--char);border:1px solid rgba(255,255,255,.08);border-radius:8px;padding:24px;overflow-x:auto;font-family:'SFMono-Regular','Consolas',monospace;font-size:13px;line-height:1.8;color:var(--fog);"><code>:root {
+  --midnight:   #0C0C0C;
+  --charcoal:   #161616;
+  --graphite:   #2A2A2A;
+  --iron:       #4A4A4A;
+  --slate:      #6B6B6B;
+  --steel:      #7A8490;
+  --silver:     #A0A0A0;
+  --fog:        #D0D0D0;
+  --bone:       #F4F3F1;
+  --white:      #FFFFFF;
+  --signal-red: #C23B22;
+}</code></pre></div>
+
+<div class="fi" style="margin-bottom:32px;">
+<div style="font-family:var(--fh);font-weight:700;font-size:13px;letter-spacing:2px;text-transform:uppercase;color:var(--amber);margin-bottom:12px;">+ Events Extension</div>
+<pre style="background:var(--char);border:1px solid rgba(255,255,255,.08);border-radius:8px;padding:24px;overflow-x:auto;font-family:'SFMono-Regular','Consolas',monospace;font-size:13px;line-height:1.8;color:var(--fog);"><code>  --amber:      #C9922E;
+  --amber-lt:   #DFAF42;
+  --amber-dk:   #8B6212;  /* text on light backgrounds */
+  --copper:     #B5634B;
+  --cream:      #FAF6EE;
+  --warm-gray:  #E8E2D8;</code></pre></div>
+
+<div class="fi" style="margin-bottom:32px;">
+<div style="font-family:var(--fh);font-weight:700;font-size:13px;letter-spacing:2px;text-transform:uppercase;color:var(--sblue);margin-bottom:12px;">+ Staffing Extension</div>
+<pre style="background:var(--char);border:1px solid rgba(255,255,255,.08);border-radius:8px;padding:24px;overflow-x:auto;font-family:'SFMono-Regular','Consolas',monospace;font-size:13px;line-height:1.8;color:var(--fog);"><code>  --navy:       #1B2A4A;
+  --slate-blue: #3D5A80;</code></pre></div>
+</div>
+
+<div class="foot"><div class="foot-brand">Sheepdog</div><p>Color Palette · Deliverable #01<br>The foundation. Every other deliverable references this document.<br><strong>#02 Typography</strong> · <strong>#03 Visual Standards</strong> · <strong>#04 Events Identity</strong> · <strong>#05 Staffing Identity</strong></p></div>
+
+<script>
+const snav=document.getElementById('snav');const nls=snav.querySelectorAll('a');
+window.addEventListener('scroll',()=>{const y=window.scrollY;snav.classList.toggle('show',y>window.innerHeight*.5);document.querySelectorAll('.s[id]').forEach(s=>{const t=s.offsetTop-80,b=t+s.offsetHeight,id=s.id;nls.forEach(a=>{if(a.getAttribute('href')==='#'+id)a.classList.toggle('active',y>=t&&y<b)})})});
+const fis=document.querySelectorAll('.fi');const obs=new IntersectionObserver(es=>{es.forEach(e=>{if(e.isIntersecting){e.target.classList.add('vis');obs.unobserve(e.target)}})},{threshold:.1,rootMargin:'0px 0px -40px 0px'});fis.forEach(el=>obs.observe(el));
+</script>
+</body>
+</html>
