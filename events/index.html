@@ -299,8 +299,8 @@ body{font-family:var(--fb);font-size:17px;line-height:1.65;color:var(--mid);back
   .qf-grid{grid-template-columns:1fr}
 
   /* hero: flex column, cards split viewport exactly */
-  .hero{display:flex;flex-direction:column;gap:10px;padding:66px 10px 10px;height:100dvh;min-height:0;max-height:100dvh;overflow:hidden}
-  .hero-card{flex:1 1 0%;min-height:0;max-height:50%;overflow:hidden;position:relative;border-radius:10px;padding:24px 20px 0}
+  .hero{display:flex;flex-direction:column;gap:10px;padding:66px 10px 10px;height:100dvh;min-height:0}
+  .hero-card{flex:1 1 0%;min-height:0;overflow:hidden;position:relative;border-radius:10px;padding:24px 20px 0}
 
   /* gradient fade at bottom — percentage-based so it scales with card height */
   .hero-card::after{content:'';position:absolute;bottom:0;left:0;right:0;height:45%;max-height:160px;pointer-events:none;z-index:2}
