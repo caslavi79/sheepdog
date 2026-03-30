@@ -322,7 +322,8 @@ body{font-family:var(--fb);font-size:17px;line-height:1.65;color:var(--mid);back
   .hero-points li{font-size:14px}
   .hero-points{gap:2px;margin-bottom:0}
 
-  /* tapped open */
+  /* tapped open — hero must grow to fit expanded content */
+  .hero:has(.m-open){height:auto;min-height:0}
   .hero-card.m-open{flex:none;height:auto;overflow:visible;padding-bottom:32px;animation:none}
   .hero-card.m-open::after{display:none}
   .hero-card.m-open .hero-btn{position:static;transform:none;font-size:14px}
