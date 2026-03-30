@@ -69,8 +69,11 @@ body{font-family:var(--fb);font-size:17px;line-height:1.65;color:var(--mid);back
 .hero-card{display:flex;flex-direction:column;align-items:center;text-align:center;padding:48px;position:relative;overflow:hidden;border-radius:12px;cursor:pointer;transition:transform .3s ease,box-shadow .3s ease,opacity .3s ease}
 .hero-card--sec{background:var(--char);border:1px solid var(--steel)}
 .hero-card--bar{background:var(--cream);border:1px solid var(--amber)}
-.hero:not(.expanded):hover .hero-card{opacity:.5;transform:scale(.98)}
-.hero:not(.expanded):hover .hero-card:hover{opacity:1;transform:scale(1.02);box-shadow:0 16px 48px rgba(0,0,0,.15)}
+@media(hover:hover){
+.hero:not(.expanded) .hero-card:hover{transform:scale(1.02);box-shadow:0 16px 48px rgba(0,0,0,.15)}
+.hero.dim-bar:not(.expanded) .hero-card--bar,
+.hero.dim-sec:not(.expanded) .hero-card--sec{opacity:.5;transform:scale(.98)}
+}
 
 /* active card becomes two-column layout */
 .hero-card.active{cursor:default;display:grid;grid-template-columns:1fr 1fr;gap:48px;text-align:left;align-items:start;padding:48px 56px}
@@ -83,14 +86,10 @@ body{font-family:var(--fb);font-size:17px;line-height:1.65;color:var(--mid);back
 .hero-card.active .hero-btn{display:none}
 
 /* collapsed card */
-.hero-card.collapsed{padding:16px 32px;flex-direction:row;align-items:center;gap:16px;cursor:pointer;opacity:.6}
+.hero-card.collapsed{padding:16px 32px;flex-direction:row;align-items:center;justify-content:center;cursor:pointer;opacity:.6}
 .hero-card.collapsed h2{font-size:18px;margin:0}
-.hero-card.collapsed .hero-intro>*:not(.hero-label):not(h2){display:none}
-.hero-card.collapsed .hero-label{margin:0}
+.hero-card.collapsed .hero-intro>*:not(h2){display:none}
 .hero-card.collapsed .hero-expanded{display:none !important}
-.hero-card.collapsed::after{content:'← Back to both';font-family:var(--fb);font-size:12px;font-weight:600;letter-spacing:1px;text-transform:uppercase;margin-left:auto}
-.hero-card--sec.collapsed::after{color:var(--amber)}
-.hero-card--bar.collapsed::after{color:var(--amber-d)}
 .hero-card.collapsed:hover{opacity:.85}
 
 /* card innards */
@@ -335,9 +334,19 @@ body{font-family:var(--fb);font-size:17px;line-height:1.65;color:var(--mid);back
   .hero-exp-grid{grid-template-columns:1fr}
   .hero-exp-steps{flex-direction:column;gap:12px}
 
-  /* collapsed card */
+  /* collapsed card (desktop) */
   .hero-card.collapsed{flex:none;height:56px;min-height:56px;padding:14px 20px;flex-direction:row;overflow:hidden}
   .hero-card.collapsed::after{display:none}
+
+  /* mobile collapsed sibling */
+  .hero-card.m-collapsed{flex:none;height:56px;min-height:56px;padding:14px 20px;overflow:hidden;animation:none;cursor:pointer;opacity:.6}
+  .hero-card.m-collapsed::after{display:none}
+  .hero-card.m-collapsed .hero-intro>*:not(.hero-label):not(h2){display:none}
+  .hero-card.m-collapsed .hero-label{margin:0}
+  .hero-card.m-collapsed h2{font-size:16px;margin:0}
+  .hero-card.m-collapsed .hero-expanded{display:none !important}
+  .hero-card.m-collapsed .hero-btn{display:none}
+
   .hero-expanded{text-align:left;align-items:flex-start}
 }
 
@@ -407,7 +416,7 @@ body{font-family:var(--fb);font-size:17px;line-height:1.65;color:var(--mid);back
 <a href="#contact" class="hero-exp-cta" onclick="event.stopPropagation();document.getElementById('contact').scrollIntoView({behavior:'smooth'})">Get a Security Quote</a>
 </div>
 </div>
-<div class="hero-card hero-card--bar si-right" id="cardBar" onclick="if(this.classList.contains('collapsed'))collapseCards();else expandCard('bar')">
+<div class="hero-card hero-card--bar si-right" id="cardBar" onclick="expandCard('bar')">
 <div class="hero-intro">
 <h2 style="color:var(--red)">Mobile<br>Bartending</h2>
 <div class="hero-mood">Best bar at the party</div>
@@ -534,28 +543,61 @@ slides.forEach(el => obs.observe(el));
 var isMobile = window.matchMedia('(max-width:900px)').matches;
 window.matchMedia('(max-width:900px)').addEventListener('change', function(e) { isMobile = e.matches; });
 
+// Hover dim: only dim the opposite card, never both
+(function() {
+  var hero = document.querySelector('.hero');
+  var sec = document.getElementById('cardSec');
+  var bar = document.getElementById('cardBar');
+  sec.addEventListener('mouseenter', function() { if (!hero.classList.contains('expanded')) hero.classList.add('dim-bar'); });
+  sec.addEventListener('mouseleave', function() { hero.classList.remove('dim-bar'); });
+  bar.addEventListener('mouseenter', function() { if (!hero.classList.contains('expanded')) hero.classList.add('dim-sec'); });
+  bar.addEventListener('mouseleave', function() { hero.classList.remove('dim-sec'); });
+})();
+
 function expandCard(which) {
   var hero = document.querySelector('.hero');
   var sec = document.getElementById('cardSec');
   var bar = document.getElementById('cardBar');
   var card = which === 'sec' ? sec : bar;
 
-  // Mobile: toggle vertical expand
+  // Mobile: expand card, collapse sibling; tapping collapsed swaps them
   if (isMobile) {
+    var other = which === 'sec' ? bar : sec;
+
+    // Tapping the collapsed card: swap which is expanded
+    if (card.classList.contains('m-collapsed')) {
+      other.classList.remove('m-open', 'active');
+      var otherExp = other.querySelector('.hero-expanded');
+      if (otherExp) otherExp.style.display = '';
+      other.classList.add('m-collapsed');
+      card.classList.remove('m-collapsed');
+      card.classList.add('m-open', 'active');
+      card.querySelector('.hero-expanded').style.display = 'flex';
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+      return;
+    }
+
+    // Tapping the already-open card: close everything back to both
     if (card.classList.contains('m-open')) {
       card.classList.remove('m-open', 'active');
       card.querySelector('.hero-expanded').style.display = '';
-    } else {
-      card.classList.add('m-open', 'active');
-      card.querySelector('.hero-expanded').style.display = 'flex';
-      card.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      other.classList.remove('m-collapsed');
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+      return;
     }
+
+    // Tapping a card when both are in default state: expand it, collapse sibling
+    card.classList.add('m-open', 'active');
+    card.querySelector('.hero-expanded').style.display = 'flex';
+    other.classList.add('m-collapsed');
+    window.scrollTo({ top: 0, behavior: 'smooth' });
     return;
   }
 
-  // Desktop: two-column expand
-  if (hero.classList.contains('expanded')) { collapseCards(); return; }
+  // Desktop: expand card, collapse sibling (swap if already expanded)
   hero.classList.add('expanded');
+  sec.classList.remove('active', 'collapsed');
+  bar.classList.remove('active', 'collapsed');
   if (which === 'sec') {
     sec.classList.add('active');
     bar.classList.add('collapsed');
