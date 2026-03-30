@@ -78,6 +78,19 @@ body{font-family:var(--fb);font-size:17px;line-height:1.65;color:var(--iron);bac
 .nav-link:hover{color:var(--white)}
 .nav-cta{font-family:var(--fh);font-weight:700;font-size:12px;letter-spacing:1.5px;text-transform:uppercase;color:var(--white);background:var(--red);padding:10px 24px;border-radius:6px;text-decoration:none;transition:background .2s}
 .nav-cta:hover{background:#A83220}
+.burger-btn{display:none;background:none;border:none;cursor:pointer;padding:4px;flex-direction:column;gap:5px;z-index:201}
+.burger-btn span{display:block;width:22px;height:2px;background:var(--white);border-radius:1px;transition:transform .3s,opacity .3s}
+.burger-btn.open span:nth-child(1){transform:translateY(7px) rotate(45deg)}
+.burger-btn.open span:nth-child(2){opacity:0}
+.burger-btn.open span:nth-child(3){transform:translateY(-7px) rotate(-45deg)}
+.mobile-nav-overlay{position:fixed;inset:0;background:rgba(0,0,0,.4);z-index:199;opacity:0;pointer-events:none;transition:opacity .3s}
+.mobile-nav-overlay.open{opacity:1;pointer-events:auto}
+.mobile-nav{position:fixed;top:0;right:0;bottom:0;width:75%;max-width:320px;background:var(--char);z-index:200;transform:translateX(100%);transition:transform .3s ease;display:flex;flex-direction:column;padding:80px 32px 32px}
+.mobile-nav.open{transform:translateX(0)}
+.mobile-nav-link{font-family:var(--fh);font-weight:700;font-size:18px;letter-spacing:1px;text-transform:uppercase;color:var(--steel);text-decoration:none;padding:16px 0;border-bottom:1px solid rgba(255,255,255,.06);transition:color .2s}
+.mobile-nav-link:hover,.mobile-nav-link.active{color:var(--white)}
+.mobile-nav-cta{font-family:var(--fh);font-weight:700;font-size:14px;letter-spacing:1.5px;text-transform:uppercase;color:var(--white);background:var(--red);padding:14px 28px;border-radius:4px;text-decoration:none;text-align:center;margin-top:24px;transition:background .2s}
+.mobile-nav-cta:hover{background:#A83220}
 
 /* HERO */
 .hero{min-height:100vh;background:var(--black);display:flex;flex-direction:column;justify-content:center;align-items:center;text-align:center;padding:120px 48px 80px;position:relative;overflow:hidden}
@@ -258,7 +271,8 @@ body.scroll-locked{overflow:hidden}
   .hero-ctas{flex-direction:column;width:100%;max-width:320px}
   .hero-btn{justify-content:center}
   .trust-grid{grid-template-columns:1fr}
-  .nav-links .nav-link{display:none}
+  .nav-links{display:none}
+  .burger-btn{display:flex}
   .contact-actions{flex-direction:column;align-items:center}
   .qf-grid{grid-template-columns:1fr}
   .nav-logo img:first-child{height:28px !important}
@@ -283,10 +297,16 @@ body.scroll-locked{overflow:hidden}
 <div class="nav-links">
 <a href="/events" class="nav-link">Events</a>
 <a href="/staffing" class="nav-link">Staffing</a>
-<a href="#about" class="nav-link" onclick="event.preventDefault();document.getElementById('about').scrollIntoView({behavior:'smooth'})">About</a>
 <a href="#contact" class="nav-cta" onclick="event.preventDefault();document.getElementById('contact').scrollIntoView({behavior:'smooth'})">Contact Us</a>
 </div>
+<button class="burger-btn" id="burgerBtn" onclick="toggleMobileNav()"><span></span><span></span><span></span></button>
 </nav>
+<div class="mobile-nav-overlay" id="mobileOverlay" onclick="toggleMobileNav()"></div>
+<div class="mobile-nav" id="mobileNav">
+<a href="/events" class="mobile-nav-link">Events</a>
+<a href="/staffing" class="mobile-nav-link">Staffing</a>
+<a href="#contact" class="mobile-nav-cta" onclick="event.preventDefault();toggleMobileNav();document.getElementById('contact').scrollIntoView({behavior:'smooth'})">Contact Us</a>
+</div>
 
 <main class="page-content">
 <!-- HERO -->
@@ -413,6 +433,12 @@ body.scroll-locked{overflow:hidden}
 </main><!-- /page-content -->
 
 <script>
+function toggleMobileNav() {
+  document.getElementById('burgerBtn').classList.toggle('open');
+  document.getElementById('mobileNav').classList.toggle('open');
+  document.getElementById('mobileOverlay').classList.toggle('open');
+  document.body.style.overflow = document.getElementById('mobileNav').classList.contains('open') ? 'hidden' : '';
+}
 // Contact form submit via Supabase Edge Function
 const SUPABASE_URL = 'https://sezzqhmsfulclcqmfwja.supabase.co';
 
