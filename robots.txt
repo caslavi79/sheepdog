@@ -1,4 +1,14 @@
+# robots.txt for sheepdogtexas.com
+# Sheepdog Texas – Event Security, Mobile Bartending & Staffing in Bryan-College Station, TX
+
 User-agent: *
 Allow: /
 
+# Block crawling of non-content resources and Cloudflare scripts
+Disallow: /cdn-cgi/
+
+# Sitemap location — submit this to Google Search Console
 Sitemap: https://sheepdogtexas.com/sitemap.xml
+
+# Crawl-delay recommendation for polite bots (optional, Google ignores this but Bing respects it)
+# Crawl-delay: 1

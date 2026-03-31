@@ -1,15 +1,103 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+<urlset
+  xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"
+  xmlns:image="http://www.google.com/schemas/sitemap-image/1.1"
+>
+
+  <!-- ============================================================
+       HOMEPAGE — sheepdogtexas.com
+       Primary hub: event security, mobile bartending, workforce staffing
+       ============================================================ -->
   <url>
     <loc>https://sheepdogtexas.com/</loc>
-    <lastmod>2026-03-28</lastmod>
+    <lastmod>2026-03-31</lastmod>
     <changefreq>weekly</changefreq>
     <priority>1.0</priority>
+    <image:image>
+      <image:loc>https://sheepdogtexas.com/og-image.png</image:loc>
+      <image:title>Sheepdog Texas – Event Security, Mobile Bartending and Workforce Staffing in Bryan-College Station TX</image:title>
+      <image:caption>Sheepdog Texas provides licensed and insured event security, TABC-certified mobile bartending, and contracted workforce staffing in Bryan-College Station, Brazos Valley, Texas.</image:caption>
+      <image:geo_location>Bryan-College Station, Texas, United States</image:geo_location>
+    </image:image>
+    <image:image>
+      <image:loc>https://sheepdogtexas.com/sheepdog-stacked-white.svg</image:loc>
+      <image:title>Sheepdog Texas Logo – Event Security, Mobile Bartending and Workforce Staffing in Bryan-College Station TX</image:title>
+      <image:caption>Official logo for Sheepdog Texas, a licensed and insured event security, mobile bartending, and workforce staffing company serving Bryan-College Station and the Brazos Valley.</image:caption>
+      <image:geo_location>Bryan-College Station, Texas, United States</image:geo_location>
+    </image:image>
+    <image:image>
+      <image:loc>https://sheepdogtexas.com/sheepdog-mark-white.svg</image:loc>
+      <image:title>Sheepdog Texas Icon – Security and Staffing Company Bryan-College Station TX</image:title>
+      <image:caption>Sheepdog Texas brand icon representing professional event security and mobile bartending services in Bryan, College Station, and the Brazos Valley, Texas.</image:caption>
+      <image:geo_location>Bryan-College Station, Texas, United States</image:geo_location>
+    </image:image>
+    <image:image>
+      <image:loc>https://sheepdogtexas.com/sheepdog-wordmark-white.svg</image:loc>
+      <image:title>Sheepdog Texas Wordmark</image:title>
+      <image:caption>Sheepdog Texas company wordmark for event security and mobile bartending in Bryan-College Station, Texas.</image:caption>
+      <image:geo_location>Bryan-College Station, Texas, United States</image:geo_location>
+    </image:image>
   </url>
+
+  <!-- ============================================================
+       EVENTS PAGE — sheepdogtexas.com/events/
+       Event security and TABC-certified mobile bartending services
+       Weddings, tailgates, Greek life, concerts, private parties
+       ============================================================ -->
   <url>
     <loc>https://sheepdogtexas.com/events/</loc>
-    <lastmod>2026-03-28</lastmod>
+    <lastmod>2026-03-31</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.9</priority>
+    <image:image>
+      <image:loc>https://sheepdogtexas.com/og-image.png</image:loc>
+      <image:title>Sheepdog Events – Event Security and Mobile Bartending Bryan-College Station TX</image:title>
+      <image:caption>Professional event security guards and TABC-certified mobile bartending for weddings, tailgates, Greek life events, concerts, and private parties in Bryan-College Station, Texas.</image:caption>
+      <image:geo_location>Bryan-College Station, Texas, United States</image:geo_location>
+    </image:image>
+    <image:image>
+      <image:loc>https://sheepdogtexas.com/sheepdog-wide-black.svg</image:loc>
+      <image:title>Sheepdog Texas Logo – Event Security and Mobile Bartending Services</image:title>
+      <image:caption>Sheepdog Texas logo for event security and TABC-certified mobile bartending services in Bryan-College Station and the Brazos Valley.</image:caption>
+      <image:geo_location>Bryan-College Station, Texas, United States</image:geo_location>
+    </image:image>
   </url>
+
+  <!-- ============================================================
+       STAFFING PAGE — sheepdogtexas.com/staffing
+       Contracted workforce staffing: warehouse, logistics, field ops,
+       facility maintenance, project-based labor
+       NOTE: Canonical URL has NO trailing slash — match exactly.
+       ============================================================ -->
+  <url>
+    <loc>https://sheepdogtexas.com/staffing</loc>
+    <lastmod>2026-03-31</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.9</priority>
+    <image:image>
+      <image:loc>https://sheepdogtexas.com/og-image.png</image:loc>
+      <image:title>Sheepdog Staffing – Contracted Workforce Staffing Agency Bryan-College Station TX</image:title>
+      <image:caption>Contracted workforce staffing agency providing warehouse staffing, logistics support, field operations, facility maintenance, and project-based labor in Bryan-College Station and the Brazos Valley, Texas.</image:caption>
+      <image:geo_location>Bryan-College Station, Texas, United States</image:geo_location>
+    </image:image>
+    <image:image>
+      <image:loc>https://sheepdogtexas.com/sheepdog-stacked-white.svg</image:loc>
+      <image:title>Sheepdog Texas Logo – Staffing Agency Bryan-College Station TX</image:title>
+      <image:caption>Official logo for Sheepdog Texas staffing agency serving warehouse, logistics, and field operations staffing needs in Bryan-College Station and the Brazos Valley.</image:caption>
+      <image:geo_location>Bryan-College Station, Texas, United States</image:geo_location>
+    </image:image>
+    <image:image>
+      <image:loc>https://sheepdogtexas.com/sheepdog-mark-white.svg</image:loc>
+      <image:title>Sheepdog Texas Icon – Staffing Solutions Brazos Valley TX</image:title>
+      <image:caption>Sheepdog Texas brand icon for contracted workforce staffing solutions in Bryan, College Station, and the Brazos Valley, Texas.</image:caption>
+      <image:geo_location>Bryan-College Station, Texas, United States</image:geo_location>
+    </image:image>
+    <image:image>
+      <image:loc>https://sheepdogtexas.com/sheepdog-wordmark-white.svg</image:loc>
+      <image:title>Sheepdog Texas Wordmark – Staffing Services</image:title>
+      <image:caption>Sheepdog Texas wordmark for contracted workforce staffing services in Bryan-College Station, Texas.</image:caption>
+      <image:geo_location>Bryan-College Station, Texas, United States</image:geo_location>
+    </image:image>
+  </url>
+
 </urlset>
