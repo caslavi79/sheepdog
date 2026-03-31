@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Page Not Found | Sheepdog</title>
+<title>Page Not Found | Sheepdog Texas</title>
 <meta name="description" content="The page you're looking for doesn't exist. Head back to Sheepdog: event security, mobile bartending & staffing in Bryan-College Station, TX.">
 <meta name="robots" content="noindex, follow">
 <link rel="icon" type="image/svg+xml" href="/sheepdog-mark-white.svg">
@@ -13,15 +13,22 @@
 body{font-family:'Source Sans 3',sans-serif;background:#0C0C0C;color:#FFFFFF;min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:24px}
 h1{font-family:'Barlow',sans-serif;font-weight:800;font-size:clamp(48px,10vw,120px);line-height:1;letter-spacing:-1px;color:#C23B22;margin-bottom:8px}
 p{font-size:18px;color:#7A8490;margin-bottom:32px;max-width:400px;line-height:1.6}
-a{font-family:'Barlow',sans-serif;font-weight:700;font-size:14px;letter-spacing:1.5px;text-transform:uppercase;color:#FFFFFF;background:#C23B22;padding:14px 32px;border-radius:6px;text-decoration:none;transition:background .2s}
-a:hover{background:#A83220}
+.btn{font-family:'Barlow',sans-serif;font-weight:700;font-size:14px;letter-spacing:1.5px;text-transform:uppercase;color:#FFFFFF;background:#C23B22;padding:14px 32px;border-radius:6px;text-decoration:none;transition:background .2s;display:inline-block}
+.btn:hover{background:#A83220}
 img{height:48px;margin-bottom:32px;opacity:.6}
+.links{display:flex;gap:24px;margin-top:24px;flex-wrap:wrap;justify-content:center}
+.links a{font-family:'Barlow',sans-serif;font-weight:700;font-size:14px;letter-spacing:1px;text-transform:uppercase;color:#C23B22;text-decoration:none;transition:color .2s}
+.links a:hover{color:#FFFFFF}
 </style>
 </head>
 <body>
 <img src="/sheepdog-stacked-white.svg" alt="Sheepdog">
 <h1>404</h1>
 <p>This page doesn't exist. Let's get you back on track.</p>
-<a href="/">Back to Home</a>
+<a class="btn" href="/">Back to Home</a>
+<div class="links">
+<a href="/events">Events</a>
+<a href="/staffing">Staffing</a>
+</div>
 </body>
 </html>
