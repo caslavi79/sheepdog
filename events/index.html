@@ -145,13 +145,13 @@ html{scroll-behavior:smooth}
 body{font-family:var(--fb);font-size:17px;line-height:1.65;color:var(--mid);background:var(--tint);-webkit-font-smoothing:antialiased}
 
 /* ── NAV ── */
-.nav{position:fixed;top:0;left:0;right:0;z-index:100;background:var(--white);border-bottom:2px solid var(--amber);padding:0 48px;height:64px;display:flex;align-items:center}
-.nav-brand{font-family:var(--fd);font-weight:800;font-size:17px;color:var(--black);text-transform:uppercase;letter-spacing:1.5px;text-decoration:none;margin-right:auto;display:flex;align-items:center;gap:10px}
-.nav-brand img{height:28px;width:auto}
+.nav{position:fixed;top:0;left:0;right:0;z-index:100;background:var(--white);border-bottom:1px solid var(--amber);padding:0 48px;height:72px;display:flex;align-items:center}
+.nav-brand{display:flex;align-items:center;gap:0;text-decoration:none;margin-right:auto}
+.nav-brand img{height:32px;width:auto;object-fit:contain}
 .nav-links{display:flex;gap:28px;align-items:center}
-.nav-link{font-family:var(--fb);font-size:13px;font-weight:600;letter-spacing:1.5px;text-transform:uppercase;color:var(--steel);text-decoration:none;transition:color .2s}
+.nav-link{font-family:var(--fh);font-weight:600;font-size:15px;letter-spacing:1px;text-transform:uppercase;color:var(--steel);text-decoration:none;transition:color .2s}
 .nav-link:hover,.nav-link.active{color:var(--black)}
-.nav-cta{font-family:var(--fh);font-weight:700;font-size:13px;letter-spacing:1.5px;text-transform:uppercase;color:var(--black);background:var(--amber);padding:10px 28px;border-radius:4px;text-decoration:none;transition:background .2s}
+.nav-cta{font-family:var(--fh);font-weight:700;font-size:12px;letter-spacing:1.5px;text-transform:uppercase;color:var(--black);background:var(--amber);padding:10px 24px;border-radius:6px;text-decoration:none;transition:background .2s}
 .nav-cta:hover{background:var(--amber-l)}
 .burger-btn{display:none;background:none;border:none;cursor:pointer;padding:4px;flex-direction:column;gap:5px;z-index:201}
 .burger-btn span{display:block;width:22px;height:2px;background:var(--black);border-radius:1px;transition:transform .3s,opacity .3s}
@@ -391,7 +391,7 @@ a:focus-visible,button:focus-visible{outline:2px solid var(--amber);outline-offs
   .hero-card--sec::after{background:linear-gradient(transparent 0%,rgba(22,22,22,.3) 25%,rgba(22,22,22,.8) 55%,var(--char) 100%)}
   .hero-card--bar::after{background:linear-gradient(transparent 0%,rgba(250,246,238,.3) 25%,rgba(250,246,238,.8) 55%,var(--cream) 100%)}
   .hero-card .hero-btn{position:absolute;bottom:18px;left:50%;transform:translateX(-50%);z-index:3;white-space:nowrap}
-  .hero.expanded{height:auto;min-height:calc(100vh - 64px)}
+  .hero.expanded{height:auto;min-height:calc(100vh - 72px)}
   .hero.expanded .hero-card::after{display:none}
   .hero.expanded .hero-card.active .hero-btn{position:static;transform:none}
 }
@@ -422,7 +422,7 @@ a:focus-visible,button:focus-visible{outline:2px solid var(--amber);outline-offs
 
 /* ── MOBILE ── */
 @media(max-width:600px){
-  .nav{height:56px}
+  .nav{height:64px}
   .nav-links{display:none}
   .burger-btn{display:flex}
   .svc-grid{grid-template-columns:1fr}
@@ -513,7 +513,7 @@ a:focus-visible,button:focus-visible{outline:2px solid var(--amber);outline-offs
 <a href="#main" class="skip-link">Skip to main content</a>
 <!-- NAV -->
 <nav class="nav si-down" role="navigation" aria-label="Main navigation">
-<a href="/" class="nav-brand"><img src="/sheepdog-wide-black.svg" alt="Sheepdog Texas – Event Security and Mobile Bartending in Bryan-College Station TX" style="height:24px;width:auto"></a>
+<a href="/" class="nav-brand"><img src="/sheepdog-wide-black.svg" alt="Sheepdog Texas – Event Security and Mobile Bartending in Bryan-College Station TX"></a>
 <div class="nav-links">
 <a href="/events" class="nav-link active">Events</a>
 <a href="/staffing" class="nav-link">Staffing</a>
