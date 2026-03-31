@@ -6,3 +6,7 @@ website/
 Sheepdog_Playbook_Updated.docx
 sheepdog-contract.pdf
 app/
+supabase/.temp/
+Item_2_InfoLetterEntity.pdf
+*.png
+!og-image.png
