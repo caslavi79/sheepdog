@@ -161,7 +161,10 @@ body{font-family:var(--fb);font-size:17px;line-height:1.65;color:var(--iron);bac
 .qf-field::after{content:'';position:absolute;bottom:0;left:0;width:100%;height:2px;background:var(--sblue);transform:scaleX(0);transform-origin:left;transition:transform .3s ease}
 .qf-field:focus-within::after{transform:scaleX(1)}
 .qf-field:focus-within .qf-label{color:var(--sblue)}
-.qf-input,.qf-select,.qf-textarea{width:100%;font-family:var(--fb);font-size:15px;padding:12px 14px;border-radius:4px;border:1px solid rgba(255,255,255,.08);background:rgba(255,255,255,.03);color:var(--white);outline:none;transition:border-color .2s}
+.qf-input,.qf-select,.qf-textarea{width:100%;font-family:var(--fb);font-size:15px;padding:12px 14px;border-radius:4px;border:1px solid rgba(255,255,255,.08);background:rgba(255,255,255,.03);color:var(--white);transition:border-color .2s}
+.qf-input:focus-visible,.qf-select:focus-visible,.qf-textarea:focus-visible{outline:2px solid var(--sblue);outline-offset:2px}
+a:focus-visible,button:focus-visible{outline:2px solid var(--sblue);outline-offset:2px}
+.skip-link{position:absolute;left:-9999px;top:auto;z-index:999}.skip-link:focus{position:fixed;top:8px;left:8px;background:var(--navy);color:var(--white);padding:12px 20px;border-radius:4px;font-family:var(--fh);font-weight:700;font-size:14px;letter-spacing:1px;text-transform:uppercase;text-decoration:none;z-index:999}
 .qf-input::placeholder,.qf-textarea::placeholder{color:var(--slate)}
 .qf-input:focus,.qf-select:focus,.qf-textarea:focus{border-color:var(--sblue)}
 .qf-select{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%237A8490' stroke-width='1.5' fill='none'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 14px center;cursor:pointer}
@@ -252,8 +255,9 @@ body{font-family:var(--fb);font-size:17px;line-height:1.65;color:var(--iron);bac
 </head>
 <body>
 <div class="scroll-progress" id="scrollProgress"></div>
+<a href="#main" class="skip-link">Skip to main content</a>
 
-<nav class="nav">
+<nav class="nav" role="navigation" aria-label="Main navigation">
 <a href="/" class="nav-logo">
 <img src="/sheepdog-mark-white.svg" alt="Sheepdog Texas - Staffing Agency in Bryan-College Station TX" style="height:32px;width:auto;object-fit:contain">
 <img src="/sheepdog-wordmark-white.svg" alt="" aria-hidden="true" style="height:18px;width:auto;object-fit:contain;margin-left:5px">
@@ -263,16 +267,16 @@ body{font-family:var(--fb);font-size:17px;line-height:1.65;color:var(--iron);bac
 <a href="/staffing" class="nav-link active">Staffing</a>
 <a href="#contact" class="nav-cta" onclick="event.preventDefault();document.getElementById('contact').scrollIntoView({behavior:'smooth'})">Contact Us</a>
 </div>
-<button class="burger-btn" id="burgerBtn" onclick="toggleMobileNav()"><span></span><span></span><span></span></button>
+<button class="burger-btn" id="burgerBtn" onclick="toggleMobileNav()" aria-label="Toggle navigation menu" aria-expanded="false" aria-controls="mobileNav"><span></span><span></span><span></span></button>
 </nav>
-<div class="mobile-nav-overlay" id="mobileOverlay" onclick="toggleMobileNav()"></div>
+<div class="mobile-nav-overlay" id="mobileOverlay" onclick="toggleMobileNav()" role="button" aria-label="Close menu" tabindex="-1"></div>
 <div class="mobile-nav" id="mobileNav">
 <a href="/events" class="mobile-nav-link">Events</a>
 <a href="/staffing" class="mobile-nav-link active">Staffing</a>
 <a href="#contact" class="mobile-nav-cta" onclick="event.preventDefault();toggleMobileNav();document.getElementById('contact').scrollIntoView({behavior:'smooth'})">Contact Us</a>
 </div>
 
-<main>
+<main id="main">
 <section class="hero">
 <div class="hero-grid"></div>
 <div class="hero-content">
@@ -282,7 +286,7 @@ body{font-family:var(--fb);font-size:17px;line-height:1.65;color:var(--iron);bac
 <p class="hero-trust">Background-checked <span>&middot;</span> Insured <span>&middot;</span> W-9 &amp; contractor agreements handled <span>&middot;</span> Serving the Brazos Valley</p>
 <div class="hero-actions">
 <a href="#contact" class="hero-cta" onclick="event.preventDefault();document.getElementById('contact').scrollIntoView({behavior:'smooth'})">Request Staff</a>
-<a href="tel:9792040945" class="hero-phone"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg> 979.204.0945</a>
+<a href="tel:9792040945" class="hero-phone" aria-label="Call us at 979-204-0945"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg> 979.204.0945</a>
 </div>
 </div>
 
@@ -343,30 +347,30 @@ body{font-family:var(--fb);font-size:17px;line-height:1.65;color:var(--iron);bac
 <div class="faq-wrap">
 <div class="faq-intro fi"><div class="faq-tag">Common Questions</div><div class="faq-heading">Staffing FAQ</div><p class="faq-note">Everything you need to know about working with Sheepdog Staffing in Bryan-College Station. If your question is not here, reach out and we will answer it directly.</p></div>
 <div class="faq-list fi">
-<div class="faq-item"><button type="button" class="faq-q" onclick="toggleFaq(this)">What types of work does your staffing agency cover?</button><div class="faq-a"><p>Anything that requires contracted workers at scale. Most common: field operations (GPS tagging, survey), logistics and warehouse staffing, facility maintenance, and project-based labor across Bryan-College Station and the Brazos Valley. We are not limited to a single industry. If you need vetted people on-site, we can scope it.</p></div></div>
-<div class="faq-item"><button type="button" class="faq-q" onclick="toggleFaq(this)">How quickly can you deploy workers in Bryan-College Station?</button><div class="faq-a"><p>For standard engagements, we can have vetted workers on-site within 48-72 hours of contract execution. For larger deployments or specialized roles, we provide a timeline during scoping. Ongoing placements with repeating schedules are set up once and run continuously.</p></div></div>
-<div class="faq-item"><button type="button" class="faq-q" onclick="toggleFaq(this)">Do you handle background checks and compliance?</button><div class="faq-a"><p>Yes, everything. Background checks, W-9 collection, independent contractor agreements, insurance verification, and any client-specific onboarding requirements. Workers are fully documented before they step on your site.</p></div></div>
-<div class="faq-item"><button type="button" class="faq-q" onclick="toggleFaq(this)">What is the minimum contract size?</button><div class="faq-a"><p>No hard minimum, but the model is built for 3+ workers. Single-person placements work for ongoing roles but are not cost-effective for one-off shifts. We will be upfront during scoping if a project is not the right fit.</p></div></div>
-<div class="faq-item"><button type="button" class="faq-q" onclick="toggleFaq(this)">How does billing work?</button><div class="faq-a"><p>Billed per worker per hour, rates set at contract signing. You get a single invoice, no separate bills from individual workers. Timesheets are tracked and verified by our on-site point of contact before invoicing. Net 15 or Net 30 terms available.</p></div></div>
-<div class="faq-item"><button type="button" class="faq-q" onclick="toggleFaq(this)">What if a worker does not perform?</button><div class="faq-a"><p>We replace them. Our team manages performance on-site. If a worker is not meeting expectations, we swap them out, typically within 24 hours. You do not need to fire or manage anyone. That is our job.</p></div></div>
+<div class="faq-item"><button type="button" class="faq-q" onclick="toggleFaq(this)" aria-expanded="false">What types of work does your staffing agency cover?</button><div class="faq-a"><p>Anything that requires contracted workers at scale. Most common: field operations (GPS tagging, survey), logistics and warehouse staffing, facility maintenance, and project-based labor across Bryan-College Station and the Brazos Valley. We are not limited to a single industry. If you need vetted people on-site, we can scope it.</p></div></div>
+<div class="faq-item"><button type="button" class="faq-q" onclick="toggleFaq(this)" aria-expanded="false">How quickly can you deploy workers in Bryan-College Station?</button><div class="faq-a"><p>For standard engagements, we can have vetted workers on-site within 48-72 hours of contract execution. For larger deployments or specialized roles, we provide a timeline during scoping. Ongoing placements with repeating schedules are set up once and run continuously.</p></div></div>
+<div class="faq-item"><button type="button" class="faq-q" onclick="toggleFaq(this)" aria-expanded="false">Do you handle background checks and compliance?</button><div class="faq-a"><p>Yes, everything. Background checks, W-9 collection, independent contractor agreements, insurance verification, and any client-specific onboarding requirements. Workers are fully documented before they step on your site.</p></div></div>
+<div class="faq-item"><button type="button" class="faq-q" onclick="toggleFaq(this)" aria-expanded="false">What is the minimum contract size?</button><div class="faq-a"><p>No hard minimum, but the model is built for 3+ workers. Single-person placements work for ongoing roles but are not cost-effective for one-off shifts. We will be upfront during scoping if a project is not the right fit.</p></div></div>
+<div class="faq-item"><button type="button" class="faq-q" onclick="toggleFaq(this)" aria-expanded="false">How does billing work?</button><div class="faq-a"><p>Billed per worker per hour, rates set at contract signing. You get a single invoice, no separate bills from individual workers. Timesheets are tracked and verified by our on-site point of contact before invoicing. Net 15 or Net 30 terms available.</p></div></div>
+<div class="faq-item"><button type="button" class="faq-q" onclick="toggleFaq(this)" aria-expanded="false">What if a worker does not perform?</button><div class="faq-a"><p>We replace them. Our team manages performance on-site. If a worker is not meeting expectations, we swap them out, typically within 24 hours. You do not need to fire or manage anyone. That is our job.</p></div></div>
 </div>
 </div>
 </section>
 
 <section class="contact" id="contact">
 <div class="contact-wrap">
-<div class="contact-copy fi"><div class="contact-tag">Get Started</div><h2>Hire Contracted Staff in Bryan-College Station</h2><p>Tell us your staffing needs. We respond within 24 hours with a clear proposal. No middlemen, no runaround.</p><a href="tel:9792040945" class="contact-phone"><svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg> 979.204.0945</a><div class="contact-trust"><span>Insured</span><span>Background-Checked Workers</span><span>24hr Response</span><span>Serving Bryan-College Station &amp; Brazos Valley</span></div></div>
+<div class="contact-copy fi"><div class="contact-tag">Get Started</div><h2>Hire Contracted Staff in Bryan-College Station</h2><p>Tell us your staffing needs. We respond within 24 hours with a clear proposal. No middlemen, no runaround.</p><a href="tel:9792040945" class="contact-phone" aria-label="Call us at 979-204-0945"><svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg> 979.204.0945</a><div class="contact-trust"><span>Insured</span><span>Background-Checked Workers</span><span>24hr Response</span><span>Serving Bryan-College Station &amp; Brazos Valley</span></div></div>
 <div class="fi">
 <form class="qf" id="quoteForm" onsubmit="return submitForm(event)">
 <div class="qf-grid">
-<div style="position:absolute;left:-9999px"><input type="text" name="website" tabindex="-1" autocomplete="off"></div>
+<div style="position:absolute;left:-9999px" aria-hidden="true"><input type="text" name="website" tabindex="-1" autocomplete="off"></div>
 <div class="qf-field"><label class="qf-label" for="qf-name">Name</label><input type="text" id="qf-name" name="name" class="qf-input" placeholder="Your name" required></div>
 <div class="qf-field"><label class="qf-label" for="qf-company">Company</label><input type="text" id="qf-company" name="company" class="qf-input" placeholder="Company name"></div>
 <div class="qf-field"><label class="qf-label" for="qf-email">Email</label><input type="email" id="qf-email" name="email" class="qf-input" placeholder="you@company.com" required></div>
-<div class="qf-field"><label class="qf-label" for="qf-phone">Phone</label><input type="tel" id="qf-phone" name="phone" class="qf-input" placeholder="(979) 555-0000" oninput="handlePhone(this)" maxlength="14"><span class="qf-error" id="phone-error"></span></div>
+<div class="qf-field"><label class="qf-label" for="qf-phone">Phone</label><input type="tel" id="qf-phone" name="phone" class="qf-input" placeholder="(979) 555-0000" oninput="handlePhone(this)" maxlength="14"><span class="qf-error" id="phone-error" aria-live="polite"></span></div>
 <div class="qf-field qf-full"><label class="qf-label" for="qf-service">Type of Staffing</label><select id="qf-service" name="service" class="qf-select" required><option value="">Select one</option><option value="field-ops">Field Operations</option><option value="logistics">Logistics Support</option><option value="facility">Facility Maintenance</option><option value="warehouse">Warehouse Staffing</option><option value="project">Project-Based Labor</option><option value="ongoing">Ongoing Placements</option><option value="other">Not sure yet</option></select></div>
 <div class="qf-full qf-field"><label class="qf-label" for="qf-message">Tell us about your staffing needs</label><textarea id="qf-message" name="message" class="qf-textarea" placeholder="Number of workers, type of work, location, duration, timeline." required oninput="this.style.height='auto';this.style.height=this.scrollHeight+'px'"></textarea></div>
-<div class="qf-full"><button type="submit" class="qf-submit">Submit Request</button></div>
+<div class="qf-full"><button type="submit" class="qf-submit" aria-live="polite">Submit Request</button></div>
 </div>
 </form>
 </div>
@@ -384,10 +388,13 @@ body{font-family:var(--fb);font-size:17px;line-height:1.65;color:var(--iron);bac
 
 <script>
 function toggleMobileNav() {
-  document.getElementById('burgerBtn').classList.toggle('open');
+  var burger = document.getElementById('burgerBtn');
+  burger.classList.toggle('open');
   document.getElementById('mobileNav').classList.toggle('open');
   document.getElementById('mobileOverlay').classList.toggle('open');
-  document.body.style.overflow = document.getElementById('mobileNav').classList.contains('open') ? 'hidden' : '';
+  var isOpen = document.getElementById('mobileNav').classList.contains('open');
+  burger.setAttribute('aria-expanded', isOpen);
+  document.body.style.overflow = isOpen ? 'hidden' : '';
 }
 var SUPABASE_URL='https://sezzqhmsfulclcqmfwja.supabase.co';
 function submitForm(e){e.preventDefault();var form=e.target,btn=form.querySelector('.qf-submit'),orig=btn.textContent;btn.textContent='Sending...';btn.disabled=true;var data={name:form.elements['name'].value,phone:form.elements['phone'].value,email:form.elements['email'].value,service:form.elements['service'].value,message:form.elements['message'].value,company:form.elements['company'].value,website:form.elements['website'].value};fetch(SUPABASE_URL+'/functions/v1/contact-submit',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(data)}).then(function(r){return r.json().then(function(j){return{ok:r.ok,result:j}})}).then(function(o){if(o.ok&&o.result.success){btn.textContent="Sent! We'll be in touch.";btn.style.background='#357A38';btn.style.color='#FFF';btn.style.cursor='default';form.querySelectorAll('input, select, textarea').forEach(function(el){el.disabled=true;el.style.opacity='.5'})}else throw new Error(o.result.error||'Failed')}).catch(function(err){btn.textContent=err.message||'Something went wrong.';btn.style.background='#C23B22';btn.style.color='#FFF';btn.disabled=false;setTimeout(function(){btn.textContent=orig;btn.style.background='';btn.style.color=''},3000)});return false}
@@ -501,7 +508,7 @@ window.addEventListener('resize',function(){
   }
 });
 
-function toggleFaq(el){var item=el.closest('.faq-item'),sibs=item.parentElement.querySelectorAll('.faq-item');sibs.forEach(function(s){if(s!==item)s.classList.remove('open')});item.classList.toggle('open')}
+function toggleFaq(el){var item=el.closest('.faq-item'),sibs=item.parentElement.querySelectorAll('.faq-item');sibs.forEach(function(s){if(s!==item){s.classList.remove('open');s.querySelector('.faq-q').setAttribute('aria-expanded','false')}});item.classList.toggle('open');el.setAttribute('aria-expanded',item.classList.contains('open'))}
 
 var scrollBar=document.getElementById('scrollProgress');
 window.addEventListener('scroll',function(){scrollBar.style.width=(window.scrollY/(document.documentElement.scrollHeight-window.innerHeight)*100)+'%'});

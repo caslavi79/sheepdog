@@ -345,7 +345,10 @@ body{font-family:var(--fb);font-size:17px;line-height:1.65;color:var(--mid);back
 .qf-field::after{content:'';position:absolute;bottom:0;left:0;width:100%;height:2px;background:var(--amber);transform:scaleX(0);transform-origin:left;transition:transform .3s ease}
 .qf-field:focus-within::after{transform:scaleX(1)}
 .qf-field:focus-within .qf-label{color:var(--amber)}
-.qf-input,.qf-select,.qf-textarea{width:100%;font-family:var(--fb);font-size:15px;padding:12px 14px;border-radius:4px;border:1px solid rgba(255,255,255,.08);background:rgba(255,255,255,.03);color:var(--white);outline:none;transition:border-color .2s}
+.qf-input,.qf-select,.qf-textarea{width:100%;font-family:var(--fb);font-size:15px;padding:12px 14px;border-radius:4px;border:1px solid rgba(255,255,255,.08);background:rgba(255,255,255,.03);color:var(--white);transition:border-color .2s}
+.qf-input:focus-visible,.qf-select:focus-visible,.qf-textarea:focus-visible{outline:2px solid var(--amber);outline-offset:2px}
+a:focus-visible,button:focus-visible{outline:2px solid var(--amber);outline-offset:2px}
+.skip-link{position:absolute;left:-9999px;top:auto;z-index:999}.skip-link:focus{position:fixed;top:8px;left:8px;background:var(--amber);color:var(--black);padding:12px 20px;border-radius:4px;font-family:var(--fh);font-weight:700;font-size:14px;letter-spacing:1px;text-transform:uppercase;text-decoration:none;z-index:999}
 .qf-input::placeholder,.qf-textarea::placeholder{color:var(--slate)}
 .qf-input:focus,.qf-select:focus,.qf-textarea:focus{border-color:var(--amber)}
 .qf-select{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%237A8490' stroke-width='1.5' fill='none'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 14px center;cursor:pointer}
@@ -507,24 +510,25 @@ body{font-family:var(--fb);font-size:17px;line-height:1.65;color:var(--mid);back
 
 <div class="scroll-progress" id="scrollProgress"></div>
 
+<a href="#main" class="skip-link">Skip to main content</a>
 <!-- NAV -->
-<nav class="nav si-down">
+<nav class="nav si-down" role="navigation" aria-label="Main navigation">
 <a href="/" class="nav-brand"><img src="/sheepdog-wide-black.svg" alt="Sheepdog Texas – Event Security and Mobile Bartending in Bryan-College Station TX" style="height:24px;width:auto"></a>
 <div class="nav-links">
 <a href="/events" class="nav-link active">Events</a>
 <a href="/staffing" class="nav-link">Staffing</a>
 <a href="#contact" class="nav-cta" onclick="event.preventDefault();document.getElementById('contact').scrollIntoView({behavior:'smooth'})">Get a Quote</a>
 </div>
-<button class="burger-btn" id="burgerBtn" onclick="toggleMobileNav()"><span></span><span></span><span></span></button>
+<button class="burger-btn" id="burgerBtn" onclick="toggleMobileNav()" aria-label="Toggle navigation menu" aria-expanded="false" aria-controls="mobileNav"><span></span><span></span><span></span></button>
 </nav>
-<div class="mobile-nav-overlay" id="mobileOverlay" onclick="toggleMobileNav()"></div>
+<div class="mobile-nav-overlay" id="mobileOverlay" onclick="toggleMobileNav()" role="button" aria-label="Close menu" tabindex="-1"></div>
 <div class="mobile-nav" id="mobileNav">
 <a href="/events" class="mobile-nav-link active">Events</a>
 <a href="/staffing" class="mobile-nav-link">Staffing</a>
 <a href="#contact" class="mobile-nav-cta" onclick="event.preventDefault();toggleMobileNav();document.getElementById('contact').scrollIntoView({behavior:'smooth'})">Get a Quote</a>
 </div>
 
-<main>
+<main id="main">
 <!-- HERO = DUAL CARDS -->
 <section class="hero">
 <div class="hero-card hero-card--sec si-left" id="cardSec" onclick="expandCard('sec')">
@@ -617,16 +621,16 @@ body{font-family:var(--fb);font-size:17px;line-height:1.65;color:var(--mid);back
 <p style="font-size:15px;line-height:1.6;color:var(--mid);margin-top:12px">Everything you need to know about hiring event security and mobile bartending in Bryan-College Station.</p>
 </div>
 <div class="si-up">
-<div class="faq-item"><button type="button" class="faq-q" onclick="toggleFaq(this)">How much does event security cost in Bryan-College Station?</button><div class="faq-a"><p>Event security pricing depends on the number of guards, event size, duration, and venue requirements. We quote per guard, per hour with no hidden fees. Whether you need a single bouncer for a College Station bar or a full security team for a concert in the Brazos Valley, we'll send a clear quote within 24 hours.</p></div></div>
-<div class="faq-item"><button type="button" class="faq-q" onclick="toggleFaq(this)">How much does a mobile bartender cost for a wedding?</button><div class="faq-a"><p>Wedding bartending packages vary based on guest count, bar type, and service hours. Our TABC-certified mobile bartending service includes full bar setup, all equipment, signature cocktails, and breakdown. We offer open bar, cash bar, and BYOB wedding bartender options for receptions throughout Bryan-College Station and the Brazos Valley.</p></div></div>
-<div class="faq-item"><button type="button" class="faq-q" onclick="toggleFaq(this)">Can I hire security and a bartender from the same company?</button><div class="faq-a"><p>Yes. Sheepdog Texas is the only company in Bryan-College Station that provides both professional event security and TABC-certified mobile bartending as a combined package. One team, one point of contact, one invoice. Our security and bartending package simplifies planning for weddings, private parties, and corporate events.</p></div></div>
-<div class="faq-item"><button type="button" class="faq-q" onclick="toggleFaq(this)">Do fraternities need security for parties at Texas A&amp;M?</button><div class="faq-a"><p>Many Greek organizations at Texas A&amp;M require professional security for registered social events. Sheepdog Texas provides fraternity party security and sorority event security with licensed guards trained in crowd management, ID verification, and de-escalation for campus events in College Station.</p></div></div>
-<div class="faq-item"><button type="button" class="faq-q" onclick="toggleFaq(this)">Can I hire a bartender for a tailgate at Kyle Field?</button><div class="faq-a"><p>Yes. Our tailgate bartending service in College Station brings a full mobile bar setup, TABC-certified bartenders, and custom drink menus right to your Aggie gameday tailgate at Kyle Field, Aggie Park, or anywhere near campus. Available for SEC football weekends, Midnight Yell after-parties, and pre-game events.</p></div></div>
-<div class="faq-item"><button type="button" class="faq-q" onclick="toggleFaq(this)">How far in advance should I book event security or a mobile bartender?</button><div class="faq-a"><p>We recommend booking 2–4 weeks in advance, especially during football season, wedding season, and major Texas A&amp;M events like Ring Day and graduation. For recurring Northgate bar security, we can often start within a week. Last-minute bookings may be available — contact us to check.</p></div></div>
-<div class="faq-item"><button type="button" class="faq-q" onclick="toggleFaq(this)">How many bartenders do I need for my event?</button><div class="faq-a"><p>A common guideline is one bartender per 50 guests. For a wedding reception with 150 guests, we recommend three TABC-certified bartenders. For corporate events and large private parties in Bryan-College Station, we'll help you determine the right number based on your guest count, drink menu, and service style.</p></div></div>
-<div class="faq-item"><button type="button" class="faq-q" onclick="toggleFaq(this)">What areas do you serve for event security and bartending?</button><div class="faq-a"><p>Sheepdog Texas is based in Bryan-College Station and serves the entire Brazos Valley, Brazos County, and surrounding Central Texas communities. That includes venues near Texas A&amp;M University, Northgate, downtown Bryan, and beyond. We'll travel for the right event.</p></div></div>
-<div class="faq-item"><button type="button" class="faq-q" onclick="toggleFaq(this)">Are your security guards licensed and insured?</button><div class="faq-a"><p>Every security guard is Level II or Level III licensed under the Texas Department of Public Safety. All bartenders are TABC certified. Sheepdog Texas is fully licensed and insured as a security company in Bryan-College Station, TX.</p></div></div>
-<div class="faq-item"><button type="button" class="faq-q" onclick="toggleFaq(this)">What does a mobile bartending service include?</button><div class="faq-a"><p>Our mobile bartending packages include TABC-certified bartenders, a portable bar setup, all barware and supplies, custom drink menus with signature cocktails, and full cleanup. We offer open bar, cash bar, and BYOB service options for events throughout Bryan-College Station and the Brazos Valley.</p></div></div>
+<div class="faq-item"><button type="button" class="faq-q" onclick="toggleFaq(this)" aria-expanded="false">How much does event security cost in Bryan-College Station?</button><div class="faq-a"><p>Event security pricing depends on the number of guards, event size, duration, and venue requirements. We quote per guard, per hour with no hidden fees. Whether you need a single bouncer for a College Station bar or a full security team for a concert in the Brazos Valley, we'll send a clear quote within 24 hours.</p></div></div>
+<div class="faq-item"><button type="button" class="faq-q" onclick="toggleFaq(this)" aria-expanded="false">How much does a mobile bartender cost for a wedding?</button><div class="faq-a"><p>Wedding bartending packages vary based on guest count, bar type, and service hours. Our TABC-certified mobile bartending service includes full bar setup, all equipment, signature cocktails, and breakdown. We offer open bar, cash bar, and BYOB wedding bartender options for receptions throughout Bryan-College Station and the Brazos Valley.</p></div></div>
+<div class="faq-item"><button type="button" class="faq-q" onclick="toggleFaq(this)" aria-expanded="false">Can I hire security and a bartender from the same company?</button><div class="faq-a"><p>Yes. Sheepdog Texas is the only company in Bryan-College Station that provides both professional event security and TABC-certified mobile bartending as a combined package. One team, one point of contact, one invoice. Our security and bartending package simplifies planning for weddings, private parties, and corporate events.</p></div></div>
+<div class="faq-item"><button type="button" class="faq-q" onclick="toggleFaq(this)" aria-expanded="false">Do fraternities need security for parties at Texas A&amp;M?</button><div class="faq-a"><p>Many Greek organizations at Texas A&amp;M require professional security for registered social events. Sheepdog Texas provides fraternity party security and sorority event security with licensed guards trained in crowd management, ID verification, and de-escalation for campus events in College Station.</p></div></div>
+<div class="faq-item"><button type="button" class="faq-q" onclick="toggleFaq(this)" aria-expanded="false">Can I hire a bartender for a tailgate at Kyle Field?</button><div class="faq-a"><p>Yes. Our tailgate bartending service in College Station brings a full mobile bar setup, TABC-certified bartenders, and custom drink menus right to your Aggie gameday tailgate at Kyle Field, Aggie Park, or anywhere near campus. Available for SEC football weekends, Midnight Yell after-parties, and pre-game events.</p></div></div>
+<div class="faq-item"><button type="button" class="faq-q" onclick="toggleFaq(this)" aria-expanded="false">How far in advance should I book event security or a mobile bartender?</button><div class="faq-a"><p>We recommend booking 2–4 weeks in advance, especially during football season, wedding season, and major Texas A&amp;M events like Ring Day and graduation. For recurring Northgate bar security, we can often start within a week. Last-minute bookings may be available — contact us to check.</p></div></div>
+<div class="faq-item"><button type="button" class="faq-q" onclick="toggleFaq(this)" aria-expanded="false">How many bartenders do I need for my event?</button><div class="faq-a"><p>A common guideline is one bartender per 50 guests. For a wedding reception with 150 guests, we recommend three TABC-certified bartenders. For corporate events and large private parties in Bryan-College Station, we'll help you determine the right number based on your guest count, drink menu, and service style.</p></div></div>
+<div class="faq-item"><button type="button" class="faq-q" onclick="toggleFaq(this)" aria-expanded="false">What areas do you serve for event security and bartending?</button><div class="faq-a"><p>Sheepdog Texas is based in Bryan-College Station and serves the entire Brazos Valley, Brazos County, and surrounding Central Texas communities. That includes venues near Texas A&amp;M University, Northgate, downtown Bryan, and beyond. We'll travel for the right event.</p></div></div>
+<div class="faq-item"><button type="button" class="faq-q" onclick="toggleFaq(this)" aria-expanded="false">Are your security guards licensed and insured?</button><div class="faq-a"><p>Every security guard is Level II or Level III licensed under the Texas Department of Public Safety. All bartenders are TABC certified. Sheepdog Texas is fully licensed and insured as a security company in Bryan-College Station, TX.</p></div></div>
+<div class="faq-item"><button type="button" class="faq-q" onclick="toggleFaq(this)" aria-expanded="false">What does a mobile bartending service include?</button><div class="faq-a"><p>Our mobile bartending packages include TABC-certified bartenders, a portable bar setup, all barware and supplies, custom drink menus with signature cocktails, and full cleanup. We offer open bar, cash bar, and BYOB service options for events throughout Bryan-College Station and the Brazos Valley.</p></div></div>
 </div>
 </div>
 </div>
@@ -638,19 +642,19 @@ body{font-family:var(--fb);font-size:17px;line-height:1.65;color:var(--mid);back
 <div class="cta-tag">Book Event Security &amp; Bartending</div>
 <h2>Hire Event Security or a Mobile Bartender in Bryan-College Station</h2>
 <p>Tell us about your event. Whether you need a bouncer for hire, a wedding bartender, tailgate bar service, or a full security and bartending package, we respond within 24 hours with a clear quote. No runaround, no hidden fees.</p>
-<a href="tel:9792040945" class="cta-phone"><svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg> 979.204.0945</a>
+<a href="tel:9792040945" class="cta-phone" aria-label="Call us at 979-204-0945"><svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg> 979.204.0945</a>
 <div class="cta-trust"><span>Licensed &amp; Insured</span><span>TABC Certified</span><span>Serving Brazos Valley</span><span>24hr Response</span></div>
 </div>
 <div class="si-up">
 <form class="qf" id="quoteForm" onsubmit="return submitForm(event)">
 <div class="qf-grid">
-<div style="position:absolute;left:-9999px"><input type="text" name="website" tabindex="-1" autocomplete="off"></div>
+<div style="position:absolute;left:-9999px" aria-hidden="true"><input type="text" name="website" tabindex="-1" autocomplete="off"></div>
 <div class="qf-field"><label class="qf-label" for="qf-name">Name</label><input type="text" id="qf-name" name="name" class="qf-input" placeholder="Your name" required></div>
-<div class="qf-field"><label class="qf-label" for="qf-phone">Phone</label><input type="tel" id="qf-phone" name="phone" class="qf-input" placeholder="(979) 555-0000" oninput="handlePhone(this)" maxlength="14"><span class="qf-error" id="phone-error"></span></div>
+<div class="qf-field"><label class="qf-label" for="qf-phone">Phone</label><input type="tel" id="qf-phone" name="phone" class="qf-input" placeholder="(979) 555-0000" oninput="handlePhone(this)" maxlength="14"><span class="qf-error" id="phone-error" aria-live="polite"></span></div>
 <div class="qf-field"><label class="qf-label" for="qf-email">Email</label><input type="email" id="qf-email" name="email" class="qf-input" placeholder="you@email.com" required></div>
 <div class="qf-field"><label class="qf-label" for="qf-service">Service</label><select id="qf-service" name="service" class="qf-select" required><option value="">Select one</option><option value="events-security">Event Security</option><option value="events-bartending">Mobile Bartending</option><option value="events-both" selected>Security + Bartending</option><option value="other">Not sure yet</option></select></div>
 <div class="qf-full qf-field"><label class="qf-label" for="qf-message">Event Details</label><textarea id="qf-message" name="message" class="qf-textarea" placeholder="Date, venue, guests, what you need." required oninput="this.style.height='auto';this.style.height=this.scrollHeight+'px'"></textarea></div>
-<div class="qf-full"><button type="submit" class="qf-submit">Get a Quote</button></div>
+<div class="qf-full"><button type="submit" class="qf-submit" aria-live="polite">Get a Quote</button></div>
 </div>
 </form>
 </div>
@@ -692,10 +696,13 @@ const obs = new IntersectionObserver(es => { es.forEach(e => { if (e.isIntersect
 slides.forEach(el => obs.observe(el));
 // Mobile nav
 function toggleMobileNav() {
-  document.getElementById('burgerBtn').classList.toggle('open');
+  var burger = document.getElementById('burgerBtn');
+  burger.classList.toggle('open');
   document.getElementById('mobileNav').classList.toggle('open');
   document.getElementById('mobileOverlay').classList.toggle('open');
-  document.body.style.overflow = document.getElementById('mobileNav').classList.contains('open') ? 'hidden' : '';
+  var isOpen = document.getElementById('mobileNav').classList.contains('open');
+  burger.setAttribute('aria-expanded', isOpen);
+  document.body.style.overflow = isOpen ? 'hidden' : '';
 }
 
 // Card expand/collapse
@@ -804,8 +811,9 @@ function collapseCards() {
 function toggleFaq(btn) {
   var item = btn.parentElement;
   var siblings = item.parentElement.querySelectorAll('.faq-item');
-  siblings.forEach(function(s) { if (s !== item) s.classList.remove('open'); });
+  siblings.forEach(function(s) { if (s !== item) { s.classList.remove('open'); s.querySelector('.faq-q').setAttribute('aria-expanded', 'false'); } });
   item.classList.toggle('open');
+  btn.setAttribute('aria-expanded', item.classList.contains('open'));
 }
 
 function handlePhone(el) { var err = document.getElementById('phone-error'), d = el.value.replace(/\D/g, ''); el.value = formatPhone(d); if (d.length > 0 && d.length !== 10) { err.textContent = 'Enter a 10-digit phone number'; el.classList.add('qf-invalid'); } else { err.textContent = ''; el.classList.remove('qf-invalid'); } }
