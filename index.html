@@ -560,9 +560,11 @@ async function submitForm(e) {
     if (res.ok && result.success) {
       btn.textContent = 'Sent! We\'ll be in touch.';
       btn.style.background = '#357A38';
-      form.reset();
-      form.style.opacity = '0';
-      setTimeout(() => { form.style.maxHeight = '0'; form.style.margin = '0'; }, 400);
+      btn.style.cursor = 'default';
+      form.querySelectorAll('input, select, textarea').forEach(el => {
+        el.disabled = true;
+        el.style.opacity = '.5';
+      });
     } else {
       throw new Error(result.error || 'Failed');
     }

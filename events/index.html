@@ -680,7 +680,7 @@ async function submitForm(e) {
   try {
     const res = await fetch(SUPABASE_URL + '/functions/v1/contact-submit', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(data) });
     const result = await res.json();
-    if (res.ok && result.success) { btn.textContent = "Sent! We'll be in touch."; btn.style.background = '#357A38'; btn.style.color = '#FFF'; form.reset(); }
+    if (res.ok && result.success) { btn.textContent = "Sent! We'll be in touch."; btn.style.background = '#357A38'; btn.style.color = '#FFF'; btn.style.cursor = 'default'; form.querySelectorAll('input, select, textarea').forEach(function(el){ el.disabled = true; el.style.opacity = '.5'; }); }
     else throw new Error(result.error || 'Failed');
   } catch (err) { btn.textContent = err.message || 'Something went wrong.'; btn.style.background = '#C23B22'; btn.style.color = '#FFF'; btn.disabled = false; setTimeout(() => { btn.textContent = orig; btn.style.background = ''; btn.style.color = ''; }, 3000); }
   return false;
