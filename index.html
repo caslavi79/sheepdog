@@ -11,7 +11,7 @@
 <meta name="robots" content="index, follow">
 <meta name="geo.region" content="US-TX">
 <meta name="geo.placename" content="Bryan-College Station, Texas">
-<link rel="icon" type="image/svg+xml" href="sheepdog-mark-white.svg">
+<link rel="icon" type="image/svg+xml" href="/sheepdog-mark-white.svg">
 <meta property="og:title" content="Sheepdog Texas | Event Security, Mobile Bartending & Staffing Agency in Bryan-College Station, TX">
 <meta property="og:description" content="Licensed & insured event security, TABC-certified mobile bartending, and contracted workforce staffing serving Bryan-College Station, Brazos Valley, and Central Texas. Locally owned.">
 <meta property="og:type" content="website">
@@ -258,12 +258,11 @@ a:focus-visible,button:focus-visible{outline:2px solid var(--red);outline-offset
 .qf-input.qf-invalid{border-color:var(--red)}
 
 /* FOOTER */
-.footer{padding:48px;background:var(--char);border-top:1px solid rgba(255,255,255,.04)}
-.footer-inner{max-width:1000px;margin:0 auto;display:flex;align-items:center;justify-content:space-between}
-.footer-brand{display:flex;align-items:center;gap:10px}
-.footer-links{display:flex;gap:24px}
+.footer{padding:48px 64px;background:var(--black);text-align:center;border-top:1px solid rgba(201,146,46,.1)}
+.footer-brand{font-family:var(--fd);font-weight:800;font-size:18px;text-transform:uppercase;letter-spacing:2px;color:var(--amber);margin-bottom:12px}
+.footer-links{display:flex;gap:24px;justify-content:center;margin-bottom:12px}
 .footer-link{font-family:var(--fb);font-size:13px;color:var(--steel);text-decoration:none;transition:color .2s}
-.footer-link:hover{color:var(--white)}
+.footer-link:hover{color:var(--amber)}
 .footer-copy{font-family:var(--fb);font-size:12px;color:var(--slate)}
 
 /* SCROLL PROGRESS */
@@ -328,8 +327,6 @@ body.scroll-locked{overflow:hidden}
   .services,.trust,.contact,.faq{padding:80px 24px}
   .cards{grid-template-columns:1fr}
   .trust-grid{grid-template-columns:1fr 1fr;gap:20px}
-  .footer-inner{flex-direction:column;gap:20px;text-align:center}
-  .footer-links{justify-content:center}
 }
 @media(max-width:768px){
   .hero h1{font-size:36px}
@@ -509,18 +506,14 @@ body.scroll-locked{overflow:hidden}
 
 <!-- FOOTER -->
 <footer class="footer">
-<div class="footer-inner">
-<div class="footer-brand">
-<img src="sheepdog-stacked-white.svg" alt="Sheepdog Texas: Event Security, Mobile Bartending & Workforce Staffing Agency in Bryan-College Station, TX" style="height:64px;width:auto;object-fit:contain">
-</div>
+<div class="footer-brand">Sheepdog Security — Bryan-College Station, TX</div>
 <div class="footer-links">
 <a href="/events" class="footer-link">Events</a>
 <a href="/staffing" class="footer-link">Staffing</a>
-<a href="#about" class="footer-link" onclick="event.preventDefault();document.getElementById('about').scrollIntoView({behavior:'smooth'})">About</a>
+<a href="/" class="footer-link" style="color:var(--amber)">Home</a>
 <a href="#contact" class="footer-link" onclick="event.preventDefault();document.getElementById('contact').scrollIntoView({behavior:'smooth'})">Contact</a>
 </div>
 <div class="footer-copy">&copy; 2026 Sheepdog Security LLC &mdash; Licensed Event Security, TABC-Certified Mobile Bartending &amp; Contracted Staffing in Bryan-College Station, Brazos Valley, TX. All rights reserved.</div>
-</div>
 </footer>
 </main><!-- /page-content -->
 <script>
