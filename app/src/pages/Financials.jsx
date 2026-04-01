@@ -723,6 +723,9 @@ export default function Financials() {
   const [selected, setSelected] = useState(null)
   const [showAdd, setShowAdd] = useState(false)
   const [showPayRates, setShowPayRates] = useState(false)
+  const [mainTab, setMainTab] = useState('invoices')
+  const [allInvoices, setAllInvoices] = useState([]) // for payouts + earnings (full dataset)
+  const [earningsPeriod, setEarningsPeriod] = useState('month') // month, quarter, year
   const [toast, setToast] = useState('')
   const fireToast = useToast()
   const showToast = (msg) => fireToast(setToast, msg)
@@ -761,6 +764,11 @@ export default function Financials() {
     setLicenses(data || [])
   }, [])
 
+  const loadAllInvoices = useCallback(async () => {
+    const { data } = await supabase.from('invoices').select('id, invoice_number, client_id, service_line, total, status, payment_date, internal_line_items, created_at, due_date').order('created_at', { ascending: false })
+    setAllInvoices(data || [])
+  }, [])
+
   const loadStats = useCallback(async () => {
     const monthStart = new Date(new Date().getFullYear(), new Date().getMonth(), 1).toISOString()
     const { data } = await supabase.from('invoices').select('status, total, created_at, payment_date')
@@ -774,7 +782,7 @@ export default function Financials() {
   }, [])
 
   useEffect(() => { load() }, [load])
-  useEffect(() => { loadClients(); loadStaff(); loadPayRates(); loadLicenses() }, [loadClients, loadStaff, loadPayRates, loadLicenses])
+  useEffect(() => { loadClients(); loadStaff(); loadPayRates(); loadLicenses(); loadAllInvoices() }, [loadClients, loadStaff, loadPayRates, loadLicenses, loadAllInvoices])
   useEffect(() => { loadStats() }, [loadStats])
   useEffect(() => { setPage(0) }, [filterStatus, filterLine])
 
@@ -786,24 +794,187 @@ export default function Financials() {
   })
   const totalPages = Math.ceil(totalCount / PAGE_SIZE)
 
-  const handleSaved = () => { load(); loadStats(); showToast('Invoice created') }
-  const handleUpdated = () => { load(); loadStats(); setSelected(null) }
-  const handleDeleted = () => { load(); loadStats(); showToast('Invoice deleted') }
+  const handleSaved = () => { load(); loadStats(); loadAllInvoices(); showToast('Invoice created') }
+  const handleUpdated = () => { load(); loadStats(); loadAllInvoices(); setSelected(null) }
+  const handleDeleted = () => { load(); loadStats(); loadAllInvoices(); showToast('Invoice deleted') }
+
+  // ─── Payout data: unpaid staff on paid invoices ───
+  const unpaidStaff = []
+  allInvoices.filter(inv => inv.status === 'paid' && inv.internal_line_items?.length > 0).forEach(inv => {
+    inv.internal_line_items.forEach((li, idx) => {
+      if (!li.paid_out) {
+        unpaidStaff.push({ ...li, _invoiceId: inv.id, _invoiceNumber: inv.invoice_number, _clientId: inv.client_id, _idx: idx, _paymentDate: inv.payment_date })
+      }
+    })
+  })
+
+  const handleMarkPaidOut = async (invoiceId, itemIdx) => {
+    const inv = allInvoices.find(i => i.id === invoiceId)
+    if (!inv) return
+    const updated = (inv.internal_line_items || []).map((li, i) => i === itemIdx ? { ...li, paid_out: true, paid_out_date: new Date().toISOString().split('T')[0] } : li)
+    const { error } = await supabase.from('invoices').update({ internal_line_items: updated, updated_at: new Date().toISOString() }).eq('id', invoiceId)
+    if (error) { if (import.meta.env.DEV) console.error('Mark paid out:', error.message); return }
+    loadAllInvoices(); showToast('Staff member marked as paid')
+  }
+
+  const handleBulkPaidOut = async () => {
+    const byInvoice = {}
+    unpaidStaff.forEach(s => {
+      if (!byInvoice[s._invoiceId]) byInvoice[s._invoiceId] = []
+      byInvoice[s._invoiceId].push(s._idx)
+    })
+    for (const [invId, indices] of Object.entries(byInvoice)) {
+      const inv = allInvoices.find(i => i.id === invId)
+      if (!inv) continue
+      const updated = (inv.internal_line_items || []).map((li, i) => indices.includes(i) ? { ...li, paid_out: true, paid_out_date: new Date().toISOString().split('T')[0] } : li)
+      await supabase.from('invoices').update({ internal_line_items: updated, updated_at: new Date().toISOString() }).eq('id', invId)
+    }
+    loadAllInvoices(); showToast(`${unpaidStaff.length} staff marked as paid`)
+  }
+
+  // ─── Staff earnings data ───
+  const now = new Date()
+  const periodStart = (() => {
+    if (earningsPeriod === 'month') return new Date(now.getFullYear(), now.getMonth(), 1).toISOString().split('T')[0]
+    if (earningsPeriod === 'quarter') { const q = Math.floor(now.getMonth() / 3) * 3; return new Date(now.getFullYear(), q, 1).toISOString().split('T')[0] }
+    return new Date(now.getFullYear(), 0, 1).toISOString().split('T')[0]
+  })()
+
+  const staffEarnings = {}
+  allInvoices.forEach(inv => {
+    if (!inv.internal_line_items?.length) return
+    inv.internal_line_items.forEach(li => {
+      if (!li.paid_out || !li.paid_out_date || li.paid_out_date < periodStart) return
+      const key = li.staff_id || li.name
+      if (!staffEarnings[key]) staffEarnings[key] = { name: li.name, staff_id: li.staff_id, total: 0, hours: 0, jobs: 0 }
+      staffEarnings[key].total += parseFloat(li.pay_total) || 0
+      staffEarnings[key].hours += parseFloat(li.hours) || 0
+      staffEarnings[key].jobs += 1
+    })
+  })
+  const earningsList = Object.values(staffEarnings).sort((a, b) => b.total - a.total)
+  const earningsTotal = earningsList.reduce((s, e) => s + e.total, 0)
+
+  // ─── YTD totals for 1099 ───
+  const ytdStart = new Date(now.getFullYear(), 0, 1).toISOString().split('T')[0]
+  const ytdEarnings = {}
+  allInvoices.forEach(inv => {
+    if (!inv.internal_line_items?.length) return
+    inv.internal_line_items.forEach(li => {
+      if (!li.paid_out || !li.paid_out_date || li.paid_out_date < ytdStart) return
+      const key = li.staff_id || li.name
+      if (!ytdEarnings[key]) ytdEarnings[key] = { name: li.name, total: 0 }
+      ytdEarnings[key].total += parseFloat(li.pay_total) || 0
+    })
+  })
+  const ytdList = Object.values(ytdEarnings).sort((a, b) => b.total - a.total)
+  const needs1099 = ytdList.filter(e => e.total >= 600)
 
   return (
     <div className="clients">
       <div className="clients-header">
         <div>
-          <h1>Invoices</h1>
-          <p className="clients-subtitle">Create, track, and manage invoices</p>
+          <h1>Financials</h1>
+          <p className="clients-subtitle">Invoices, payouts, and staff earnings</p>
         </div>
         <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
           <button className="modal-btn-cancel" style={{ fontSize: 13 }} onClick={() => navigate('/compliance')}>Staff Roster</button>
           <button className="modal-btn-cancel" style={{ fontSize: 13 }} onClick={() => setShowPayRates(true)}>Pay Rates</button>
-          <button className="clients-add-btn" onClick={() => setShowAdd(true)}>+ New Invoice</button>
+          {mainTab === 'invoices' && <button className="clients-add-btn" onClick={() => setShowAdd(true)}>+ New Invoice</button>}
         </div>
       </div>
 
+      {/* Main Tabs */}
+      <div className="detail-tabs" style={{ padding: 0, marginBottom: 16 }}>
+        <button className={`detail-tab ${mainTab === 'invoices' ? 'detail-tab--active' : ''}`} onClick={() => setMainTab('invoices')}>Invoices</button>
+        <button className={`detail-tab ${mainTab === 'payouts' ? 'detail-tab--active' : ''}`} onClick={() => setMainTab('payouts')}>Payouts{unpaidStaff.length > 0 ? ` (${unpaidStaff.length})` : ''}</button>
+        <button className={`detail-tab ${mainTab === 'earnings' ? 'detail-tab--active' : ''}`} onClick={() => setMainTab('earnings')}>Staff Earnings</button>
+      </div>
+
+      {/* ─── PAYOUTS TAB ─── */}
+      {mainTab === 'payouts' && (
+        <>
+          <div className="hub-stats" style={{ marginBottom: 24 }}>
+            <div className="hub-stat-card"><div className="hub-stat-value" style={{ color: unpaidStaff.length > 0 ? COLORS.amber : undefined }}>{unpaidStaff.length}</div><div className="hub-stat-label">Unpaid Staff</div></div>
+            <div className="hub-stat-card"><div className="hub-stat-value">{fmtMoney(unpaidStaff.reduce((s, li) => s + (parseFloat(li.pay_total) || 0), 0))}</div><div className="hub-stat-label">Total Owed</div></div>
+          </div>
+          {unpaidStaff.length === 0 ? (
+            <div className="clients-empty">All staff have been paid out. No outstanding payouts.</div>
+          ) : (
+            <>
+              <div style={{ marginBottom: 12 }}>
+                <button className="modal-btn-save" style={{ fontSize: 13 }} onClick={handleBulkPaidOut}>Mark All as Paid ({unpaidStaff.length})</button>
+              </div>
+              <div className="clients-table-wrap">
+                <table className="clients-table">
+                  <thead><tr><th>Staff</th><th>Role</th><th>Invoice</th><th>Client</th><th>Hours</th><th>Rate</th><th>Owed</th><th></th></tr></thead>
+                  <tbody>
+                    {unpaidStaff.map((s, i) => (
+                      <tr key={`${s._invoiceId}-${s._idx}`}>
+                        <td className="clients-name">{s.name}</td>
+                        <td>{s.role || '—'}</td>
+                        <td>{s._invoiceNumber || '—'}</td>
+                        <td>{clientMap[s._clientId] || '—'}</td>
+                        <td>{s.hours || '—'}</td>
+                        <td>{fmtMoney(s.pay_rate)}</td>
+                        <td style={{ fontWeight: 600 }}>{fmtMoney(s.pay_total)}</td>
+                        <td><button className="modal-btn-save" style={{ fontSize: 11, padding: '2px 10px', background: COLORS.green }} onClick={() => handleMarkPaidOut(s._invoiceId, s._idx)}>Paid</button></td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </>
+          )}
+        </>
+      )}
+
+      {/* ─── STAFF EARNINGS TAB ─── */}
+      {mainTab === 'earnings' && (
+        <>
+          <div className="clients-toolbar">
+            <select className="clients-filter" value={earningsPeriod} onChange={e => setEarningsPeriod(e.target.value)}>
+              <option value="month">This Month</option>
+              <option value="quarter">This Quarter</option>
+              <option value="year">Year to Date</option>
+            </select>
+          </div>
+          <div className="hub-stats" style={{ marginBottom: 24 }}>
+            <div className="hub-stat-card"><div className="hub-stat-value">{fmtMoney(earningsTotal)}</div><div className="hub-stat-label">Total Paid ({earningsPeriod === 'month' ? 'Month' : earningsPeriod === 'quarter' ? 'Quarter' : 'YTD'})</div></div>
+            <div className="hub-stat-card"><div className="hub-stat-value">{earningsList.length}</div><div className="hub-stat-label">Staff Paid</div></div>
+            <div className="hub-stat-card"><div className="hub-stat-value" style={{ color: needs1099.length > 0 ? COLORS.amber : undefined }}>{needs1099.length}</div><div className="hub-stat-label">Need 1099 (YTD)</div></div>
+          </div>
+          {earningsList.length === 0 ? (
+            <div className="clients-empty">No staff payouts recorded for this period.</div>
+          ) : (
+            <div className="clients-table-wrap">
+              <table className="clients-table">
+                <thead><tr><th>Staff</th><th>Jobs</th><th>Hours</th><th>Total Paid</th><th>YTD Total</th><th>1099?</th></tr></thead>
+                <tbody>
+                  {earningsList.map((e, i) => {
+                    const ytd = ytdEarnings[e.staff_id || e.name]
+                    const ytdTotal = ytd ? ytd.total : 0
+                    return (
+                      <tr key={e.staff_id || e.name}>
+                        <td className="clients-name">{e.name}</td>
+                        <td>{e.jobs}</td>
+                        <td>{e.hours}</td>
+                        <td style={{ fontWeight: 600 }}>{fmtMoney(e.total)}</td>
+                        <td>{fmtMoney(ytdTotal)}</td>
+                        <td>{ytdTotal >= 600 ? <span style={badgeStyle(COLORS.amber)}>YES</span> : <span style={badgeStyle(COLORS.steel)}>NO</span>}</td>
+                      </tr>
+                    )
+                  })}
+                </tbody>
+              </table>
+            </div>
+          )}
+        </>
+      )}
+
+      {/* ─── INVOICES TAB ─── */}
+      {mainTab === 'invoices' && (
+      <>
       <div className="hub-stats" style={{ marginBottom: 24 }}>
         <div className="hub-stat-card"><div className="hub-stat-value">{stats.outstanding}</div><div className="hub-stat-label">Outstanding</div></div>
         <div className="hub-stat-card"><div className="hub-stat-value">{stats.paidMonth}</div><div className="hub-stat-label">Paid This Month</div></div>
@@ -860,6 +1031,8 @@ export default function Financials() {
             </div>
           )}
         </>
+      )}
+      </>
       )}
 
       {showAdd && <AddInvoiceModal onClose={() => setShowAdd(false)} onSaved={handleSaved} clients={clients} onGoToClients={() => { setShowAdd(false); navigate('/clients') }} staffRoster={staffRoster} payRateDefaults={payRateDefaults} licenses={licenses} onStaffRefresh={loadStaff} />}
