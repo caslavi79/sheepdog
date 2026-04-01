@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback } from 'react'
+import { useNavigate } from 'react-router-dom'
 import { supabase } from '../lib/supabase'
 import { useEscapeKey, useBodyLock, useToast } from '../lib/hooks'
 
@@ -68,7 +69,7 @@ function LineItemsEditor({ items, onChange }) {
 }
 
 /* ─── Add Invoice Modal ─── */
-function AddInvoiceModal({ onClose, onSaved, clients }) {
+function AddInvoiceModal({ onClose, onSaved, clients, onGoToClients }) {
   useEscapeKey(onClose)
   useBodyLock()
   const [form, setForm] = useState({
@@ -111,6 +112,7 @@ function AddInvoiceModal({ onClose, onSaved, clients }) {
                 <option value="">Select client...</option>
                 {clients.map(c => <option key={c.id} value={c.id}>{c.business_name || c.contact_name}</option>)}
               </select>
+              <button type="button" style={{ background: 'none', border: 'none', color: 'var(--steel)', fontSize: 13, fontFamily: 'var(--fh)', fontWeight: 600, cursor: 'pointer', padding: '4px 0 0', textAlign: 'left' }} onClick={onGoToClients}>+ New Client</button>
             </label>
             <label className="modal-field">
               <span>Service Line</span>
@@ -342,6 +344,7 @@ function InvoiceDetail({ invoice, clients, onClose, onUpdated, onDeleted, showTo
 
 /* ─── Main Financials Page ─── */
 export default function Financials() {
+  const navigate = useNavigate()
   const [invoices, setInvoices] = useState([])
   const [clients, setClients] = useState([])
   const [loading, setLoading] = useState(true)
@@ -493,7 +496,7 @@ export default function Financials() {
         </>
       )}
 
-      {showAdd && <AddInvoiceModal onClose={() => setShowAdd(false)} onSaved={handleSaved} clients={clients} />}
+      {showAdd && <AddInvoiceModal onClose={() => setShowAdd(false)} onSaved={handleSaved} clients={clients} onGoToClients={() => { setShowAdd(false); navigate('/clients') }} />}
       {selected && <InvoiceDetail invoice={selected} clients={clients} onClose={() => setSelected(null)} onUpdated={handleUpdated} onDeleted={handleDeleted} showToast={showToast} />}
       {toast && <div className="toast">{toast}</div>}
     </div>
