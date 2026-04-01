@@ -97,7 +97,7 @@ Deno.serve(async (req) => {
     }
 
     // Honeypot
-    if (body.website) {
+    if (body.website || body.confirm_email_hp) {
       return new Response(JSON.stringify({ success: true }), {
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
@@ -219,18 +219,26 @@ Deno.serve(async (req) => {
     const serviceDisplay = SERVICE_LABELS[service] || service;
 
     // Insert into contact_submissions
+    const submissionData: Record<string, unknown> = { name, phone: typeof phone === "string" ? phone : null, email, service, message };
+    // Only include company if it has a value (column may not exist yet on older schemas)
+    if (typeof company === "string" && company) submissionData.company = company;
+
     const { error: dbError } = await supabase
       .from("contact_submissions")
-      .insert({
-        name,
-        phone: typeof phone === "string" ? phone : null,
-        email,
-        service,
-        message,
-        company: typeof company === "string" ? company : null,
-      });
+      .insert(submissionData);
 
-    if (dbError) throw dbError;
+    if (dbError) {
+      console.error("DB insert failed:", dbError.message);
+      // If it failed because of the company column, retry without it
+      if (dbError.message.includes("company")) {
+        const { error: retryErr } = await supabase
+          .from("contact_submissions")
+          .insert({ name, phone: typeof phone === "string" ? phone : null, email, service, message });
+        if (retryErr) throw retryErr;
+      } else {
+        throw dbError;
+      }
+    }
 
     // Auto-create pipeline deal
     const { error: pipelineError } = await supabase

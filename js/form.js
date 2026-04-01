@@ -20,7 +20,7 @@ async function submitForm(e) {
     email:   form.elements['email'].value,
     service: form.elements['service'].value,
     message: form.elements['message'].value,
-    website: form.elements['website'].value,
+    confirm_email_hp: form.elements['confirm_email_hp'].value,
     company: form.elements['company'] ? form.elements['company'].value : ''
   };
 
