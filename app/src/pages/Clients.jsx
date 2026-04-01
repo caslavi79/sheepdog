@@ -1,6 +1,8 @@
 import { useState, useEffect } from 'react'
+import { useNavigate, useLocation } from 'react-router-dom'
 import { supabase } from '../lib/supabase'
 import { useEscapeKey, useBodyLock, useToast } from '../lib/hooks'
+import { COLORS } from '../lib/format'
 
 const SERVICE_LINES = ['events', 'staffing', 'both']
 const STATUSES = ['active', 'inactive', 'prospect']
@@ -46,12 +48,14 @@ function ServiceBadge({ line }) {
   )
 }
 
-function AddClientModal({ onClose, onSaved }) {
+function AddClientModal({ onClose, onSaved, fromDeal }) {
   useEscapeKey(onClose)
   useBodyLock()
   const [form, setForm] = useState({
-    contact_name: '', business_name: '', phone: '', email: '',
-    address: '', service_line: 'events', client_type: '', status: 'prospect', notes: ''
+    contact_name: fromDeal?.contact_name || '', business_name: fromDeal?.business_name || '',
+    phone: fromDeal?.phone || '', email: fromDeal?.email || '',
+    address: '', service_line: fromDeal?.service_line || 'events', client_type: '',
+    status: fromDeal ? 'active' : 'prospect', notes: ''
   })
   const [saving, setSaving] = useState(false)
   const [error, setError] = useState('')
@@ -60,9 +64,13 @@ function AddClientModal({ onClose, onSaved }) {
     e.preventDefault()
     setSaving(true)
     setError('')
-    const { error: err } = await supabase.from('clients').insert([form])
+    const { data: newClient, error: err } = await supabase.from('clients').insert([form]).select('id').single()
     setSaving(false)
     if (err) { setError(err.message); return }
+    // Link pipeline deal to new client
+    if (fromDeal?.deal_id && newClient?.id) {
+      await supabase.from('pipeline').update({ client_id: newClient.id, updated_at: new Date().toISOString() }).eq('id', fromDeal.deal_id)
+    }
     onSaved(); onClose()
   }
 
@@ -131,7 +139,7 @@ function AddClientModal({ onClose, onSaved }) {
   )
 }
 
-function ClientDetail({ client, onClose, onUpdated, onDeleted }) {
+function ClientDetail({ client, onClose, onUpdated, onDeleted, navigate }) {
   useEscapeKey(onClose)
   useBodyLock()
   const [editing, setEditing] = useState(false)
@@ -244,6 +252,24 @@ function ClientDetail({ client, onClose, onUpdated, onDeleted }) {
               )}
             </div>
 
+            <div className="detail-section">
+              <h3 className="detail-section-title">Quick Actions</h3>
+              <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
+                <button className="modal-btn-save" style={{ fontSize: 13 }}
+                  onClick={() => { onClose(); navigate('/scheduling', { state: { fromClient: { client_id: client.id, business_name: client.business_name || client.contact_name } } }) }}>
+                  New Event
+                </button>
+                <button className="modal-btn-save" style={{ fontSize: 13, background: COLORS.blue }}
+                  onClick={() => { onClose(); navigate('/financials', { state: { fromClient: { client_id: client.id, business_name: client.business_name || client.contact_name } } }) }}>
+                  New Invoice
+                </button>
+                <button className="modal-btn-save" style={{ fontSize: 13, background: COLORS.amber }}
+                  onClick={() => { onClose(); navigate(`/contracts?client_id=${client.id}`) }}>
+                  New Contract
+                </button>
+              </div>
+            </div>
+
             <div className="detail-actions" style={{ justifyContent: 'space-between' }}>
               {confirmDelete ? (
                 <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
@@ -316,6 +342,8 @@ function ClientDetail({ client, onClose, onUpdated, onDeleted }) {
 const CLIENTS_PAGE_SIZE = 25
 
 export default function Clients() {
+  const navigate = useNavigate()
+  const location = useLocation()
   const [clients, setClients] = useState([])
   const [loading, setLoading] = useState(true)
   const [search, setSearch] = useState('')
@@ -330,6 +358,14 @@ export default function Clients() {
 
   const fireToast = useToast()
   const showToast = (msg) => fireToast(setToast, msg)
+
+  // Open AddClientModal when arriving from Pipeline "Convert to Client"
+  useEffect(() => {
+    if (location.state?.fromDeal) {
+      setShowAdd(true)
+      navigate(location.pathname, { replace: true, state: {} })
+    }
+  }, []) // eslint-disable-line react-hooks/exhaustive-deps
 
   const loadClients = async () => {
     setLoading(true)
@@ -436,8 +472,8 @@ export default function Clients() {
       )}
 
       {toast && <div className="toast">{toast}</div>}
-      {showAdd && <AddClientModal onClose={() => setShowAdd(false)} onSaved={() => { loadClients(); showToast('Client added') }} />}
-      {selected && <ClientDetail client={selected} onClose={() => setSelected(null)} onUpdated={() => { loadClients(); setSelected(null); showToast('Client updated') }} onDeleted={() => { loadClients(); setSelected(null); showToast('Client deleted') }} />}
+      {showAdd && <AddClientModal onClose={() => setShowAdd(false)} onSaved={() => { loadClients(); showToast('Client added') }} fromDeal={location.state?.fromDeal} />}
+      {selected && <ClientDetail client={selected} onClose={() => setSelected(null)} onUpdated={() => { loadClients(); setSelected(null); showToast('Client updated') }} onDeleted={() => { loadClients(); setSelected(null); showToast('Client deleted') }} navigate={navigate} />}
     </div>
   )
 }

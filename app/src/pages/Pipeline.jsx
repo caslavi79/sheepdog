@@ -1,6 +1,8 @@
 import { useState, useEffect, useRef } from 'react'
+import { useNavigate } from 'react-router-dom'
 import { supabase } from '../lib/supabase'
 import { useEscapeKey, useBodyLock, useToast } from '../lib/hooks'
+import { COLORS } from '../lib/format'
 
 const STAGES = [
   { id: 'lead', label: 'Lead' },
@@ -123,7 +125,7 @@ function AddDealModal({ onClose, onSaved }) {
   )
 }
 
-function DealDetailModal({ deal, onClose, onUpdated, onDeleted }) {
+function DealDetailModal({ deal, onClose, onUpdated, onDeleted, navigate }) {
   useEscapeKey(onClose)
   useBodyLock()
   const [editing, setEditing] = useState(false)
@@ -185,6 +187,28 @@ function DealDetailModal({ deal, onClose, onUpdated, onDeleted }) {
                 <div className="detail-item"><span className="detail-label">Source</span><span>{deal.source === 'contact_form' ? 'Contact Form' : deal.source || 'Manual'}</span></div>
               </div>
               {deal.notes && <div className="detail-notes"><span className="detail-label">Notes</span><p>{deal.notes}</p></div>}
+            </div>
+            <div className="detail-section">
+              <h3 className="detail-section-title">Quick Actions</h3>
+              <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
+                {!deal.client_id ? (
+                  <button className="modal-btn-save" style={{ fontSize: 13, background: COLORS.blue }}
+                    onClick={() => { onClose(); navigate('/clients', { state: { fromDeal: { deal_id: deal.id, contact_name: deal.contact_name, business_name: deal.business_name, phone: deal.phone, email: deal.email, service_line: deal.service_line } } }) }}>
+                    Convert to Client
+                  </button>
+                ) : (
+                  <button className="modal-btn-cancel" style={{ fontSize: 13, color: COLORS.green, borderColor: `${COLORS.green}44` }}
+                    onClick={() => { onClose(); navigate('/clients') }}>
+                    View Client
+                  </button>
+                )}
+                {deal.client_id && (deal.stage === 'proposal_sent' || deal.stage === 'meeting_scheduled') && (
+                  <button className="modal-btn-save" style={{ fontSize: 13, background: COLORS.amber }}
+                    onClick={() => { onClose(); navigate(`/contracts?client_id=${deal.client_id}`) }}>
+                    Send Contract
+                  </button>
+                )}
+              </div>
             </div>
             <div className="detail-actions" style={{ justifyContent: 'space-between' }}>
               {confirmDelete ? (
@@ -270,9 +294,10 @@ function DealCard({ deal, onDragStart, onDragEnd, onClick, onStageChange }) {
         <p className="pipeline-card-biz">{deal.business_name}</p>
       )}
       <div className="pipeline-card-meta">
-        <span style={{ display: 'flex', alignItems: 'center' }}>
+        <span style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
           <ServiceDot line={deal.service_line} />
           {deal.service_line}
+          {deal.client_id && <span style={{ fontSize: 9, fontWeight: 700, color: COLORS.green, background: `${COLORS.green}22`, padding: '1px 5px', borderRadius: 2, letterSpacing: '0.5px', fontFamily: 'var(--fh)' }}>CLIENT</span>}
         </span>
         {isMobile && (
           <select
@@ -331,6 +356,7 @@ function PipelineColumn({ stage, deals, onDragOver, onDrop, onDragStart, onDragE
 }
 
 export default function Pipeline() {
+  const navigate = useNavigate()
   const [deals, setDeals] = useState([])
   const [loading, setLoading] = useState(true)
   const [showAdd, setShowAdd] = useState(false)
@@ -458,6 +484,7 @@ export default function Pipeline() {
           onClose={() => setSelected(null)}
           onUpdated={() => { loadDeals(); setSelected(null); showToast('Deal updated') }}
           onDeleted={() => { loadDeals(); showToast('Deal deleted') }}
+          navigate={navigate}
         />
       )}
     </div>

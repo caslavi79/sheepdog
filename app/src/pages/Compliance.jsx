@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback } from 'react'
+import { useNavigate } from 'react-router-dom'
 import { supabase } from '../lib/supabase'
 import { useEscapeKey, useBodyLock, useToast } from '../lib/hooks'
 import { fmtDate, daysUntil, badgeStyle, COLORS } from '../lib/format'
@@ -56,9 +57,16 @@ function StaffModal({ staff, onClose, onSaved }) {
       setSaving(false)
       if (err) { setError(err.message); return }
     } else {
-      const { error: err } = await supabase.from('staff').insert([payload])
+      const { data: newStaff, error: err } = await supabase.from('staff').insert([payload]).select('id').single()
       setSaving(false)
       if (err) { setError(err.message); return }
+      // Auto-create required contractor docs
+      if (newStaff?.id) {
+        await supabase.from('contractor_docs').insert([
+          { staff_id: newStaff.id, doc_type: 'w9', status: 'missing' },
+          { staff_id: newStaff.id, doc_type: 'agreement', status: 'missing' },
+        ])
+      }
     }
     onSaved(); onClose()
   }
@@ -224,6 +232,7 @@ function DocModal({ doc, staffList, onClose, onSaved }) {
    MAIN COMPLIANCE PAGE
    ═══════════════════════════════════════════════════════════ */
 export default function Compliance() {
+  const navigate = useNavigate()
   const [tab, setTab] = useState('roster')
   const [staff, setStaff] = useState([])
   const [licenses, setLicenses] = useState([])
@@ -354,9 +363,13 @@ export default function Compliance() {
           ) : (
             <div className="clients-table-wrap">
               <table className="clients-table">
-                <thead><tr><th>Name</th><th>Role</th><th>Phone</th><th>Email</th><th>Status</th><th>BG Check</th><th>Pay Rate</th><th></th></tr></thead>
+                <thead><tr><th>Name</th><th>Role</th><th>Phone</th><th>Email</th><th>Status</th><th>BG Check</th><th>Pay Rate</th><th>Docs</th><th></th></tr></thead>
                 <tbody>
-                  {filteredStaff.map(s => (
+                  {filteredStaff.map(s => {
+                    const staffDocs = docs.filter(d => d.staff_id === s.id)
+                    const hasAgreement = staffDocs.some(d => d.doc_type === 'agreement' && d.status === 'received')
+                    const hasW9 = staffDocs.some(d => d.doc_type === 'w9' && d.status === 'received')
+                    return (
                     <tr key={s.id}>
                       <td className="clients-name" style={{ cursor: 'pointer' }} onClick={() => setShowStaffModal(s)}>{s.name}</td>
                       <td>{s.role || '—'}</td>
@@ -365,6 +378,16 @@ export default function Compliance() {
                       <td><StaffStatusBadge status={s.status} /></td>
                       <td><BgCheckBadge status={s.background_check} /></td>
                       <td>{s.default_pay_rate ? `$${s.default_pay_rate}/hr` : '—'}</td>
+                      <td style={{ whiteSpace: 'nowrap' }}>
+                        {s.email ? (
+                          <span style={{ display: 'flex', gap: 4 }}>
+                            {!hasAgreement && <button style={{ background: 'none', border: 'none', color: COLORS.blue, cursor: 'pointer', fontSize: 11, fontFamily: 'var(--fh)', fontWeight: 600 }} onClick={() => navigate(`/contracts?staff_id=${s.id}&template=${encodeURIComponent('/docs/08-independent-contractor-agreement.html')}`)}>Agreement</button>}
+                            {hasAgreement && <span style={badgeStyle(COLORS.green)}>AGR</span>}
+                            {!hasW9 && <button style={{ background: 'none', border: 'none', color: COLORS.blue, cursor: 'pointer', fontSize: 11, fontFamily: 'var(--fh)', fontWeight: 600 }} onClick={() => navigate(`/contracts?staff_id=${s.id}&template=${encodeURIComponent('/docs/09-w9-request-form.html')}`)}>W-9</button>}
+                            {hasW9 && <span style={badgeStyle(COLORS.green)}>W-9</span>}
+                          </span>
+                        ) : <span style={{ fontSize: 11, color: 'var(--steel)' }}>Add email</span>}
+                      </td>
                       <td>
                         {confirmDeleteId === s.id && confirmDeleteType === 'staff' ? (
                           <span style={{ display: 'flex', gap: 4, alignItems: 'center' }}>
@@ -376,7 +399,8 @@ export default function Compliance() {
                         )}
                       </td>
                     </tr>
-                  ))}
+                    )
+                  })}
                 </tbody>
               </table>
             </div>

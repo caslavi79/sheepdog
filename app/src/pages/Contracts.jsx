@@ -63,17 +63,31 @@ function TemplatePicker({ onSelect, onClose }) {
 /* ═══════════════════════════════════════════════════════════
    CONTRACT EDITOR (side-by-side)
    ═══════════════════════════════════════════════════════════ */
-function ContractEditor({ template, contract, clients, onSaved, onClose }) {
+function ContractEditor({ template, contract, clients, onSaved, onClose, preselectedClientId, preselectedStaffId }) {
   const [templateHtml, setTemplateHtml] = useState('')
   const [fields, setFields] = useState([])
   const [values, setValues] = useState(contract?.field_values || {})
-  const [selectedClient, setSelectedClient] = useState(contract?.client_id || '')
+  const [selectedClient, setSelectedClient] = useState(contract?.client_id || preselectedClientId || '')
   const [signerEmail, setSignerEmail] = useState(contract?.signer_email || '')
+  const [staffId, setStaffId] = useState(contract?.staff_id || preselectedStaffId || null)
+  const [staffMember, setStaffMember] = useState(null)
   const [saving, setSaving] = useState(false)
   const [error, setError] = useState('')
   const [contractId, setContractId] = useState(contract?.id || null)
   const [contractStatus, setContractStatus] = useState(contract?.status || 'draft')
   const editorRef = useRef(null)
+
+  // Load staff member for auto-fill when staff_id is set
+  useEffect(() => {
+    if (!staffId) return
+    supabase.from('staff').select('id, name, email, phone, role').eq('id', staffId).single()
+      .then(({ data }) => {
+        if (data) {
+          setStaffMember(data)
+          setSignerEmail(data.email || '')
+        }
+      })
+  }, [staffId])
 
   // Load template and extract fields
   useEffect(() => {
@@ -114,6 +128,21 @@ function ContractEditor({ template, contract, clients, onSaved, onClose }) {
     })
   }, [selectedClient, clients])
 
+  // Auto-fill from staff member (for contractor agreements)
+  useEffect(() => {
+    if (!staffMember) return
+    setValues(prev => {
+      const next = { ...prev }
+      Object.keys(next).forEach(key => {
+        const k = key.toUpperCase()
+        if (k.includes('CONTRACTOR NAME') || k.includes('SIGNER') || k.includes('EMPLOYEE NAME') || k.includes('STAFF NAME')) next[key] = staffMember.name || ''
+        if (k.includes('EMAIL') || k.includes('CONTRACTOR EMAIL')) next[key] = staffMember.email || ''
+        if (k.includes('PHONE') || k.includes('CONTRACTOR PHONE')) next[key] = staffMember.phone || ''
+      })
+      return next
+    })
+  }, [staffMember])
+
   // Build filled HTML
   const filledHtml = (() => {
     if (!templateHtml) return ''
@@ -130,7 +159,8 @@ function ContractEditor({ template, contract, clients, onSaved, onClose }) {
     setSaving(true); setError('')
     const title = template?.title || contract?.template_name || 'Contract'
     const payload = {
-      client_id: selectedClient || null, template_name: title, title,
+      client_id: selectedClient || null, staff_id: staffId || null,
+      template_name: title, title,
       status: 'draft', field_values: values, filled_html: filledHtml, signer_email: signerEmail || null,
     }
     if (contractId) {
@@ -150,7 +180,8 @@ function ContractEditor({ template, contract, clients, onSaved, onClose }) {
     // Save first
     const title = template?.title || contract?.template_name || 'Contract'
     const payload = {
-      client_id: selectedClient || null, template_name: title, title,
+      client_id: selectedClient || null, staff_id: staffId || null,
+      template_name: title, title,
       field_values: values, filled_html: filledHtml, signer_email: signerEmail,
     }
     let id = contractId
@@ -276,10 +307,19 @@ export default function Contracts() {
     Promise.all([loadContracts(), loadClients()]).then(() => setLoading(false))
   }, [loadContracts, loadClients])
 
-  // Handle deep link from Resources "Fill & Send"
+  const [preselectedClientId, setPreselectedClientId] = useState(null)
+  const [preselectedStaffId, setPreselectedStaffId] = useState(null)
+
+  // Handle deep links from Resources "Fill & Send", Compliance "Send Agreement", Clients "New Contract"
   useEffect(() => {
     const params = new URLSearchParams(location.search)
     const templateFile = params.get('template')
+    const staffId = params.get('staff_id')
+    const clientId = params.get('client_id')
+
+    if (staffId) setPreselectedStaffId(staffId)
+    if (clientId) setPreselectedClientId(clientId)
+
     if (templateFile) {
       const t = TEMPLATES.find(tpl => tpl.file === templateFile)
       if (t) {
@@ -287,6 +327,9 @@ export default function Contracts() {
         setEditorContract(null)
         setShowEditor(true)
       }
+    } else if (clientId && !templateFile) {
+      // From Clients "New Contract" — open picker with client pre-selected
+      setShowPicker(true)
     }
   }, [location.search])
 
@@ -388,6 +431,8 @@ export default function Contracts() {
           clients={clients}
           onSaved={handleSaved}
           onClose={handleCloseEditor}
+          preselectedClientId={preselectedClientId}
+          preselectedStaffId={preselectedStaffId}
         />
       )}
 

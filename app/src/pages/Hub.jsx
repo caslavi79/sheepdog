@@ -65,13 +65,15 @@ export default function Hub() {
   useEffect(() => {
     const sevenDaysAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString()
     Promise.all([
-      supabase.from('pipeline').select('stage, value'),
+      supabase.from('pipeline').select('stage, value, last_activity'),
       supabase.from('contact_submissions').select('id', { count: 'exact', head: true }).gte('created_at', sevenDaysAgo),
       supabase.from('clients').select('id', { count: 'exact', head: true }).eq('status', 'active'),
       supabase.from('invoices').select('status, total, due_date'),
       supabase.from('licenses').select('expiration_date, staff_id'),
       supabase.from('contractor_docs').select('status'),
-    ]).then(([pipelineRes, subsRes, clientsRes, invoicesRes, licensesRes, docsRes]) => {
+      supabase.from('events').select('id, invoice_id, date, status').is('invoice_id', null).neq('status', 'cancelled'),
+      supabase.from('contracts').select('id, status, sent_at').in('status', ['sent', 'viewed']),
+    ]).then(([pipelineRes, subsRes, clientsRes, invoicesRes, licensesRes, docsRes, eventsRes, contractsRes]) => {
       const deals = pipelineRes.data || []
       const leads = deals.filter(d => d.stage === 'lead').length
       const pipelineValue = deals.filter(d => d.stage !== 'lost').reduce((sum, d) => sum + (parseFloat(d.value) || 0), 0)
@@ -102,6 +104,28 @@ export default function Hub() {
 
       const missingDocs = (docsRes.data || []).filter(d => d.status === 'missing').length
       if (missingDocs > 0) a.push({ color: '#D4483A', text: `${missingDocs} missing contractor doc${missingDocs !== 1 ? 's' : ''}`, link: '/compliance' })
+
+      // Stale pipeline deals (14+ days without activity)
+      const staleDeals = deals.filter(d => {
+        if (d.stage === 'lost' || d.stage === 'under_contract') return false
+        if (!d.last_activity) return true
+        const daysSince = Math.ceil((Date.now() - new Date(d.last_activity).getTime()) / (1000 * 60 * 60 * 24))
+        return daysSince > 14
+      })
+      if (staleDeals.length > 0) a.push({ color: '#C9922E', text: `${staleDeals.length} stale pipeline deal${staleDeals.length !== 1 ? 's' : ''} (14+ days)`, link: '/pipeline' })
+
+      // Unsigned contracts (sent 7+ days ago)
+      const unsignedContracts = (contractsRes.data || []).filter(c => {
+        if (!c.sent_at) return false
+        const daysSince = Math.ceil((Date.now() - new Date(c.sent_at).getTime()) / (1000 * 60 * 60 * 24))
+        return daysSince > 7
+      })
+      if (unsignedContracts.length > 0) a.push({ color: '#C9922E', text: `${unsignedContracts.length} unsigned contract${unsignedContracts.length !== 1 ? 's' : ''} (7+ days)`, link: '/contracts' })
+
+      // Past events without invoices
+      const now = new Date()
+      const pastEventsNoInvoice = (eventsRes.data || []).filter(e => e.date && new Date(e.date + 'T00:00:00') < now)
+      if (pastEventsNoInvoice.length > 0) a.push({ color: '#C9922E', text: `${pastEventsNoInvoice.length} past event${pastEventsNoInvoice.length !== 1 ? 's' : ''} without invoices`, link: '/scheduling' })
 
       setAlerts(a)
     }).catch(err => {

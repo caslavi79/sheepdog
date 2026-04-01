@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback, useMemo } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate, useLocation } from 'react-router-dom'
 import { supabase } from '../lib/supabase'
 import { useEscapeKey, useBodyLock, useToast } from '../lib/hooks'
 import { fmtDate, daysUntil, badgeStyle, COLORS } from '../lib/format'
@@ -259,6 +259,7 @@ function dateStr(d) { return d.toISOString().split('T')[0] }
    ═══════════════════════════════════════════════════════════ */
 export default function Scheduling() {
   const navigate = useNavigate()
+  const location = useLocation()
   const [tab, setTab] = useState('calendar')
   const [events, setEvents] = useState([])
   const [placements, setPlacements] = useState([])
@@ -278,6 +279,15 @@ export default function Scheduling() {
   const [toast, setToast] = useState('')
   const fireToast = useToast()
   const showToast = (msg) => fireToast(setToast, msg)
+
+  // Open EventModal when arriving from Clients "New Event"
+  useEffect(() => {
+    if (location.state?.fromClient) {
+      setShowEventModal({ client_id: location.state.fromClient.client_id })
+      setTab('events')
+      navigate(location.pathname, { replace: true, state: {} })
+    }
+  }, []) // eslint-disable-line react-hooks/exhaustive-deps
 
   const loadEvents = useCallback(async () => {
     const { data, error } = await supabase.from('events').select('*').order('date', { ascending: true })

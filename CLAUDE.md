@@ -159,6 +159,7 @@ Sends contract email via Resend with branded "Review & Sign" button. Validates c
 |--------|------|-------|
 | id | uuid | PK |
 | staff_id | uuid | FK to staff |
+| contract_id | uuid | FK to contracts (auto-set when signed) |
 | doc_type | text | w9, agreement, other |
 | status | text | received, missing, expired |
 | signature_date | date | |
@@ -170,6 +171,7 @@ Sends contract email via Resend with branded "Review & Sign" button. Validates c
 |--------|------|-------|
 | id | uuid | PK |
 | client_id | uuid | FK to clients |
+| staff_id | uuid | FK to staff (for contractor agreements) |
 | template_name, title | text | |
 | status | text | draft, sent, viewed, signed |
 | field_values | jsonb | Filled form data |
@@ -325,7 +327,30 @@ Create invoice with internal staff assignments → mark invoice as paid
 ### Scheduling → Invoice
 ```
 Create event (or generate from placement) → assign staff → "Create Invoice" button
-→ navigates to /financials with pre-filled event data
+→ navigates to /financials with pre-filled event data → invoice created
+→ invoice_id written back to events table (prevents double-invoicing)
+```
+
+### Staff Onboarding
+```
+Add staff in Compliance → auto-create contractor_docs (w9=missing, agreement=missing)
+→ "Agreement" / "W-9" buttons navigate to Contracts with staff pre-filled
+→ Send for signing → staff signs → contract-sign auto-updates contractor_docs
+to status='received' with signature_date
+```
+
+### Pipeline → Client Conversion
+```
+Pipeline deal detail → "Convert to Client" button → navigates to Clients
+→ AddClientModal pre-filled from deal data → client created
+→ pipeline.client_id linked back to new client
+```
+
+### Client → Everything (Hub)
+```
+Client detail panel → "New Event" → Scheduling with client pre-selected
+                    → "New Invoice" → Financials with client pre-selected
+                    → "New Contract" → Contracts with client pre-selected
 ```
 
 ## Known Issues / Watch Out For

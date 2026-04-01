@@ -195,6 +195,38 @@ Deno.serve(async (req: Request) => {
         });
       }
 
+      // Auto-update contractor_docs if this contract is linked to a staff member
+      if (contract.staff_id) {
+        const TEMPLATE_TO_DOC_TYPE: Record<string, string> = {
+          'Independent Contractor Agreement': 'agreement',
+          'W-9 Request Form': 'w9',
+        };
+        const docType = TEMPLATE_TO_DOC_TYPE[contract.template_name];
+        if (docType) {
+          await supabase.from("contractor_docs")
+            .update({
+              status: "received",
+              signature_date: new Date().toISOString().split("T")[0],
+              contract_id: contract.id,
+              updated_at: new Date().toISOString(),
+            })
+            .eq("staff_id", contract.staff_id)
+            .eq("doc_type", docType);
+        }
+      }
+
+      // Auto-advance pipeline if client has a linked deal
+      if (contract.client_id) {
+        await supabase.from("pipeline")
+          .update({
+            stage: "under_contract",
+            last_activity: new Date().toISOString(),
+            updated_at: new Date().toISOString(),
+          })
+          .eq("client_id", contract.client_id)
+          .in("stage", ["proposal_sent", "meeting_scheduled"]);
+      }
+
       // Send confirmation emails
       const confirmHtml = `<div style="font-family:Arial,sans-serif;max-width:600px;"><h2 style="color:${BRAND_COLOR};">Contract Signed</h2><p>This confirms that <strong>${escapeHtml(signer_name)}</strong> has signed <strong>${escapeHtml(contract.title || contract.template_name)}</strong>.</p><p style="color:#929BAA;font-size:13px;">Signed at ${new Date().toLocaleString("en-US")} from IP ${escapeHtml(signerIp)}.</p><p style="color:#929BAA;font-size:13px;margin-top:16px;">This is an automated confirmation from ${escapeHtml(BRAND_NAME)}.</p></div>`;
 

@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback, useMemo } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate, useLocation } from 'react-router-dom'
 import { supabase } from '../lib/supabase'
 import { useEscapeKey, useBodyLock, useToast } from '../lib/hooks'
 import { fmtMoney, fmtDate, daysUntil, badgeStyle, COLORS } from '../lib/format'
@@ -321,20 +321,40 @@ function QuickAddStaffModal({ name, onClose, onAdded }) {
 /* ═══════════════════════════════════════════════════════════
    ADD INVOICE MODAL
    ═══════════════════════════════════════════════════════════ */
-function AddInvoiceModal({ onClose, onSaved, clients, onGoToClients, staffRoster, payRateDefaults, licenses, onStaffRefresh }) {
+function AddInvoiceModal({ onClose, onSaved, clients, onGoToClients, staffRoster, payRateDefaults, licenses, onStaffRefresh, fromEvent, fromClient }) {
   useEscapeKey(onClose)
   useBodyLock()
-  const [form, setForm] = useState({
-    client_id: '', service_line: 'events',
-    line_items: [{ description: '', hours: '', rate: '', total: 0 }],
-    tax: 0, due_date: '', status: 'draft', notes: '',
-    // Internal
-    event_date: '', event_start_time: '', event_end_time: '', venue_name: '',
-    internal_line_items: [], internal_notes: ''
-  })
+
+  const buildInitialForm = () => {
+    const base = {
+      client_id: '', service_line: 'events',
+      line_items: [{ description: '', hours: '', rate: '', total: 0 }],
+      tax: 0, due_date: '', status: 'draft', notes: '',
+      event_date: '', event_start_time: '', event_end_time: '', venue_name: '',
+      internal_line_items: [], internal_notes: ''
+    }
+    if (fromEvent) {
+      base.client_id = fromEvent.client_id || ''
+      base.service_line = fromEvent.service_line || 'events'
+      base.event_date = fromEvent.event_date || ''
+      base.event_start_time = fromEvent.event_start_time || ''
+      base.event_end_time = fromEvent.event_end_time || ''
+      base.venue_name = fromEvent.venue_name || ''
+      base.internal_line_items = (fromEvent.staff || []).filter(s => s.name).map(s => ({
+        name: s.name || '', staff_id: s.staff_id || null, role: s.role || '',
+        hours: '', pay_rate: '', pay_total: 0
+      }))
+    }
+    if (fromClient) {
+      base.client_id = fromClient.client_id || ''
+    }
+    return base
+  }
+
+  const [form, setForm] = useState(buildInitialForm)
   const [saving, setSaving] = useState(false)
   const [error, setError] = useState('')
-  const [showInternal, setShowInternal] = useState(false)
+  const [showInternal, setShowInternal] = useState(!!fromEvent)
   const [quickAddName, setQuickAddName] = useState(null)
 
   const subtotal = (form.line_items || []).reduce((s, li) => s + (parseFloat(li.total) || 0), 0)
@@ -348,7 +368,7 @@ function AddInvoiceModal({ onClose, onSaved, clients, onGoToClients, staffRoster
     const { data: lastInv } = await supabase.from('invoices').select('invoice_number').order('created_at', { ascending: false }).limit(1)
     const lastNum = lastInv?.[0]?.invoice_number ? parseInt(lastInv[0].invoice_number.replace('SHD-', '')) : 0
     const invoiceNumber = `SHD-${String((lastNum || 0) + 1).padStart(4, '0')}`
-    const { error: err } = await supabase.from('invoices').insert([{
+    const { data: newInvoice, error: err } = await supabase.from('invoices').insert([{
       client_id: form.client_id, service_line: form.service_line, invoice_number: invoiceNumber,
       line_items: form.line_items.filter(li => li.description), subtotal, tax: parseFloat(form.tax) || 0,
       total, due_date: form.due_date || null, status: form.status, notes: form.notes || null,
@@ -357,9 +377,13 @@ function AddInvoiceModal({ onClose, onSaved, clients, onGoToClients, staffRoster
       event_end_time: form.event_end_time || null, venue_name: form.venue_name || null,
       internal_line_items: (form.internal_line_items || []).filter(li => li.name),
       internal_notes: form.internal_notes || null,
-    }])
+    }]).select('id').single()
     setSaving(false)
     if (err) { setError(err.message); return }
+    // Link invoice back to event if created from Scheduling
+    if (fromEvent?.event_id && newInvoice?.id) {
+      await supabase.from('events').update({ invoice_id: newInvoice.id, updated_at: new Date().toISOString() }).eq('id', fromEvent.event_id)
+    }
     onSaved(); onClose()
   }
 
@@ -708,6 +732,7 @@ function InvoiceDetail({ invoice, clients, onClose, onUpdated, onDeleted, showTo
    ═══════════════════════════════════════════════════════════ */
 export default function Financials() {
   const navigate = useNavigate()
+  const location = useLocation()
   const [invoices, setInvoices] = useState([])
   const [clients, setClients] = useState([])
   const [staffRoster, setStaffRoster] = useState([])
@@ -790,6 +815,15 @@ export default function Financials() {
   useEffect(() => { loadClients(); loadStaff(); loadPayRates(); loadLicenses(); loadAllInvoices() }, [loadClients, loadStaff, loadPayRates, loadLicenses, loadAllInvoices])
   useEffect(() => { loadStats() }, [loadStats])
   useEffect(() => { setPage(0) }, [filterStatus, filterLine])
+
+  // Open AddInvoiceModal when arriving from Scheduling or Clients
+  useEffect(() => {
+    if (location.state?.fromEvent || location.state?.fromClient) {
+      setShowAdd(true)
+      // Clear state so modal doesn't reopen on refresh
+      navigate(location.pathname, { replace: true, state: {} })
+    }
+  }, []) // eslint-disable-line react-hooks/exhaustive-deps
 
   const clientMap = Object.fromEntries(clients.map(c => [c.id, c.business_name || c.contact_name]))
   const filtered = invoices.filter(inv => {
@@ -1048,7 +1082,7 @@ export default function Financials() {
       </>
       )}
 
-      {showAdd && <AddInvoiceModal onClose={() => setShowAdd(false)} onSaved={handleSaved} clients={clients} onGoToClients={() => { setShowAdd(false); navigate('/clients') }} staffRoster={staffRoster} payRateDefaults={payRateDefaults} licenses={licenses} onStaffRefresh={loadStaff} />}
+      {showAdd && <AddInvoiceModal onClose={() => setShowAdd(false)} onSaved={handleSaved} clients={clients} onGoToClients={() => { setShowAdd(false); navigate('/clients') }} staffRoster={staffRoster} payRateDefaults={payRateDefaults} licenses={licenses} onStaffRefresh={loadStaff} fromEvent={location.state?.fromEvent} fromClient={location.state?.fromClient} />}
       {selected && <InvoiceDetail invoice={selected} clients={clients} onClose={() => setSelected(null)} onUpdated={handleUpdated} onDeleted={handleDeleted} showToast={showToast} staffRoster={staffRoster} payRateDefaults={payRateDefaults} licenses={licenses} onStaffRefresh={loadStaff} />}
       {showPayRates && <PayRateDefaultsModal onClose={() => setShowPayRates(false)} payRateDefaults={payRateDefaults} onRefresh={loadPayRates} showToast={showToast} />}
       {toast && <div className="toast">{toast}</div>}
