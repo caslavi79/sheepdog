@@ -51,6 +51,12 @@ export default function ProtectedRoute({ children }) {
   const [recovery, setRecovery] = useState(false)
 
   useEffect(() => {
+    // Detect recovery from URL hash (e.g. #access_token=...&type=recovery)
+    const hash = window.location.hash
+    if (hash.includes('type=recovery')) {
+      setRecovery(true)
+    }
+
     supabase.auth.getSession().then(({ data: { session } }) => {
       setUser(session?.user ?? null)
       setLoading(false)
