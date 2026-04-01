@@ -97,6 +97,40 @@ npx supabase functions deploy contact-submit --project-ref sezzqhmsfulclcqmfwja 
 
 Enable `pg_cron` in Supabase Dashboard → Database → Extensions, then schedule a daily invocation.
 
+## Edge Function: contract-sign
+
+- **Endpoint:** `https://sezzqhmsfulclcqmfwja.supabase.co/functions/v1/contract-sign`
+- **Source:** `supabase/functions/contract-sign/index.ts`
+- **Method:** GET + POST (no auth — public signing page for clients)
+- **Deploy:** `npx supabase functions deploy contract-sign --project-ref sezzqhmsfulclcqmfwja --no-verify-jwt`
+
+### What it does
+
+1. **GET `?token=UUID`** — Renders a branded signing page with the filled contract, signature canvas, and "I agree" checkbox
+2. Updates contract status to 'viewed' on first access
+3. **POST `?token=UUID`** — Captures signature (base64 canvas image), signer name, IP address, timestamp
+4. Sends confirmation email to signer + notification to team via Resend
+5. Returns success/failure JSON
+
+### Config (Supabase secrets)
+
+Uses brand secrets for reusability: BRAND_NAME, BRAND_FROM_EMAIL, BRAND_REPLY_TO, BRAND_COLOR, BRAND_LOGO_URL
+
+## Edge Function: contract-send
+
+- **Endpoint:** `https://sezzqhmsfulclcqmfwja.supabase.co/functions/v1/contract-send`
+- **Source:** `supabase/functions/contract-send/index.ts`
+- **Method:** POST (called from app with JWT auth)
+- **Deploy:** `npx supabase functions deploy contract-send --project-ref sezzqhmsfulclcqmfwja --no-verify-jwt`
+
+### What it does
+
+1. Receives `{ contract_id }` in POST body
+2. Validates contract exists, has signer_email, has filled_html, is not already signed
+3. Builds signing URL using SIGNING_BASE_URL secret
+4. Sends branded email via Resend with "Review & Sign" button
+5. Updates contract status to 'sent'
+
 ## Database Tables
 
 ### pipeline
@@ -302,7 +336,7 @@ On mobile:
 - `app/src/components/ProtectedRoute.jsx` — auth guard (uses onAuthStateChange only, no race condition)
 - `app/src/App.css` — all styles (responsive at 1024px and 768px)
 - `js/form.js` — shared contact form JS (used by static site, not the app)
-- `scripts/deploy-edge.sh` — edge function deploy script with --no-verify-jwt baked in
+- `scripts/deploy-edge.sh` — edge function deploy script with --no-verify-jwt baked in (deploys all 4 functions: contact-submit, license-reminders, contract-sign, contract-send)
 - `supabase/schema.sql` — database schema, RLS policies, and indexes (source of truth)
 
 ### Deploy the app

@@ -230,7 +230,11 @@ function ClientDetail({ client, onClose, onUpdated, onDeleted }) {
                 <div className="detail-list">
                   {contracts.map(c => (
                     <div key={c.id} className="detail-list-item">
-                      <span>{c.title || c.template_name}</span>
+                      {c.sign_token ? (
+                        <a href={`https://sezzqhmsfulclcqmfwja.supabase.co/functions/v1/contract-sign?token=${c.sign_token}`} target="_blank" rel="noopener noreferrer" style={{ color: '#7EAAF2', textDecoration: 'none' }}>{c.title || c.template_name}</a>
+                      ) : (
+                        <span>{c.title || c.template_name}</span>
+                      )}
                       <span className="detail-list-meta" style={{
                         color: c.status === 'signed' ? '#357A38' : c.status === 'sent' || c.status === 'viewed' ? '#C9922E' : '#929BAA'
                       }}>{c.status}</span>
@@ -279,6 +283,12 @@ function ClientDetail({ client, onClose, onUpdated, onDeleted }) {
                 <label className="modal-field"><span>Service Line</span>
                   <select value={form.service_line} onChange={e => setForm({...form, service_line: e.target.value})}>
                     {SERVICE_LINES.map(s => <option key={s} value={s}>{s}</option>)}
+                  </select>
+                </label>
+                <label className="modal-field"><span>Client Type</span>
+                  <select value={form.client_type || ''} onChange={e => setForm({...form, client_type: e.target.value})}>
+                    <option value="">Select...</option>
+                    {CLIENT_TYPES.map(t => <option key={t} value={t}>{t.replace(/-/g, ' ')}</option>)}
                   </select>
                 </label>
                 <label className="modal-field"><span>Status</span>
