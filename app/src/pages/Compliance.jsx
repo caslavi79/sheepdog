@@ -258,17 +258,20 @@ export default function Compliance() {
   const missingDocs = docs.filter(d => d.status === 'missing').length
 
   const loadStaff = useCallback(async () => {
-    const { data } = await supabase.from('staff').select('*').order('name')
+    const { data, error } = await supabase.from('staff').select('*').order('name')
+    if (error && import.meta.env.DEV) console.error('Load staff:', error.message)
     setStaff(data || [])
   }, [])
 
   const loadLicenses = useCallback(async () => {
-    const { data } = await supabase.from('licenses').select('*').order('expiration_date', { ascending: true })
+    const { data, error } = await supabase.from('licenses').select('*').order('expiration_date', { ascending: true })
+    if (error && import.meta.env.DEV) console.error('Load licenses:', error.message)
     setLicenses(data || [])
   }, [])
 
   const loadDocs = useCallback(async () => {
-    const { data } = await supabase.from('contractor_docs').select('*').order('created_at', { ascending: false })
+    const { data, error } = await supabase.from('contractor_docs').select('*').order('created_at', { ascending: false })
+    if (error && import.meta.env.DEV) console.error('Load docs:', error.message)
     setDocs(data || [])
   }, [])
 
@@ -279,10 +282,16 @@ export default function Compliance() {
   const staffMap = Object.fromEntries(staff.map(s => [s.id, s.name]))
 
   const handleDelete = async (table, id) => {
+    if (table === 'staff') {
+      const { error: licErr } = await supabase.from('licenses').delete().eq('staff_id', id)
+      if (licErr && import.meta.env.DEV) console.error('Delete staff licenses:', licErr.message)
+      const { error: docErr } = await supabase.from('contractor_docs').delete().eq('staff_id', id)
+      if (docErr && import.meta.env.DEV) console.error('Delete staff docs:', docErr.message)
+    }
     const { error } = await supabase.from(table).delete().eq('id', id)
     if (error) { if (import.meta.env.DEV) console.error(`Delete ${table}:`, error.message); return }
     setConfirmDeleteId(null); setConfirmDeleteType(null)
-    if (table === 'staff') { loadStaff(); showToast('Staff removed') }
+    if (table === 'staff') { loadStaff(); loadLicenses(); loadDocs(); showToast('Staff removed') }
     if (table === 'licenses') { loadLicenses(); showToast('License removed') }
     if (table === 'contractor_docs') { loadDocs(); showToast('Document removed') }
   }
@@ -339,9 +348,9 @@ export default function Compliance() {
 
       {/* Tabs */}
       <div className="detail-tabs" style={{ padding: 0, marginBottom: 16 }}>
-        <button className={`detail-tab ${tab === 'roster' ? 'detail-tab--active' : ''}`} onClick={() => setTab('roster')}>Staff Roster ({staff.length})</button>
-        <button className={`detail-tab ${tab === 'licenses' ? 'detail-tab--active' : ''}`} onClick={() => setTab('licenses')}>Licenses & Certs ({licenses.length})</button>
-        <button className={`detail-tab ${tab === 'docs' ? 'detail-tab--active' : ''}`} onClick={() => setTab('docs')}>Contractor Docs ({docs.length})</button>
+        <button className={`detail-tab ${tab === 'roster' ? 'detail-tab--active' : ''}`} onClick={() => { setTab('roster'); setSearch('') }}>Staff Roster ({staff.length})</button>
+        <button className={`detail-tab ${tab === 'licenses' ? 'detail-tab--active' : ''}`} onClick={() => { setTab('licenses'); setSearch('') }}>Licenses & Certs ({licenses.length})</button>
+        <button className={`detail-tab ${tab === 'docs' ? 'detail-tab--active' : ''}`} onClick={() => { setTab('docs'); setSearch('') }}>Contractor Docs ({docs.length})</button>
       </div>
 
       {/* ─── STAFF ROSTER TAB ─── */}

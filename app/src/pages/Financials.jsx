@@ -309,8 +309,9 @@ function AddInvoiceModal({ onClose, onSaved, clients, onGoToClients, staffRoster
     if (!form.client_id) { setError('Select a client'); return }
     if (!form.line_items.some(li => li.description)) { setError('Add at least one line item'); return }
     setSaving(true); setError('')
-    const { count } = await supabase.from('invoices').select('id', { count: 'exact', head: true })
-    const invoiceNumber = `SHD-${String((count || 0) + 1).padStart(4, '0')}`
+    const { data: lastInv } = await supabase.from('invoices').select('invoice_number').order('created_at', { ascending: false }).limit(1)
+    const lastNum = lastInv?.[0]?.invoice_number ? parseInt(lastInv[0].invoice_number.replace('SHD-', '')) : 0
+    const invoiceNumber = `SHD-${String((lastNum || 0) + 1).padStart(4, '0')}`
     const { error: err } = await supabase.from('invoices').insert([{
       client_id: form.client_id, service_line: form.service_line, invoice_number: invoiceNumber,
       line_items: form.line_items.filter(li => li.description), subtotal, tax: parseFloat(form.tax) || 0,

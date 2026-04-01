@@ -12,6 +12,15 @@ const NOTIFY_EMAILS = [
 
 const REMINDER_DAYS = [30, 14, 7];
 
+function escapeHtml(str: string): string {
+  return str
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#039;");
+}
+
 Deno.serve(async (req: Request) => {
   // Allow GET (cron) or POST (manual trigger)
   if (req.method !== "GET" && req.method !== "POST") {
@@ -35,7 +44,7 @@ Deno.serve(async (req: Request) => {
     }
 
     const today = new Date();
-    today.setHours(0, 0, 0, 0);
+    today.setUTCHours(0, 0, 0, 0);
     const reminders: Array<{
       staffName: string;
       licenseType: string;
@@ -45,7 +54,7 @@ Deno.serve(async (req: Request) => {
     }> = [];
 
     for (const lic of licenses || []) {
-      const expDate = new Date(lic.expiration_date + "T00:00:00");
+      const expDate = new Date(lic.expiration_date + "T00:00:00Z");
       const daysLeft = Math.ceil(
         (expDate.getTime() - today.getTime()) / (1000 * 60 * 60 * 24)
       );
@@ -81,8 +90,8 @@ Deno.serve(async (req: Request) => {
       html += `<h3 style="color: #D4483A; margin-top: 24px;">Expired</h3>`;
       for (const r of expired) {
         html += `<div style="background: #FFF5F5; border-left: 3px solid #D4483A; padding: 12px 16px; margin: 8px 0; border-radius: 0 6px 6px 0;">`;
-        html += `<strong>${r.staffName}</strong> &mdash; ${r.licenseType} #${r.licenseNumber}<br>`;
-        html += `<span style="color: #D4483A;">Expired ${Math.abs(r.daysLeft)} day${Math.abs(r.daysLeft) !== 1 ? "s" : ""} ago (${r.expirationDate})</span>`;
+        html += `<strong>${escapeHtml(r.staffName)}</strong> &mdash; ${escapeHtml(r.licenseType)} #${escapeHtml(r.licenseNumber)}<br>`;
+        html += `<span style="color: #D4483A;">Expired ${Math.abs(r.daysLeft)} day${Math.abs(r.daysLeft) !== 1 ? "s" : ""} ago (${escapeHtml(r.expirationDate)})</span>`;
         html += `</div>`;
       }
     }
@@ -92,8 +101,8 @@ Deno.serve(async (req: Request) => {
       for (const r of expiringSoon) {
         const color = r.daysLeft <= 7 ? "#D4483A" : "#C9922E";
         html += `<div style="background: #FFFBF0; border-left: 3px solid ${color}; padding: 12px 16px; margin: 8px 0; border-radius: 0 6px 6px 0;">`;
-        html += `<strong>${r.staffName}</strong> &mdash; ${r.licenseType} #${r.licenseNumber}<br>`;
-        html += `<span style="color: ${color};">${r.daysLeft} day${r.daysLeft !== 1 ? "s" : ""} left (expires ${r.expirationDate})</span>`;
+        html += `<strong>${escapeHtml(r.staffName)}</strong> &mdash; ${escapeHtml(r.licenseType)} #${escapeHtml(r.licenseNumber)}<br>`;
+        html += `<span style="color: ${color};">${r.daysLeft} day${r.daysLeft !== 1 ? "s" : ""} left (expires ${escapeHtml(r.expirationDate)})</span>`;
         html += `</div>`;
       }
     }
@@ -122,6 +131,19 @@ Deno.serve(async (req: Request) => {
     });
 
     const emailResult = await emailRes.json();
+
+    if (!emailRes.ok) {
+      console.error("Resend email error:", JSON.stringify(emailResult));
+      return new Response(
+        JSON.stringify({
+          success: false,
+          error: "Failed to send reminder email",
+          resendError: emailResult,
+          reminders: reminders.length,
+        }),
+        { status: 500, headers: { "Content-Type": "application/json" } }
+      );
+    }
 
     return new Response(
       JSON.stringify({
