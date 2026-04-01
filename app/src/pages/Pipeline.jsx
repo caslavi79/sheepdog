@@ -190,7 +190,7 @@ function DealDetailModal({ deal, onClose, onUpdated, onDeleted, navigate }) {
             <select value={currentStage} onChange={e => handleStageChange(e.target.value)}
               style={{
                 fontFamily: 'var(--fh)', fontSize: 13, fontWeight: 700, letterSpacing: '1px',
-                textTransform: 'uppercase', color: '#fff', background: stageColor,
+                textTransform: 'uppercase', color: '#fff', backgroundColor: stageColor,
                 padding: '8px 32px 8px 14px', borderRadius: 6, border: 'none', cursor: 'pointer',
                 appearance: 'none', WebkitAppearance: 'none',
                 backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='7' viewBox='0 0 12 7'%3E%3Cpath d='M1 1l5 5 5-5' stroke='white' stroke-width='2' fill='none' stroke-linecap='round'/%3E%3C/svg%3E")`,
