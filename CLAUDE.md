@@ -4,7 +4,7 @@ Everything a new Claude Code session needs to pick up where we left off.
 
 ## Architecture
 
-Two repos, one Supabase project, one Resend account. No new repos needed.
+Two repos, one Supabase project, one Resend account.
 
 | Layer | URL | Repo | Hosting |
 |-------|-----|------|---------|
@@ -27,317 +27,256 @@ The client-facing site and the app code both live in the `sheepdog` repo. The `s
 - `RESEND_API_KEY` — Resend API key for sending emails
 - `SUPABASE_URL` — auto-set by Supabase
 - `SUPABASE_SERVICE_ROLE_KEY` — auto-set by Supabase
+- `BRAND_NAME` — "Sheepdog Security LLC" (used by contract edge functions)
+- `BRAND_FROM_EMAIL` — "noreply@sheepdogtexas.com"
+- `BRAND_REPLY_TO` — "sheepdogsecurityllc@gmail.com"
+- `BRAND_COLOR` — "#0C0C0C"
+- `BRAND_LOGO_URL` — "https://sheepdogtexas.com/favicon.jpg"
+- `SIGNING_BASE_URL` — "https://sezzqhmsfulclcqmfwja.supabase.co/functions/v1/contract-sign"
 
-## Edge Function: contact-submit
+The BRAND_* secrets make the contract signing system reusable for other businesses — swap them out, upload new templates, zero code changes.
 
-**This is the most critical piece. If this breaks, the client's live website cannot intake leads.**
-
-- **Endpoint:** `https://sezzqhmsfulclcqmfwja.supabase.co/functions/v1/contact-submit`
-- **Source:** `supabase/functions/contact-submit/index.ts`
-- **Method:** POST (no auth required — public form)
-- **CORS:** locked to `sheepdogtexas.com` and `www.sheepdogtexas.com`
+## Edge Functions (4 total)
 
 ### Deploy command (CRITICAL)
 
 ```bash
-npx supabase functions deploy contact-submit --project-ref sezzqhmsfulclcqmfwja --no-verify-jwt
+bash scripts/deploy-edge.sh
 ```
 
-**ALWAYS use `--no-verify-jwt`.** The contact form is public — no auth token is sent. Without this flag, Supabase re-enables JWT verification on every deploy, which silently returns 401 on all form submissions and breaks lead intake.
+This deploys ALL 4 functions with `--no-verify-jwt` and verifies each endpoint. **Never deploy edge functions any other way.** Without `--no-verify-jwt`, Supabase re-enables JWT verification and public functions (contact form, signing page) silently break.
 
-### What it does
+### contact-submit
 
-1. Validates + sanitizes input (name, phone, email, service, message)
-2. Checks honeypot (`website` field — if filled, silently returns 200)
-3. Rate limits: 5 requests per IP per 10 minutes (stored in `rate_limits` table)
-4. Validates email format + DNS MX record check
-5. Inserts into `contact_submissions` table
-6. Auto-creates a deal in `pipeline` table with proper columns
-7. Sends internal notification email to team via Resend
-8. Sends confirmation email to submitter via Resend
-9. Returns `{ success: true }`
+**The most critical piece. If this breaks, the client's live website cannot intake leads.**
 
-### Email recipients (hardcoded in edge function)
+- **Endpoint:** `https://sezzqhmsfulclcqmfwja.supabase.co/functions/v1/contact-submit`
+- **Source:** `supabase/functions/contact-submit/index.ts`
+- **Method:** POST (no auth — public form)
+- **CORS:** locked to `sheepdogtexas.com` and `www.sheepdogtexas.com`
 
-- **Internal notification to:** benschultz519@gmail.com, Joshk1288@gmail.com, sheepdogsecurityllc@gmail.com
-- **From:** `Sheepdog Lead <noreply@sheepdogtexas.com>`
-- **Reply-to on internal:** submitter's email (so owners can reply directly to the lead)
-- **Confirmation to:** submitter's email
-- **From:** `Sheepdog <noreply@sheepdogtexas.com>`
-- **Reply-to on confirmation:** sheepdogsecurityllc@gmail.com
+What it does: validates + sanitizes input, checks honeypot, rate limits (5/IP/10min), validates email + DNS MX, inserts into `contact_submissions`, auto-creates pipeline deal, sends internal + confirmation emails via Resend.
 
-### Service mapping (form value -> pipeline service_line)
+### license-reminders
 
-| Form value | Pipeline service_line |
-|---|---|
-| events-security, events-bartending, events-both, other | events |
-| staffing, field-ops, logistics, facility, warehouse, project, ongoing | staffing |
-
-## Edge Function: license-reminders
-
-- **Endpoint:** `https://sezzqhmsfulclcqmfwja.supabase.co/functions/v1/license-reminders`
+- **Endpoint:** `.../functions/v1/license-reminders`
 - **Source:** `supabase/functions/license-reminders/index.ts`
-- **Method:** GET or POST (no auth — invoked by cron or manual trigger)
-- **Deploy:** `npx supabase functions deploy license-reminders --project-ref sezzqhmsfulclcqmfwja --no-verify-jwt`
+- **Method:** GET or POST (no auth — invoked by cron)
 
-### What it does
+Checks license expirations, sends email alerts at 30/14/7 days + when expired. Color-coded HTML. Emails all 3 owners.
 
-1. Queries all licenses with expiration dates, joins staff names
-2. Checks for licenses expiring in 30, 14, or 7 days, plus already expired
-3. Builds color-coded HTML email (red for expired, amber for expiring)
-4. Sends to all 3 owners via Resend
-5. Returns JSON with reminder count and email result
+### contract-sign
 
-### Email recipients (same as contact-submit)
+- **Endpoint:** `.../functions/v1/contract-sign`
+- **Source:** `supabase/functions/contract-sign/index.ts`
+- **Method:** GET + POST (no auth — public signing page)
+
+GET renders branded signing page with filled contract + signature canvas. POST captures signature (base64), signer name, IP, timestamp. Sends confirmation emails. Double-sign protection via atomic status check.
+
+### contract-send
+
+- **Endpoint:** `.../functions/v1/contract-send`
+- **Source:** `supabase/functions/contract-send/index.ts`
+- **Method:** POST (called from app)
+
+Sends contract email via Resend with branded "Review & Sign" button. Validates contract exists, has content, isn't already signed. Updates status to 'sent'.
+
+### Email recipients (hardcoded in edge functions)
 
 - benschultz519@gmail.com, Joshk1288@gmail.com, sheepdogsecurityllc@gmail.com
-- **From:** `Sheepdog Compliance <noreply@sheepdogtexas.com>`
-
-### Cron setup
-
-Enable `pg_cron` in Supabase Dashboard → Database → Extensions, then schedule a daily invocation.
-
-## Edge Function: contract-sign
-
-- **Endpoint:** `https://sezzqhmsfulclcqmfwja.supabase.co/functions/v1/contract-sign`
-- **Source:** `supabase/functions/contract-sign/index.ts`
-- **Method:** GET + POST (no auth — public signing page for clients)
-- **Deploy:** `npx supabase functions deploy contract-sign --project-ref sezzqhmsfulclcqmfwja --no-verify-jwt`
-
-### What it does
-
-1. **GET `?token=UUID`** — Renders a branded signing page with the filled contract, signature canvas, and "I agree" checkbox
-2. Updates contract status to 'viewed' on first access
-3. **POST `?token=UUID`** — Captures signature (base64 canvas image), signer name, IP address, timestamp
-4. Sends confirmation email to signer + notification to team via Resend
-5. Returns success/failure JSON
-
-### Config (Supabase secrets)
-
-Uses brand secrets for reusability: BRAND_NAME, BRAND_FROM_EMAIL, BRAND_REPLY_TO, BRAND_COLOR, BRAND_LOGO_URL
-
-## Edge Function: contract-send
-
-- **Endpoint:** `https://sezzqhmsfulclcqmfwja.supabase.co/functions/v1/contract-send`
-- **Source:** `supabase/functions/contract-send/index.ts`
-- **Method:** POST (called from app with JWT auth)
-- **Deploy:** `npx supabase functions deploy contract-send --project-ref sezzqhmsfulclcqmfwja --no-verify-jwt`
-
-### What it does
-
-1. Receives `{ contract_id }` in POST body
-2. Validates contract exists, has signer_email, has filled_html, is not already signed
-3. Builds signing URL using SIGNING_BASE_URL secret
-4. Sends branded email via Resend with "Review & Sign" button
-5. Updates contract status to 'sent'
 
 ## Database Tables
 
 ### pipeline
-
 | Column | Type | Notes |
 |--------|------|-------|
-| id | uuid | PK, auto |
+| id | uuid | PK |
 | client_id | uuid | FK to clients, nullable |
-| contact_name | text | Person's name |
-| business_name | text | Company/venue |
-| phone | text | |
-| email | text | |
-| service_line | text | 'events', 'staffing', or 'both' |
-| stage | text | See stages below |
-| value | numeric | Estimated deal value |
-| source | text | 'contact_form' or null (manual) |
-| notes | text | Message from form or manual notes |
-| next_action | text | |
-| last_activity | timestamptz | |
-| created_at | timestamptz | DEFAULT now() |
-| updated_at | timestamptz | DEFAULT now() |
-
-**Pipeline stages:** lead -> outreach_sent -> responded -> meeting_scheduled -> proposal_sent -> under_contract -> lost
-
-### contact_submissions
-
-| Column | Type |
-|--------|------|
-| id | uuid |
-| name | text |
-| phone | text |
-| email | text |
-| company | text |
-| service | text |
-| message | text |
-| created_at | timestamptz |
+| contact_name, business_name, phone, email | text | |
+| service_line | text | 'events', 'staffing', 'both' |
+| stage | text | lead → outreach_sent → responded → meeting_scheduled → proposal_sent → under_contract → lost |
+| value | numeric | |
+| source | text | 'contact_form' or null |
+| notes, next_action | text | |
+| last_activity, created_at, updated_at | timestamptz | |
 
 ### clients
-
-| Column | Type |
-|--------|------|
-| id | uuid |
-| contact_name | text |
-| business_name | text |
-| phone | text |
-| email | text |
-| address | text |
-| service_line | text ('events', 'staffing', 'both') |
-| client_type | text ('bar', 'venue', 'wedding-planner', 'corporate', 'greek-org', 'promoter', 'private', 'other') |
-| status | text ('active', 'inactive', 'prospect') |
-| notes | text |
-| created_at | timestamptz |
-| updated_at | timestamptz |
+| Column | Type | Notes |
+|--------|------|-------|
+| id | uuid | PK |
+| contact_name, business_name, phone, email, address | text | |
+| service_line | text | events/staffing/both |
+| client_type | text | bar, venue, wedding-planner, corporate, greek-org, promoter, private, other |
+| status | text | active, inactive, prospect |
+| notes | text | |
+| created_at, updated_at | timestamptz | |
 
 ### invoices
-
 | Column | Type | Notes |
 |--------|------|-------|
-| id | uuid | PK, auto |
+| id | uuid | PK |
 | client_id | uuid | FK to clients |
-| service_line | text | 'events', 'staffing', 'both' |
+| service_line | text | |
 | invoice_number | text | Auto-generated SHD-XXXX |
 | line_items | jsonb | Client-facing: [{description, hours, rate, total}] |
-| subtotal | numeric | Sum of line items |
-| tax | numeric | Tax amount |
-| total | numeric | subtotal + tax |
+| subtotal, tax, total | numeric | |
 | status | text | draft, sent, paid, overdue |
-| due_date | date | |
-| payment_date | date | When marked paid |
+| due_date, payment_date | date | |
 | payment_method | text | cash, check, zelle, venmo, card, ach, other |
-| notes | text | Client-facing notes |
-| internal_line_items | jsonb | Staff assignments: [{name, staff_id, role, hours, pay_rate, pay_total, paid_out, paid_out_date}] |
-| internal_notes | text | Internal-only notes |
-| event_date | date | Event/job date |
-| event_start_time | time | |
-| event_end_time | time | |
-| venue_name | text | Event location |
-| created_at | timestamptz | DEFAULT now() |
-| updated_at | timestamptz | DEFAULT now() |
+| notes | text | Client-facing |
+| internal_line_items | jsonb | Staff: [{name, staff_id, role, hours, pay_rate, pay_total, paid_out, paid_out_date}] |
+| internal_notes | text | |
+| event_date | date | |
+| event_start_time, event_end_time | time | |
+| venue_name | text | |
+| created_at, updated_at | timestamptz | |
 
 ### staff
-
 | Column | Type | Notes |
 |--------|------|-------|
-| id | uuid | PK, auto |
+| id | uuid | PK |
 | name | text | NOT NULL |
-| phone | text | |
-| email | text | |
-| role | text | e.g. Security Guard, Bartender |
-| default_pay_rate | numeric | $/hr default |
-| status | text | 'active' or 'inactive' |
-| background_check | text | 'none', 'pending', 'cleared' |
-| created_at | timestamptz | DEFAULT now() |
-| updated_at | timestamptz | DEFAULT now() |
+| phone, email, role | text | |
+| default_pay_rate | numeric | $/hr |
+| status | text | active, inactive |
+| background_check | text | none, pending, cleared |
+| created_at, updated_at | timestamptz | |
 
 ### licenses
-
 | Column | Type | Notes |
 |--------|------|-------|
-| id | uuid | PK, auto |
+| id | uuid | PK |
 | staff_id | uuid | FK to staff |
-| license_type | text | 'general' or 'tabc' |
-| license_number | text | |
-| issuing_authority | text | TDPS, TABC, etc. |
-| issue_date | date | |
-| expiration_date | date | Used for reminder emails |
-| status | text | 'active' |
+| license_type | text | general, tabc |
+| license_number, issuing_authority | text | |
+| issue_date, expiration_date | date | |
+| status | text | active |
 | notes | text | |
-| created_at | timestamptz | DEFAULT now() |
-| updated_at | timestamptz | DEFAULT now() |
+| created_at, updated_at | timestamptz | |
 
 ### contractor_docs
-
 | Column | Type | Notes |
 |--------|------|-------|
-| id | uuid | PK, auto |
+| id | uuid | PK |
 | staff_id | uuid | FK to staff |
-| doc_type | text | 'w9', 'agreement', 'other' |
-| status | text | 'received', 'missing', 'expired' |
+| doc_type | text | w9, agreement, other |
+| status | text | received, missing, expired |
 | signature_date | date | |
 | notes | text | |
-| created_at | timestamptz | DEFAULT now() |
-| updated_at | timestamptz | DEFAULT now() |
+| created_at, updated_at | timestamptz | |
 
-### pay_rate_defaults
-
+### contracts
 | Column | Type | Notes |
 |--------|------|-------|
-| id | uuid | PK, auto |
-| role | text | NOT NULL, e.g. Security Guard |
-| service_line | text | NOT NULL, events/staffing/both |
-| rate | numeric | NOT NULL, $/hr |
-| created_at | timestamptz | DEFAULT now() |
+| id | uuid | PK |
+| client_id | uuid | FK to clients |
+| template_name, title | text | |
+| status | text | draft, sent, viewed, signed |
+| field_values | jsonb | Filled form data |
+| filled_html | text | Rendered contract HTML (frozen at send) |
+| signer_name, signer_email | text | |
+| signature_data | text | Base64 signature image |
+| signed_at | timestamptz | |
+| signer_ip | text | Audit trail |
+| sign_token | uuid | UNIQUE — used in signing URL |
+| sent_at | timestamptz | |
+| notes | text | |
+| created_at, updated_at | timestamptz | |
 
-Unique index on (role, service_line) for upsert support.
+### events
+| Column | Type | Notes |
+|--------|------|-------|
+| id | uuid | PK |
+| client_id | uuid | FK to clients |
+| title, venue_name | text | |
+| event_type | text | bar shift, wedding, etc. |
+| service_line | text | |
+| date | text | |
+| start_time, end_time | time | |
+| staff_needed | integer | |
+| staff_assigned | jsonb | [{name, staff_id, role}] |
+| status | text | scheduled, confirmed, in_progress, completed, cancelled |
+| invoice_id | uuid | FK to invoices (nullable) |
+| placement_id | uuid | |
+| notes | text | |
+| created_at, updated_at | timestamptz | |
+
+### placements
+| Column | Type | Notes |
+|--------|------|-------|
+| id | uuid | PK |
+| client_id | uuid | FK to clients |
+| title, venue_name | text | |
+| service_line | text | |
+| schedule_pattern | text | e.g. "mon,tue,wed,thu,fri" |
+| start_date, end_date | date | |
+| default_start_time, default_end_time | time | |
+| staff_needed | integer | |
+| default_staff | jsonb | |
+| status | text | active, paused, ended |
+| notes | text | |
+| created_at, updated_at | timestamptz | |
+
+### pay_rate_defaults
+| Column | Type | Notes |
+|--------|------|-------|
+| id | uuid | PK |
+| role | text | NOT NULL |
+| service_line | text | NOT NULL |
+| rate | numeric | NOT NULL, $/hr |
+| created_at | timestamptz | |
+
+Unique index on (role, service_line).
 
 ### Other tables
-
-- **events** — client events (client_id FK, venue_name, event_type, date)
+- **contact_submissions** — form submissions (name, phone, email, company, service, message)
 - **rate_limits** — rate limit tracking (ip, endpoint, created_at)
-- **contracts, placements, shifts** — exist but are stubs
+- **shifts** — stub (not yet used)
 
 ### RLS
-
-Row Level Security is enabled on ALL tables. Policies require authenticated users for all ops tables. The edge function uses the service role key to bypass RLS.
+Row Level Security enabled on ALL tables. "authenticated only" policy on all ops tables. Edge functions use service role key to bypass RLS.
 
 ## Client-Facing Site (sheepdogtexas.com)
 
-Three static HTML pages, each with a contact form:
+Three static HTML pages with shared `js/form.js`:
+- `index.html` — homepage
+- `events/index.html` — events landing
+- `staffing/index.html` — staffing landing
 
-- `index.html` — homepage, "CONTACT US" button
-- `events/index.html` — events landing page, "GET A QUOTE" button
-- `staffing/index.html` — staffing landing page, "GET A QUOTE" button
-
-All three forms share `js/form.js` which contains `submitForm()`, `handlePhone()`, `formatPhone()`, `toggleMobileNav()`, and `toggleFaq()`. Each page defines `SUPABASE_URL` inline before loading the shared script. Page-specific JS (splash animation, hero cards, rail panels) remains inline.
-
-The form fields are: name, phone, email, service (dropdown), message, company (staffing only), website (honeypot, hidden).
-
-**Google Analytics:** G-1ZT2F15325
+All internal links use trailing slashes (`/events/`, `/staffing/`) matching canonical URLs and sitemap. Google Analytics: G-1ZT2F15325.
 
 ## Operations App (app.sheepdogtexas.com)
 
 Vite + React 19 + React Router v7 + Supabase JS client.
 
-### App routes
+### App routes (ALL ACTIVE — no stubs)
 
-| Route | Page | Status |
-|-------|------|--------|
-| /login | Login | Ready |
-| /reset-password | Password reset | Ready |
-| / | Hub (dashboard) | Ready |
-| /pipeline | Sales pipeline (Kanban) | Ready |
-| /submissions | Contact form submissions viewer | Ready |
-| /clients | Client management (CRUD) | Ready |
-| /resources | Docs, guides, templates | Ready |
-| /scheduling | Events/staffing calendars | Coming soon |
-| /financials | Invoices, payouts, staff earnings/1099 | Ready |
-| /compliance | Staff roster, licenses, TABC, contractor docs | Ready |
+| Route | Page | What it does |
+|-------|------|--------------|
+| /login | Login | Email/password auth |
+| /reset-password | ResetPassword | Password recovery |
+| / | Hub | Dashboard with stats + alert banners (overdue invoices, expiring licenses, missing docs) |
+| /pipeline | Pipeline | Kanban board with drag-drop (desktop) / stage dropdown (mobile) |
+| /clients | Clients | Full CRUD, search, filters, pagination. Detail panel shows events, invoices, contracts |
+| /contracts | Contracts | Contract table + side-by-side fill/preview editor. Template picker, auto-fill from client, send for e-signing |
+| /resources | Resources | 33 docs across 10 categories (brand, outreach, reviews, contracts, ops). "Fill & Send" links to /contracts |
+| /scheduling | Scheduling | Calendar (month view), Events list (CRUD + staff assignment), Placements (recurring + event generation) |
+| /financials | Financials | 3 tabs: Invoices (CRUD, dual client/internal view, payout tracking), Payouts (unpaid staff), Staff Earnings (1099) |
+| /compliance | Compliance | 3 tabs: Staff Roster (CRUD), Licenses & Certs (expiration tracking), Contractor Docs (W-9, agreements) |
 
-All routes except /login and /reset-password are protected (require Supabase auth session).
-
-### Mobile layout
-
-The app has responsive CSS with breakpoints at 1024px (tablet) and 768px (mobile).
-
-On mobile:
-- Sidebar becomes a bottom tab bar with 4 primary tabs + "More" overflow menu
-- **Bottom nav tabs:** Dashboard, Clients, Pipeline, Financials, More
-- **More menu:** Submissions, Resources, Scheduling, Compliance, Log Out
-- Pipeline columns stack vertically, empty columns collapse to headers only
-- Stage-change dropdown appears on pipeline cards (since drag-and-drop doesn't work on touch)
-- Tables convert to stacked card layout
-- Modals slide up as bottom sheets with stacked fields
+### Shared utilities
+- `app/src/lib/format.js` — fmtMoney, fmtDate, daysUntil, badgeStyle, COLORS
+- `app/src/lib/hooks.js` — useEscapeKey, useBodyLock, useToast
+- `app/src/lib/supabase.js` — Supabase client init
 
 ### Key files
-
-- `app/src/App.jsx` — router + auth provider + 404 catch-all
-- `app/src/lib/supabase.js` — Supabase client init
-- `app/src/pages/Pipeline.jsx` — Kanban board with drag-and-drop (desktop) / stage dropdown (mobile)
-- `app/src/pages/Submissions.jsx` — read-only submissions table with error state
-- `app/src/pages/Clients.jsx` — full CRUD for clients with error state
-- `app/src/components/Layout.jsx` — sidebar nav + mobile bottom tab bar with More menu
-- `app/src/components/ProtectedRoute.jsx` — auth guard (uses onAuthStateChange only, no race condition)
+- `app/src/App.jsx` — router
 - `app/src/App.css` — all styles (responsive at 1024px and 768px)
-- `js/form.js` — shared contact form JS (used by static site, not the app)
-- `scripts/deploy-edge.sh` — edge function deploy script with --no-verify-jwt baked in (deploys all 4 functions: contact-submit, license-reminders, contract-sign, contract-send)
-- `supabase/schema.sql` — database schema, RLS policies, and indexes (source of truth)
+- `app/src/components/Layout.jsx` — sidebar nav + mobile bottom tab bar
+- `app/src/components/ProtectedRoute.jsx` — auth guard
+- `scripts/deploy-edge.sh` — deploys all 4 edge functions with --no-verify-jwt
+- `supabase/schema.sql` — database schema source of truth
+- `js/form.js` — shared contact form JS (static site only)
 
 ### Deploy the app
 
@@ -345,54 +284,62 @@ On mobile:
 cd app && npm run deploy
 ```
 
-This builds with Vite and pushes to the `sheepdog-app` repo via gh-pages.
+Builds with Vite and pushes to `sheepdog-app` repo via gh-pages.
 
-### Deploy the edge function
+### Deploy edge functions
 
 ```bash
 bash scripts/deploy-edge.sh
 ```
 
-This deploys with `--no-verify-jwt` and auto-tests the endpoint. **Never deploy the edge function any other way.**
+Deploys all 4 functions with `--no-verify-jwt` and verifies each endpoint.
 
 ## Resend (Email)
 
-- **Domain:** sheepdogtexas.com (verified, GoDaddy DNS)
-- **API key name:** "contact form 1" (stored as Supabase secret `RESEND_API_KEY`)
-- **Region:** us-east-1
+- **Domain:** sheepdogtexas.com (verified, us-east-1)
+- **API key:** "contact form 1" — full access
 - **Sender:** noreply@sheepdogtexas.com
 
-## Environment Files
+## Data Flows
 
-### app/.env
-
+### Contact Form → Pipeline
 ```
-VITE_SUPABASE_URL=https://sezzqhmsfulclcqmfwja.supabase.co
-VITE_SUPABASE_ANON_KEY=<public anon key>
-```
-
-## Data Flow: Contact Form -> Pipeline
-
-```
-Website visitor fills form
-  -> submitForm() in HTML
-  -> POST to edge function (no auth)
-  -> Validates, rate limits, honeypot check
-  -> INSERT into contact_submissions
-  -> INSERT into pipeline (contact_name, email, phone, service_line, stage='lead', source='contact_form', notes=message)
-  -> Resend: internal email to team (reply-to = submitter)
-  -> Resend: confirmation email to submitter (reply-to = sheepdog)
-  -> Return { success: true }
+Website form → POST edge function → validate → INSERT contact_submissions
+→ INSERT pipeline (stage='lead', source='contact_form') → Resend emails
 ```
 
-Leads appear in the Pipeline page of the app as cards in the "Lead" column.
+### Contract Signing
+```
+App: pick template → fill fields → save to contracts table → call contract-send
+→ Resend email with signing link → client clicks link → contract-sign renders page
+→ client signs → POST signature → UPDATE contracts (signed) → Resend confirmations
+```
+
+### Invoice → Payout
+```
+Create invoice with internal staff assignments → mark invoice as paid
+→ Payouts tab shows unpaid staff → mark staff as paid → appears in Staff Earnings
+→ 1099 flag if YTD ≥ $600
+```
+
+### Scheduling → Invoice
+```
+Create event (or generate from placement) → assign staff → "Create Invoice" button
+→ navigates to /financials with pre-filled event data
+```
 
 ## Known Issues / Watch Out For
 
-1. **--no-verify-jwt** — Cannot stress this enough. Every edge function deploy without this flag breaks the live contact form. Use `scripts/deploy-edge.sh` which has it baked in.
-2. **Rate limiter** — 5 per IP per 10 min. During testing, you'll get blocked. Clear the `rate_limits` table via Supabase SQL editor: `DELETE FROM rate_limits;`
-3. **Supabase dashboard is slow** — SQL editor and table editor load slowly. Be patient or use CLI/curl instead.
-4. **Pipeline.jsx uses drag-and-drop** — has optimistic updates with rollback on error. On mobile, a stage-change dropdown replaces drag.
-5. **Scheduling, Financials, Compliance pages** — routes exist but components are stubs (show "coming soon").
-6. **Docker not installed** — `supabase db dump` requires Docker. Schema is manually maintained in `supabase/schema.sql` instead.
-7. **Audit tracker** — `AUDIT-2.md` has 87 remaining findings. 27 fixed so far.
+1. **--no-verify-jwt** — CRITICAL. Use `scripts/deploy-edge.sh` which has it baked in for all 4 functions.
+2. **Rate limiter** — 5/IP/10min. During testing: `DELETE FROM rate_limits;`
+3. **Docker not installed** — Schema manually maintained in `supabase/schema.sql`.
+4. **Overdue auto-detection** — Invoices with status 'sent' past due_date show as 'overdue' in UI (computed, not stored).
+5. **License warnings** — Staff assignments editor shows red/amber border when assigning staff with expired/expiring licenses.
+6. **Cascade deletes** — Deleting staff in Compliance cascades to licenses + contractor_docs (app-level, not DB-level). Deleting clients does NOT cascade invoices/events/contracts.
+7. **Invoice numbers** — Generated from last invoice number (not count), but still has small race window for concurrent users.
+
+## Completed Audits
+
+- AUDIT.md — original audit (all resolved)
+- AUDIT-2.md — 114 findings across 6 categories (all resolved)
+- Multiple targeted audits on Financials, Compliance, Scheduling, Contracts, edge functions (all resolved)
