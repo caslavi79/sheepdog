@@ -162,7 +162,7 @@ function DealDetailModal({ deal, onClose, onUpdated, onDeleted }) {
 
   const handleDelete = async () => {
     const { error } = await supabase.from('pipeline').delete().eq('id', deal.id)
-    if (error) { console.error('Delete error:', error.message); setConfirmDelete(false); return }
+    if (error) { if (import.meta.env.DEV) console.error('Delete error:', error.message); setConfirmDelete(false); return }
     onDeleted()
     onClose()
   }
@@ -358,7 +358,7 @@ export default function Pipeline() {
   const loadDeals = async () => {
     setLoading(true)
     const { data, error } = await supabase.from('pipeline').select('*').order('created_at', { ascending: false })
-    if (error) { setLoadError('Failed to load deals. Please refresh.'); console.error('Load deals error:', error.message) }
+    if (error) { setLoadError('Failed to load deals. Please refresh.'); if (import.meta.env.DEV) console.error('Load deals error:', error.message) }
     else { setLoadError('') }
     setDeals(data || [])
     setLoading(false)

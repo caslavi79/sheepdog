@@ -11,7 +11,7 @@ export default class ErrorBoundary extends Component {
   }
 
   componentDidCatch(error, info) {
-    console.error('[Sheepdog] Uncaught error:', error, info)
+    if (import.meta.env.DEV) console.error('[Sheepdog] Uncaught error:', error, info)
   }
 
   render() {

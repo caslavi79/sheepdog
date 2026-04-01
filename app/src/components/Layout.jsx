@@ -8,7 +8,7 @@ export default function Layout() {
 
   const handleLogout = async () => {
     const { error } = await supabase.auth.signOut()
-    if (error) console.error('Logout error:', error.message)
+    if (error && import.meta.env.DEV) console.error('Logout error:', error.message)
     navigate('/login')
   }
 

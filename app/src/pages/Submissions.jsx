@@ -73,7 +73,7 @@ export default function Submissions() {
       .from('contact_submissions')
       .select('*')
       .order('created_at', { ascending: false })
-    if (error) { setLoadError('Failed to load submissions. Please refresh.'); console.error('Load submissions error:', error.message) }
+    if (error) { setLoadError('Failed to load submissions. Please refresh.'); if (import.meta.env.DEV) console.error('Load submissions error:', error.message) }
     setSubmissions(data || [])
     setLoading(false)
   }

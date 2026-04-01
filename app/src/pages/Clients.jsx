@@ -291,7 +291,7 @@ export default function Clients() {
     if (filterLine) q = q.eq('service_line', filterLine)
     if (filterStatus) q = q.eq('status', filterStatus)
     const { data, error } = await q
-    if (error) { setLoadError('Failed to load clients. Please refresh.'); console.error('Load clients error:', error.message) }
+    if (error) { setLoadError('Failed to load clients. Please refresh.'); if (import.meta.env.DEV) console.error('Load clients error:', error.message) }
     setClients(data || [])
     setLoading(false)
   }
