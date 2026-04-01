@@ -1,5 +1,10 @@
 import { createClient } from '@supabase/supabase-js'
 
+// Intercept recovery hash BEFORE createClient consumes it
+if (window.location.hash.includes('type=recovery')) {
+  sessionStorage.setItem('password_recovery', 'true')
+}
+
 const supabaseUrl = import.meta.env.VITE_SUPABASE_URL
 const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY
 
@@ -12,11 +17,3 @@ if (!supabaseUrl || !supabaseAnonKey) {
 }
 
 export const supabase = createClient(supabaseUrl, supabaseAnonKey)
-
-// Catch PASSWORD_RECOVERY event before React mounts — Supabase strips the
-// URL hash immediately on createClient, so React components miss it.
-supabase.auth.onAuthStateChange((event) => {
-  if (event === 'PASSWORD_RECOVERY') {
-    sessionStorage.setItem('password_recovery', 'true')
-  }
-})
