@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Post-Event Report | Sheepdog</title>
+<link href="https://fonts.googleapis.com/css2?family=Barlow:wght@400;600;700;800&family=Source+Sans+3:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+:root{--black:#0C0C0C;--char:#161616;--graphite:#2A2A2A;--iron:#4A4A4A;--slate:#6B6B6B;--steel:#7A8490;--fog:#D0D0D0;--bone:#F4F3F1;--white:#FFF;--navy:#1B2A4A;--sblue:#3D5A80;--amber:#C9922E;--red:#C23B22;--green:#357A38}
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:'Source Sans 3',sans-serif;font-size:16px;line-height:1.7;color:var(--iron);background:var(--white)}
+.doc{max-width:800px;margin:0 auto;padding:48px 32px 80px}
+h1{font-family:'Barlow',sans-serif;font-weight:800;font-size:32px;color:var(--black);line-height:1.1;margin-bottom:6px}
+.subtitle{font-family:'Source Sans 3',sans-serif;font-size:15px;color:var(--steel);margin-bottom:48px}
+h2{font-family:'Barlow',sans-serif;font-weight:700;font-size:22px;color:var(--navy);margin-top:48px;margin-bottom:16px;padding-bottom:8px;border-bottom:2px solid var(--bone)}
+h3{font-family:'Barlow',sans-serif;font-weight:700;font-size:17px;color:var(--graphite);margin-top:28px;margin-bottom:10px}
+p{margin-bottom:14px}
+ul,ol{padding-left:20px;margin-bottom:16px}
+li{margin-bottom:6px;color:var(--iron)}
+li::marker{color:var(--sblue)}
+.field{background:var(--bone);border:1px dashed var(--fog);border-radius:4px;padding:2px 8px;font-family:'Source Sans 3',sans-serif;font-weight:600;color:var(--sblue);white-space:nowrap}
+.sig-block{display:grid;grid-template-columns:1fr 1fr;gap:32px;margin-top:32px}
+.sig-line{border-top:1px solid var(--fog);padding-top:8px;margin-top:40px}
+.sig-line .label{font-family:'Barlow',sans-serif;font-weight:700;font-size:13px;color:var(--steel);text-transform:uppercase;letter-spacing:.3px}
+.section{border:1px solid var(--fog);border-radius:8px;padding:24px;margin:16px 0 32px;position:relative;overflow:hidden}
+.section::before{content:'';position:absolute;top:0;left:0;width:4px;height:100%;background:var(--sblue)}
+.section h3{margin-top:0}
+.context{background:rgba(61,90,128,.04);border:1px solid rgba(61,90,128,.15);border-radius:6px;padding:20px;margin:16px 0 24px}
+.context h3{margin-top:0;color:var(--navy)}
+.context li::marker{color:var(--navy)}
+.warning{background:rgba(194,59,34,.04);border:1px solid rgba(194,59,34,.15);border-radius:6px;padding:20px;margin:16px 0 24px}
+.warning h3{margin-top:0;color:var(--red)}
+.divider{height:1px;background:var(--fog);margin:40px 0}
+.field-row{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:14px}
+.field-row.three{grid-template-columns:1fr 1fr 1fr}
+.field-row.four{grid-template-columns:1fr 1fr 1fr 1fr}
+.field-label{font-family:'Barlow',sans-serif;font-weight:700;font-size:13px;color:var(--steel);text-transform:uppercase;letter-spacing:.3px;margin-bottom:4px}
+.field-box{background:var(--bone);border:1px dashed var(--fog);border-radius:4px;padding:10px 14px;min-height:38px;color:var(--sblue);font-weight:600}
+.header-block{background:var(--bone);border-radius:8px;padding:24px;margin-bottom:32px}
+.header-block p{margin-bottom:4px;font-size:14px;color:var(--steel)}
+.header-block .company{font-family:'Barlow',sans-serif;font-weight:800;font-size:18px;color:var(--navy);margin-bottom:8px}
+table.info{width:100%;border-collapse:collapse;margin:16px 0}
+table.info td{padding:8px 12px;border-bottom:1px solid var(--fog);vertical-align:top}
+table.info td:first-child{font-family:'Barlow',sans-serif;font-weight:700;font-size:13px;color:var(--steel);text-transform:uppercase;letter-spacing:.3px;width:180px;white-space:nowrap}
+table.info td:last-child{color:var(--iron)}
+@media(max-width:600px){
+  .doc{padding:28px 20px 60px}
+  h1{font-size:26px}
+  .sig-block{grid-template-columns:1fr}
+  .field-row,.field-row.three,.field-row.four{grid-template-columns:1fr}
+}
+</style>
+</head>
+<body>
+<div class="doc">
+
+<h1>Post-Event Report</h1>
+<div class="subtitle">Team lead fills out after each job</div>
+
+
+<div class="header-block">
+<div class="company">Sheepdog Security &amp; Staffing LLC</div>
+<p>Bryan-College Station, TX</p>
+<p>(979) 204-0945 &bull; sheepdogsecurityllc@gmail.com</p>
+</div>
+
+<h2>Event Information</h2>
+<table class="info">
+<tr><td>Team Lead</td><td><span class="field">[YOUR NAME]</span></td></tr>
+<tr><td>Date</td><td><span class="field">[EVENT DATE]</span></td></tr>
+<tr><td>Venue / Client</td><td><span class="field">[VENUE OR CLIENT NAME]</span></td></tr>
+<tr><td>Event Type</td><td><span class="field">[e.g. Wedding, Bar Night, Corporate, Festival]</span></td></tr>
+<tr><td>Service Provided</td><td><span class="field">[SECURITY / BARTENDING / BOTH / STAFFING]</span></td></tr>
+</table>
+
+<h2>Staff Attendance</h2>
+<table class="info">
+<tr><td>Staff Scheduled</td><td><span class="field">[NUMBER SCHEDULED]</span></td></tr>
+<tr><td>Staff Present</td><td><span class="field">[NUMBER PRESENT]</span></td></tr>
+<tr><td>No-Shows</td><td><span class="field">[NAMES OF NO-SHOWS (if any)]</span></td></tr>
+<tr><td>Late Arrivals</td><td><span class="field">[NAMES AND HOW LATE (if any)]</span></td></tr>
+</table>
+
+<h2>Shift Times</h2>
+<table class="info">
+<tr><td>Scheduled Start</td><td><span class="field">[SCHEDULED START TIME]</span></td></tr>
+<tr><td>Actual Start</td><td><span class="field">[ACTUAL START TIME]</span></td></tr>
+<tr><td>Scheduled End</td><td><span class="field">[SCHEDULED END TIME]</span></td></tr>
+<tr><td>Actual End</td><td><span class="field">[ACTUAL END TIME]</span></td></tr>
+<tr><td>Overtime?</td><td><span class="field">[YES / NO - if yes, how much and was it approved?]</span></td></tr>
+</table>
+
+<h2>How Did It Go?</h2>
+<p><span class="field">[BRIEF SUMMARY OF THE EVENT. Did it go smooth? Any problems? How was the client's mood at the end of the night?]</span></p>
+
+<h2>Issues or Incidents</h2>
+<p><span class="field">[DESCRIBE ANY ISSUES THAT CAME UP - e.g. unruly guests, equipment problems, staff performance issues, client complaints. If a formal Incident Report was filed, note that here.]</span></p>
+
+<h2>Client Feedback</h2>
+<p><span class="field">[DID THE CLIENT SAY ANYTHING ABOUT THE SERVICE? Positive or negative. Direct quotes if you remember them.]</span></p>
+
+<h2>Review Ask</h2>
+<table class="info">
+<tr><td>Did you ask for a review?</td><td><span class="field">[YES / NO]</span></td></tr>
+<tr><td>Method</td><td><span class="field">[IN-PERSON / HANDED CARD / WILL TEXT TOMORROW]</span></td></tr>
+<tr><td>Client response</td><td><span class="field">[e.g. Said yes, said they'd do it later, seemed busy]</span></td></tr>
+</table>
+
+<h2>Equipment &amp; Supplies</h2>
+<p><span class="field">[NOTE ANYTHING THAT NEEDS RESTOCKING, REPLACING, OR REPAIRING - e.g. ran out of review cards, radio battery died, uniform issue]</span></p>
+
+<h2>Follow-Up Items</h2>
+<p><span class="field">[ANYTHING THAT NEEDS TO HAPPEN NEXT - e.g. send invoice, follow up with client about rebooking, address staff issue, send review text tomorrow]</span></p>
+
+
+<h2>Staff Performance</h2>
+<table class="info">
+<tr><td>Overall team performance</td><td><span class="field">[1-5 RATING AND BRIEF NOTE]</span></td></tr>
+<tr><td>Standout performer</td><td><span class="field">[NAME AND WHY - or N/A]</span></td></tr>
+<tr><td>Anyone who needs coaching?</td><td><span class="field">[NAME AND ISSUE - or N/A]</span></td></tr>
+</table>
+
+<h2>Rebooking Opportunity</h2>
+<table class="info">
+<tr><td>Would this client rebook?</td><td><span class="field">[YES / LIKELY / UNLIKELY / NO]</span></td></tr>
+<tr><td>Next event mentioned?</td><td><span class="field">[DATE OR DETAILS IF MENTIONED - or N/A]</span></td></tr>
+<tr><td>Upsell opportunity?</td><td><span class="field">[e.g. They only booked security but asked about bartending - or N/A]</span></td></tr>
+</table>
+
+<div class="divider"></div>
+
+<div class="sig-block">
+<div>
+<div class="sig-line">
+<div class="label">Team Lead Signature</div>
+</div>
+<div class="sig-line">
+<div class="label">Date Submitted</div>
+</div>
+</div>
+<div></div>
+</div>
+
+
+</div>
+</body>
+</html>

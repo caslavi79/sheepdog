@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Incident Report Form | Sheepdog</title>
+<link href="https://fonts.googleapis.com/css2?family=Barlow:wght@400;600;700;800&family=Source+Sans+3:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+:root{--black:#0C0C0C;--char:#161616;--graphite:#2A2A2A;--iron:#4A4A4A;--slate:#6B6B6B;--steel:#7A8490;--fog:#D0D0D0;--bone:#F4F3F1;--white:#FFF;--navy:#1B2A4A;--sblue:#3D5A80;--amber:#C9922E;--red:#C23B22;--green:#357A38}
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:'Source Sans 3',sans-serif;font-size:16px;line-height:1.7;color:var(--iron);background:var(--white)}
+.doc{max-width:800px;margin:0 auto;padding:48px 32px 80px}
+h1{font-family:'Barlow',sans-serif;font-weight:800;font-size:32px;color:var(--black);line-height:1.1;margin-bottom:6px}
+.subtitle{font-family:'Source Sans 3',sans-serif;font-size:15px;color:var(--steel);margin-bottom:48px}
+h2{font-family:'Barlow',sans-serif;font-weight:700;font-size:22px;color:var(--navy);margin-top:48px;margin-bottom:16px;padding-bottom:8px;border-bottom:2px solid var(--bone)}
+h3{font-family:'Barlow',sans-serif;font-weight:700;font-size:17px;color:var(--graphite);margin-top:28px;margin-bottom:10px}
+p{margin-bottom:14px}
+ul,ol{padding-left:20px;margin-bottom:16px}
+li{margin-bottom:6px;color:var(--iron)}
+li::marker{color:var(--sblue)}
+.field{background:var(--bone);border:1px dashed var(--fog);border-radius:4px;padding:2px 8px;font-family:'Source Sans 3',sans-serif;font-weight:600;color:var(--sblue);white-space:nowrap}
+.sig-block{display:grid;grid-template-columns:1fr 1fr;gap:32px;margin-top:32px}
+.sig-line{border-top:1px solid var(--fog);padding-top:8px;margin-top:40px}
+.sig-line .label{font-family:'Barlow',sans-serif;font-weight:700;font-size:13px;color:var(--steel);text-transform:uppercase;letter-spacing:.3px}
+.section{border:1px solid var(--fog);border-radius:8px;padding:24px;margin:16px 0 32px;position:relative;overflow:hidden}
+.section::before{content:'';position:absolute;top:0;left:0;width:4px;height:100%;background:var(--sblue)}
+.section h3{margin-top:0}
+.context{background:rgba(61,90,128,.04);border:1px solid rgba(61,90,128,.15);border-radius:6px;padding:20px;margin:16px 0 24px}
+.context h3{margin-top:0;color:var(--navy)}
+.context li::marker{color:var(--navy)}
+.warning{background:rgba(194,59,34,.04);border:1px solid rgba(194,59,34,.15);border-radius:6px;padding:20px;margin:16px 0 24px}
+.warning h3{margin-top:0;color:var(--red)}
+.divider{height:1px;background:var(--fog);margin:40px 0}
+.field-row{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:14px}
+.field-row.three{grid-template-columns:1fr 1fr 1fr}
+.field-row.four{grid-template-columns:1fr 1fr 1fr 1fr}
+.field-label{font-family:'Barlow',sans-serif;font-weight:700;font-size:13px;color:var(--steel);text-transform:uppercase;letter-spacing:.3px;margin-bottom:4px}
+.field-box{background:var(--bone);border:1px dashed var(--fog);border-radius:4px;padding:10px 14px;min-height:38px;color:var(--sblue);font-weight:600}
+.header-block{background:var(--bone);border-radius:8px;padding:24px;margin-bottom:32px}
+.header-block p{margin-bottom:4px;font-size:14px;color:var(--steel)}
+.header-block .company{font-family:'Barlow',sans-serif;font-weight:800;font-size:18px;color:var(--navy);margin-bottom:8px}
+table.info{width:100%;border-collapse:collapse;margin:16px 0}
+table.info td{padding:8px 12px;border-bottom:1px solid var(--fog);vertical-align:top}
+table.info td:first-child{font-family:'Barlow',sans-serif;font-weight:700;font-size:13px;color:var(--steel);text-transform:uppercase;letter-spacing:.3px;width:180px;white-space:nowrap}
+table.info td:last-child{color:var(--iron)}
+@media(max-width:600px){
+  .doc{padding:28px 20px 60px}
+  h1{font-size:26px}
+  .sig-block{grid-template-columns:1fr}
+  .field-row,.field-row.three,.field-row.four{grid-template-columns:1fr}
+}
+</style>
+</head>
+<body>
+<div class="doc">
+
+<h1>Incident Report Form</h1>
+<div class="subtitle">For documenting security incidents, injuries, or notable events during a shift</div>
+
+
+<div class="header-block">
+<div class="company">Sheepdog Security &amp; Staffing LLC</div>
+<p>Bryan-College Station, TX</p>
+<p>(979) 204-0945 &bull; sheepdogsecurityllc@gmail.com</p>
+</div>
+
+<div class="warning">
+<h3>Fill this out as soon as possible after the incident</h3>
+<p>Be factual and specific. Do not include opinions or assumptions. Describe what you saw, what you did, and what happened.</p>
+</div>
+
+<h2>Report Details</h2>
+<table class="info">
+<tr><td>Report Filed By</td><td><span class="field">[YOUR FULL NAME]</span></td></tr>
+<tr><td>Your Role</td><td><span class="field">[TEAM LEAD / SECURITY / BARTENDER / OTHER]</span></td></tr>
+<tr><td>Date of Report</td><td><span class="field">[TODAY'S DATE]</span></td></tr>
+</table>
+
+<h2>Incident Details</h2>
+<table class="info">
+<tr><td>Date of Incident</td><td><span class="field">[INCIDENT DATE]</span></td></tr>
+<tr><td>Time of Incident</td><td><span class="field">[INCIDENT TIME (approximate)]</span></td></tr>
+<tr><td>Venue / Location</td><td><span class="field">[VENUE NAME AND ADDRESS]</span></td></tr>
+<tr><td>Event Name (if applicable)</td><td><span class="field">[EVENT NAME]</span></td></tr>
+<tr><td>Client Contact On-Site</td><td><span class="field">[CLIENT/VENUE CONTACT NAME]</span></td></tr>
+</table>
+
+<h2>Type of Incident</h2>
+<p><span class="field">[SELECT ALL THAT APPLY: Physical altercation / Verbal altercation / Theft / Property damage / Injury (staff) / Injury (guest or patron) / Alcohol-related / Trespasser or unauthorized access / Medical emergency / Other]</span></p>
+
+<h2>Description of Incident</h2>
+<p><span class="field">[DESCRIBE WHAT HAPPENED IN DETAIL. Include: what led up to the incident, what occurred, who was involved, and how it ended. Be specific about times, locations within the venue, and sequence of events.]</span></p>
+
+<h2>Persons Involved</h2>
+<table class="info">
+<tr><td>Person 1</td><td><span class="field">[NAME / DESCRIPTION / ROLE (guest, staff, patron, etc.)]</span></td></tr>
+<tr><td>Person 2</td><td><span class="field">[NAME / DESCRIPTION / ROLE]</span></td></tr>
+<tr><td>Person 3</td><td><span class="field">[NAME / DESCRIPTION / ROLE (add more rows as needed)]</span></td></tr>
+</table>
+
+<h2>Witnesses</h2>
+<table class="info">
+<tr><td>Witness 1</td><td><span class="field">[NAME AND CONTACT INFO IF AVAILABLE]</span></td></tr>
+<tr><td>Witness 2</td><td><span class="field">[NAME AND CONTACT INFO IF AVAILABLE]</span></td></tr>
+</table>
+
+<h2>Actions Taken</h2>
+<p><span class="field">[DESCRIBE WHAT YOU AND YOUR TEAM DID IN RESPONSE. Include: who was notified (venue manager, police, EMS), what steps were taken to resolve the situation, and the outcome.]</span></p>
+
+<h2>Injuries</h2>
+<table class="info">
+<tr><td>Was anyone injured?</td><td><span class="field">[YES / NO]</span></td></tr>
+<tr><td>If yes, who?</td><td><span class="field">[NAME(S) AND DESCRIPTION OF INJURIES]</span></td></tr>
+<tr><td>Medical attention provided?</td><td><span class="field">[YES / NO - describe if yes]</span></td></tr>
+<tr><td>EMS called?</td><td><span class="field">[YES / NO]</span></td></tr>
+</table>
+
+<h2>Police Involvement</h2>
+<table class="info">
+<tr><td>Were police called?</td><td><span class="field">[YES / NO]</span></td></tr>
+<tr><td>Report number (if filed)</td><td><span class="field">[POLICE REPORT NUMBER]</span></td></tr>
+<tr><td>Responding officer(s)</td><td><span class="field">[OFFICER NAME(S) AND BADGE NUMBER(S)]</span></td></tr>
+</table>
+
+<h2>Photos or Evidence</h2>
+<p><span class="field">[LIST ANY PHOTOS, VIDEOS, OR OTHER EVIDENCE COLLECTED. Note where they are stored (phone, email, etc.)]</span></p>
+
+<h2>Follow-Up Needed</h2>
+<p><span class="field">[DESCRIBE ANY FOLLOW-UP ACTIONS REQUIRED - e.g. contact client, file insurance claim, follow up with injured party, review with team]</span></p>
+
+
+<h2>Client Notification</h2>
+<table class="info">
+<tr><td>Was the client/venue manager informed?</td><td><span class="field">[YES / NO]</span></td></tr>
+<tr><td>Who was notified?</td><td><span class="field">[NAME AND ROLE]</span></td></tr>
+<tr><td>Was a copy of this report shared with the client?</td><td><span class="field">[YES / NO / PENDING]</span></td></tr>
+</table>
+
+<div class="divider"></div>
+
+<div class="sig-block">
+<div>
+<div class="sig-line">
+<div class="label">Report Filed By (Signature)</div>
+</div>
+<div class="sig-line">
+<div class="label">Date</div>
+</div>
+</div>
+<div>
+<div class="sig-line">
+<div class="label">Reviewed By (Sheepdog Management)</div>
+</div>
+<div class="sig-line">
+<div class="label">Date Reviewed</div>
+</div>
+</div>
+</div>
+
+
+</div>
+</body>
+</html>

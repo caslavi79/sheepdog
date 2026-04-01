@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Event Security Agreement | Sheepdog</title>
+<link href="https://fonts.googleapis.com/css2?family=Barlow:wght@400;600;700;800&family=Source+Sans+3:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+:root{--black:#0C0C0C;--char:#161616;--graphite:#2A2A2A;--iron:#4A4A4A;--slate:#6B6B6B;--steel:#7A8490;--fog:#D0D0D0;--bone:#F4F3F1;--white:#FFF;--navy:#1B2A4A;--sblue:#3D5A80;--amber:#C9922E;--red:#C23B22;--green:#357A38}
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:'Source Sans 3',sans-serif;font-size:16px;line-height:1.7;color:var(--iron);background:var(--white)}
+.doc{max-width:800px;margin:0 auto;padding:48px 32px 80px}
+h1{font-family:'Barlow',sans-serif;font-weight:800;font-size:32px;color:var(--black);line-height:1.1;margin-bottom:6px}
+.subtitle{font-family:'Source Sans 3',sans-serif;font-size:15px;color:var(--steel);margin-bottom:48px}
+h2{font-family:'Barlow',sans-serif;font-weight:700;font-size:22px;color:var(--navy);margin-top:48px;margin-bottom:16px;padding-bottom:8px;border-bottom:2px solid var(--bone)}
+h3{font-family:'Barlow',sans-serif;font-weight:700;font-size:17px;color:var(--graphite);margin-top:28px;margin-bottom:10px}
+p{margin-bottom:14px}
+ul,ol{padding-left:20px;margin-bottom:16px}
+li{margin-bottom:6px;color:var(--iron)}
+li::marker{color:var(--sblue)}
+.field{background:var(--bone);border:1px dashed var(--fog);border-radius:4px;padding:2px 8px;font-family:'Source Sans 3',sans-serif;font-weight:600;color:var(--sblue);white-space:nowrap}
+.sig-block{display:grid;grid-template-columns:1fr 1fr;gap:32px;margin-top:32px}
+.sig-line{border-top:1px solid var(--fog);padding-top:8px;margin-top:40px}
+.sig-line .label{font-family:'Barlow',sans-serif;font-weight:700;font-size:13px;color:var(--steel);text-transform:uppercase;letter-spacing:.3px}
+.section{border:1px solid var(--fog);border-radius:8px;padding:24px;margin:16px 0 32px;position:relative;overflow:hidden}
+.section::before{content:'';position:absolute;top:0;left:0;width:4px;height:100%;background:var(--sblue)}
+.section h3{margin-top:0}
+.context{background:rgba(61,90,128,.04);border:1px solid rgba(61,90,128,.15);border-radius:6px;padding:20px;margin:16px 0 24px}
+.context h3{margin-top:0;color:var(--navy)}
+.context li::marker{color:var(--navy)}
+.warning{background:rgba(194,59,34,.04);border:1px solid rgba(194,59,34,.15);border-radius:6px;padding:20px;margin:16px 0 24px}
+.warning h3{margin-top:0;color:var(--red)}
+.divider{height:1px;background:var(--fog);margin:40px 0}
+.field-row{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:14px}
+.field-row.three{grid-template-columns:1fr 1fr 1fr}
+.field-row.four{grid-template-columns:1fr 1fr 1fr 1fr}
+.field-label{font-family:'Barlow',sans-serif;font-weight:700;font-size:13px;color:var(--steel);text-transform:uppercase;letter-spacing:.3px;margin-bottom:4px}
+.field-box{background:var(--bone);border:1px dashed var(--fog);border-radius:4px;padding:10px 14px;min-height:38px;color:var(--sblue);font-weight:600}
+.header-block{background:var(--bone);border-radius:8px;padding:24px;margin-bottom:32px}
+.header-block p{margin-bottom:4px;font-size:14px;color:var(--steel)}
+.header-block .company{font-family:'Barlow',sans-serif;font-weight:800;font-size:18px;color:var(--navy);margin-bottom:8px}
+table.info{width:100%;border-collapse:collapse;margin:16px 0}
+table.info td{padding:8px 12px;border-bottom:1px solid var(--fog);vertical-align:top}
+table.info td:first-child{font-family:'Barlow',sans-serif;font-weight:700;font-size:13px;color:var(--steel);text-transform:uppercase;letter-spacing:.3px;width:180px;white-space:nowrap}
+table.info td:last-child{color:var(--iron)}
+@media(max-width:600px){
+  .doc{padding:28px 20px 60px}
+  h1{font-size:26px}
+  .sig-block{grid-template-columns:1fr}
+  .field-row,.field-row.three,.field-row.four{grid-template-columns:1fr}
+}
+</style>
+</head>
+<body>
+<div class="doc">
+
+<h1>Event Security Agreement</h1>
+<div class="subtitle">Single-event security contract</div>
+
+
+<div class="header-block">
+<div class="company">Sheepdog Security &amp; Staffing LLC</div>
+<p>Bryan-College Station, TX</p>
+<p>(979) 204-0945 &bull; sheepdogsecurityllc@gmail.com</p>
+</div>
+
+<h2>Parties</h2>
+<table class="info">
+<tr><td>Client Name</td><td><span class="field">[CLIENT NAME]</span></td></tr>
+<tr><td>Company (if applicable)</td><td><span class="field">[COMPANY NAME]</span></td></tr>
+<tr><td>Phone</td><td><span class="field">[CLIENT PHONE]</span></td></tr>
+<tr><td>Email</td><td><span class="field">[CLIENT EMAIL]</span></td></tr>
+</table>
+
+<h2>Event Details</h2>
+<table class="info">
+<tr><td>Event Name / Type</td><td><span class="field">[EVENT NAME]</span></td></tr>
+<tr><td>Venue</td><td><span class="field">[VENUE NAME AND ADDRESS]</span></td></tr>
+<tr><td>Date</td><td><span class="field">[EVENT DATE]</span></td></tr>
+<tr><td>Start Time</td><td><span class="field">[START TIME]</span></td></tr>
+<tr><td>End Time</td><td><span class="field">[END TIME]</span></td></tr>
+<tr><td>Expected Attendance</td><td><span class="field">[GUEST COUNT]</span></td></tr>
+</table>
+
+<h2>Scope of Services</h2>
+<table class="info">
+<tr><td>Number of Guards</td><td><span class="field">[NUMBER OF GUARDS]</span></td></tr>
+<tr><td>Hourly Rate (per guard)</td><td><span class="field">[HOURLY RATE]</span></td></tr>
+<tr><td>Estimated Total Hours</td><td><span class="field">[TOTAL HOURS]</span></td></tr>
+<tr><td>Total Amount</td><td><span class="field">[TOTAL AMOUNT]</span></td></tr>
+</table>
+
+<p>Sheepdog Security & Staffing LLC ("Sheepdog") will provide uniformed security personnel for the event described above. Guards will perform access control, crowd management, and general security duties as agreed upon with the Client.</p>
+
+<h2>Payment Terms</h2>
+<ul>
+<li>A non-refundable deposit of <span class="field">[DEPOSIT AMOUNT]</span> is due at signing to secure the date.</li>
+<li>Remaining balance is due <span class="field">[PAYMENT DUE DATE / TERMS - e.g. day of event, net 15]</span>.</li>
+<li>Accepted payment methods: <span class="field">[PAYMENT METHODS - e.g. Zelle, check, cash]</span>.</li>
+<li>If the event runs past the scheduled end time, additional hours will be billed at the hourly rate listed above.</li>
+</ul>
+
+<h2>Cancellation Policy</h2>
+<ul>
+<li>Cancellations made 7+ days before the event: deposit is forfeited, no additional charges.</li>
+<li>Cancellations made within 7 days of the event: Client owes 50% of the total amount.</li>
+<li>Cancellations made within 48 hours of the event: Client owes 100% of the total amount.</li>
+<li>Sheepdog reserves the right to cancel if conditions pose a safety risk to staff. Full refund will be issued.</li>
+</ul>
+
+<h2>Liability &amp; Insurance</h2>
+<ul>
+<li>Sheepdog maintains general liability insurance for all events.</li>
+<li>Sheepdog personnel are not law enforcement, do not carry weapons unless separately agreed in writing, and do not have arrest authority. Guards may detain individuals only to the extent permitted by Texas law (Penal Code Chapter 9).</li>
+<li>Sheepdog is not liable for injuries, damages, or losses caused by event attendees, third parties, or conditions outside Sheepdog's reasonable control.</li>
+<li>Client agrees to indemnify and hold harmless Sheepdog from any claims arising from the event that are not the direct result of Sheepdog's negligence.</li>
+</ul>
+
+<h2>Additional Terms</h2>
+<ul>
+<li>Sheepdog reserves the right to remove or replace personnel at its discretion.</li>
+<li>Client will provide a safe working environment and access to the venue as needed for security operations.</li>
+<li>Any additional services not listed in this agreement must be agreed upon in writing.</li>
+</ul>
+
+<div class="context">
+<h3>Additional Notes</h3>
+<p><span class="field">[ANY ADDITIONAL NOTES OR SPECIAL INSTRUCTIONS]</span></p>
+</div>
+
+
+<h2>Force Majeure</h2>
+<ul>
+<li>Neither party is liable for failure to perform due to events beyond reasonable control, including but not limited to: severe weather, natural disasters, government orders, public health emergencies, venue closures, or civil disturbances.</li>
+<li>If a force majeure event prevents the event from occurring, the Client's deposit will be applied as a credit toward a future booking within 12 months. If no rebooking occurs within 12 months, the deposit is forfeited.</li>
+<li>Sheepdog will make reasonable efforts to notify the Client as soon as possible if it cannot fulfill the agreement due to a force majeure event.</li>
+</ul>
+
+
+<h2>On-Site Changes</h2>
+<ul>
+<li>If the Client requests additional staff, extended hours, or expanded scope on the day of the event, Sheepdog will make reasonable efforts to accommodate.</li>
+<li>Additional hours or staff will be billed at the rates listed in this agreement.</li>
+<li>Verbal on-site approvals from the Client's designated contact are considered binding for billing purposes.</li>
+</ul>
+
+
+<h2>General Provisions</h2>
+
+<div class="section">
+<h3>Governing Law &amp; Jurisdiction</h3>
+<p>This agreement is governed by the laws of the State of Texas. Any disputes arising from this agreement will be resolved in the courts of Brazos County, Texas.</p>
+</div>
+
+<div class="section">
+<h3>Severability</h3>
+<p>If any provision of this agreement is found to be unenforceable or invalid, that provision will be limited or removed to the minimum extent necessary, and the remaining provisions will remain in full effect.</p>
+</div>
+
+<div class="section">
+<h3>Entire Agreement</h3>
+<p>This document represents the complete agreement between the parties. It replaces any prior conversations, emails, or verbal agreements on this subject. No side deals or promises exist outside of this document.</p>
+</div>
+
+<div class="section">
+<h3>Amendments</h3>
+<p>Changes to this agreement must be made in writing and signed by both parties. Verbal changes are not valid.</p>
+</div>
+
+<div class="section">
+<h3>Waiver</h3>
+<p>If either party does not enforce a term of this agreement on one occasion, that does not waive the right to enforce it in the future.</p>
+</div>
+
+<div class="divider"></div>
+<p>By signing below, both parties agree to the terms outlined in this Event Security Agreement.</p>
+<div class="sig-block">
+<div>
+<div class="sig-line">
+<div class="label">Client Signature</div>
+</div>
+<div class="sig-line">
+<div class="label">Printed Name</div>
+</div>
+<div class="sig-line">
+<div class="label">Date</div>
+</div>
+</div>
+<div>
+<div class="sig-line">
+<div class="label">Sheepdog Representative</div>
+</div>
+<div class="sig-line">
+<div class="label">Printed Name</div>
+</div>
+<div class="sig-line">
+<div class="label">Date</div>
+</div>
+</div>
+</div>
+
+
+</div>
+</body>
+</html>

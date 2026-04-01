@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Recurring Event Contract | Sheepdog</title>
+<link href="https://fonts.googleapis.com/css2?family=Barlow:wght@400;600;700;800&family=Source+Sans+3:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+:root{--black:#0C0C0C;--char:#161616;--graphite:#2A2A2A;--iron:#4A4A4A;--slate:#6B6B6B;--steel:#7A8490;--fog:#D0D0D0;--bone:#F4F3F1;--white:#FFF;--navy:#1B2A4A;--sblue:#3D5A80;--amber:#C9922E;--red:#C23B22;--green:#357A38}
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:'Source Sans 3',sans-serif;font-size:16px;line-height:1.7;color:var(--iron);background:var(--white)}
+.doc{max-width:800px;margin:0 auto;padding:48px 32px 80px}
+h1{font-family:'Barlow',sans-serif;font-weight:800;font-size:32px;color:var(--black);line-height:1.1;margin-bottom:6px}
+.subtitle{font-family:'Source Sans 3',sans-serif;font-size:15px;color:var(--steel);margin-bottom:48px}
+h2{font-family:'Barlow',sans-serif;font-weight:700;font-size:22px;color:var(--navy);margin-top:48px;margin-bottom:16px;padding-bottom:8px;border-bottom:2px solid var(--bone)}
+h3{font-family:'Barlow',sans-serif;font-weight:700;font-size:17px;color:var(--graphite);margin-top:28px;margin-bottom:10px}
+p{margin-bottom:14px}
+ul,ol{padding-left:20px;margin-bottom:16px}
+li{margin-bottom:6px;color:var(--iron)}
+li::marker{color:var(--sblue)}
+.field{background:var(--bone);border:1px dashed var(--fog);border-radius:4px;padding:2px 8px;font-family:'Source Sans 3',sans-serif;font-weight:600;color:var(--sblue);white-space:nowrap}
+.sig-block{display:grid;grid-template-columns:1fr 1fr;gap:32px;margin-top:32px}
+.sig-line{border-top:1px solid var(--fog);padding-top:8px;margin-top:40px}
+.sig-line .label{font-family:'Barlow',sans-serif;font-weight:700;font-size:13px;color:var(--steel);text-transform:uppercase;letter-spacing:.3px}
+.section{border:1px solid var(--fog);border-radius:8px;padding:24px;margin:16px 0 32px;position:relative;overflow:hidden}
+.section::before{content:'';position:absolute;top:0;left:0;width:4px;height:100%;background:var(--sblue)}
+.section h3{margin-top:0}
+.context{background:rgba(61,90,128,.04);border:1px solid rgba(61,90,128,.15);border-radius:6px;padding:20px;margin:16px 0 24px}
+.context h3{margin-top:0;color:var(--navy)}
+.context li::marker{color:var(--navy)}
+.warning{background:rgba(194,59,34,.04);border:1px solid rgba(194,59,34,.15);border-radius:6px;padding:20px;margin:16px 0 24px}
+.warning h3{margin-top:0;color:var(--red)}
+.divider{height:1px;background:var(--fog);margin:40px 0}
+.field-row{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:14px}
+.field-row.three{grid-template-columns:1fr 1fr 1fr}
+.field-row.four{grid-template-columns:1fr 1fr 1fr 1fr}
+.field-label{font-family:'Barlow',sans-serif;font-weight:700;font-size:13px;color:var(--steel);text-transform:uppercase;letter-spacing:.3px;margin-bottom:4px}
+.field-box{background:var(--bone);border:1px dashed var(--fog);border-radius:4px;padding:10px 14px;min-height:38px;color:var(--sblue);font-weight:600}
+.header-block{background:var(--bone);border-radius:8px;padding:24px;margin-bottom:32px}
+.header-block p{margin-bottom:4px;font-size:14px;color:var(--steel)}
+.header-block .company{font-family:'Barlow',sans-serif;font-weight:800;font-size:18px;color:var(--navy);margin-bottom:8px}
+table.info{width:100%;border-collapse:collapse;margin:16px 0}
+table.info td{padding:8px 12px;border-bottom:1px solid var(--fog);vertical-align:top}
+table.info td:first-child{font-family:'Barlow',sans-serif;font-weight:700;font-size:13px;color:var(--steel);text-transform:uppercase;letter-spacing:.3px;width:180px;white-space:nowrap}
+table.info td:last-child{color:var(--iron)}
+@media(max-width:600px){
+  .doc{padding:28px 20px 60px}
+  h1{font-size:26px}
+  .sig-block{grid-template-columns:1fr}
+  .field-row,.field-row.three,.field-row.four{grid-template-columns:1fr}
+}
+</style>
+</head>
+<body>
+<div class="doc">
+
+<h1>Recurring Event Contract</h1>
+<div class="subtitle">Ongoing weekly shifts at a single venue</div>
+
+
+<div class="header-block">
+<div class="company">Sheepdog Security &amp; Staffing LLC</div>
+<p>Bryan-College Station, TX</p>
+<p>(979) 204-0945 &bull; sheepdogsecurityllc@gmail.com</p>
+</div>
+
+<h2>Parties</h2>
+<table class="info">
+<tr><td>Venue / Client Name</td><td><span class="field">[VENUE / CLIENT NAME]</span></td></tr>
+<tr><td>Contact Person</td><td><span class="field">[CONTACT NAME]</span></td></tr>
+<tr><td>Address</td><td><span class="field">[VENUE ADDRESS]</span></td></tr>
+<tr><td>Phone</td><td><span class="field">[CLIENT PHONE]</span></td></tr>
+<tr><td>Email</td><td><span class="field">[CLIENT EMAIL]</span></td></tr>
+</table>
+
+<h2>Service Details</h2>
+<table class="info">
+<tr><td>Service Type</td><td><span class="field">[SECURITY / BARTENDING / BOTH]</span></td></tr>
+<tr><td>Number of Staff Per Shift</td><td><span class="field">[NUMBER OF STAFF]</span></td></tr>
+<tr><td>Hourly Rate (per person)</td><td><span class="field">[HOURLY RATE]</span></td></tr>
+</table>
+
+<h2>Schedule</h2>
+<table class="info">
+<tr><td>Days of Week</td><td><span class="field">[e.g. FRIDAY, SATURDAY]</span></td></tr>
+<tr><td>Shift Start Time</td><td><span class="field">[START TIME]</span></td></tr>
+<tr><td>Shift End Time</td><td><span class="field">[END TIME]</span></td></tr>
+<tr><td>Effective Start Date</td><td><span class="field">[START DATE]</span></td></tr>
+</table>
+
+<h2>Rate Lock</h2>
+<p>The hourly rate listed above is locked for <span class="field">[RATE LOCK PERIOD - e.g. 6 months, 1 year]</span> from the effective start date. After the lock period, Sheepdog may adjust rates with 30 days written notice.</p>
+
+<h2>Billing &amp; Payment</h2>
+<ul>
+<li>Sheepdog will invoice <span class="field">[BILLING FREQUENCY - e.g. weekly, bi-weekly, monthly]</span>.</li>
+<li>Payment is due within <span class="field">[NET TERMS - e.g. 15, 30]</span> days of invoice.</li>
+<li>Late payments are subject to a <span class="field">[LATE FEE - e.g. $25 flat, 5%]</span> late fee.</li>
+<li>Accepted payment methods: <span class="field">[PAYMENT METHODS]</span>.</li>
+</ul>
+
+<h2>Schedule Changes &amp; Cancellations</h2>
+<ul>
+<li>Client may cancel a scheduled shift with 24+ hours notice at no charge.</li>
+<li>Cancellations with less than 24 hours notice: Client owes 50% of the scheduled shift cost.</li>
+<li>Sheepdog will make reasonable efforts to accommodate schedule changes with 48+ hours notice.</li>
+<li>Temporary schedule pauses (holidays, closures) require 7 days notice.</li>
+</ul>
+
+<h2>Termination</h2>
+<ul>
+<li>Either party may terminate this agreement with <span class="field">[NOTICE PERIOD - e.g. 14 days, 30 days]</span> written notice.</li>
+<li>All outstanding invoices remain due upon termination.</li>
+<li>Sheepdog may terminate immediately if the venue poses a safety risk to staff.</li>
+</ul>
+
+<h2>Liability &amp; Insurance</h2>
+<ul>
+<li>Sheepdog maintains general liability insurance.</li>
+<li>Security personnel are not law enforcement and do not carry weapons unless separately agreed in writing.</li>
+<li>Sheepdog is not liable for damages caused by venue patrons or conditions outside Sheepdog's control.</li>
+<li>Client agrees to indemnify and hold harmless Sheepdog from claims not caused by Sheepdog's direct negligence.</li>
+</ul>
+
+<h2>TABC Compliance</h2>
+<p><em>Applies if bartending services are included.</em></p>
+<ul>
+<li>All bartenders hold valid TABC certifications.</li>
+<li>Bartenders will refuse service to visibly intoxicated persons per Texas law.</li>
+<li>Sheepdog may shut down bar service at any time if continued service would violate TABC regulations.</li>
+</ul>
+
+<div class="context">
+<h3>Additional Notes</h3>
+<p><span class="field">[ANY ADDITIONAL NOTES OR SPECIAL TERMS]</span></p>
+</div>
+
+
+<h2>Ownership Changes</h2>
+<p>If the venue changes ownership or management, this agreement remains in effect with the new owner/operator unless either party provides written notice of termination per the terms above. Sheepdog is not obligated to continue service if the new ownership materially changes the working conditions or safety of the venue.</p>
+
+<h2>Holiday &amp; Special Event Rates</h2>
+<ul>
+<li>Shifts falling on major holidays (New Year's Eve, July 4th, Thanksgiving, Christmas Eve, Christmas Day) may be billed at a premium rate of <span class="field">[HOLIDAY RATE - e.g. 1.5x standard rate]</span>.</li>
+<li>Special events that require additional staff beyond the standard shift (concerts, private buyouts, large-scale events) will be quoted separately.</li>
+</ul>
+
+
+<h2>Force Majeure</h2>
+<ul>
+<li>Neither party is liable for failure to perform due to events beyond reasonable control, including but not limited to: severe weather, natural disasters, government orders, public health emergencies, venue closures, or civil disturbances.</li>
+<li>If a force majeure event prevents the event from occurring, the Client's deposit will be applied as a credit toward a future booking within 12 months. If no rebooking occurs within 12 months, the deposit is forfeited.</li>
+<li>Sheepdog will make reasonable efforts to notify the Client as soon as possible if it cannot fulfill the agreement due to a force majeure event.</li>
+</ul>
+
+
+<h2>General Provisions</h2>
+
+<div class="section">
+<h3>Governing Law &amp; Jurisdiction</h3>
+<p>This agreement is governed by the laws of the State of Texas. Any disputes arising from this agreement will be resolved in the courts of Brazos County, Texas.</p>
+</div>
+
+<div class="section">
+<h3>Severability</h3>
+<p>If any provision of this agreement is found to be unenforceable or invalid, that provision will be limited or removed to the minimum extent necessary, and the remaining provisions will remain in full effect.</p>
+</div>
+
+<div class="section">
+<h3>Entire Agreement</h3>
+<p>This document represents the complete agreement between the parties. It replaces any prior conversations, emails, or verbal agreements on this subject. No side deals or promises exist outside of this document.</p>
+</div>
+
+<div class="section">
+<h3>Amendments</h3>
+<p>Changes to this agreement must be made in writing and signed by both parties. Verbal changes are not valid.</p>
+</div>
+
+<div class="section">
+<h3>Waiver</h3>
+<p>If either party does not enforce a term of this agreement on one occasion, that does not waive the right to enforce it in the future.</p>
+</div>
+
+<div class="divider"></div>
+<p>By signing below, both parties agree to the terms outlined in this Recurring Event Contract.</p>
+<div class="sig-block">
+<div>
+<div class="sig-line">
+<div class="label">Client Signature</div>
+</div>
+<div class="sig-line">
+<div class="label">Printed Name</div>
+</div>
+<div class="sig-line">
+<div class="label">Date</div>
+</div>
+</div>
+<div>
+<div class="sig-line">
+<div class="label">Sheepdog Representative</div>
+</div>
+<div class="sig-line">
+<div class="label">Printed Name</div>
+</div>
+<div class="sig-line">
+<div class="label">Date</div>
+</div>
+</div>
+</div>
+
+
+</div>
+</body>
+</html>

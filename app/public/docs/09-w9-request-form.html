@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>W-9 Request Form | Sheepdog</title>
+<link href="https://fonts.googleapis.com/css2?family=Barlow:wght@400;600;700;800&family=Source+Sans+3:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+:root{--black:#0C0C0C;--char:#161616;--graphite:#2A2A2A;--iron:#4A4A4A;--slate:#6B6B6B;--steel:#7A8490;--fog:#D0D0D0;--bone:#F4F3F1;--white:#FFF;--navy:#1B2A4A;--sblue:#3D5A80;--amber:#C9922E;--red:#C23B22;--green:#357A38}
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:'Source Sans 3',sans-serif;font-size:16px;line-height:1.7;color:var(--iron);background:var(--white)}
+.doc{max-width:800px;margin:0 auto;padding:48px 32px 80px}
+h1{font-family:'Barlow',sans-serif;font-weight:800;font-size:32px;color:var(--black);line-height:1.1;margin-bottom:6px}
+.subtitle{font-family:'Source Sans 3',sans-serif;font-size:15px;color:var(--steel);margin-bottom:48px}
+h2{font-family:'Barlow',sans-serif;font-weight:700;font-size:22px;color:var(--navy);margin-top:48px;margin-bottom:16px;padding-bottom:8px;border-bottom:2px solid var(--bone)}
+h3{font-family:'Barlow',sans-serif;font-weight:700;font-size:17px;color:var(--graphite);margin-top:28px;margin-bottom:10px}
+p{margin-bottom:14px}
+ul,ol{padding-left:20px;margin-bottom:16px}
+li{margin-bottom:6px;color:var(--iron)}
+li::marker{color:var(--sblue)}
+.field{background:var(--bone);border:1px dashed var(--fog);border-radius:4px;padding:2px 8px;font-family:'Source Sans 3',sans-serif;font-weight:600;color:var(--sblue);white-space:nowrap}
+.sig-block{display:grid;grid-template-columns:1fr 1fr;gap:32px;margin-top:32px}
+.sig-line{border-top:1px solid var(--fog);padding-top:8px;margin-top:40px}
+.sig-line .label{font-family:'Barlow',sans-serif;font-weight:700;font-size:13px;color:var(--steel);text-transform:uppercase;letter-spacing:.3px}
+.section{border:1px solid var(--fog);border-radius:8px;padding:24px;margin:16px 0 32px;position:relative;overflow:hidden}
+.section::before{content:'';position:absolute;top:0;left:0;width:4px;height:100%;background:var(--sblue)}
+.section h3{margin-top:0}
+.context{background:rgba(61,90,128,.04);border:1px solid rgba(61,90,128,.15);border-radius:6px;padding:20px;margin:16px 0 24px}
+.context h3{margin-top:0;color:var(--navy)}
+.context li::marker{color:var(--navy)}
+.warning{background:rgba(194,59,34,.04);border:1px solid rgba(194,59,34,.15);border-radius:6px;padding:20px;margin:16px 0 24px}
+.warning h3{margin-top:0;color:var(--red)}
+.divider{height:1px;background:var(--fog);margin:40px 0}
+.field-row{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:14px}
+.field-row.three{grid-template-columns:1fr 1fr 1fr}
+.field-row.four{grid-template-columns:1fr 1fr 1fr 1fr}
+.field-label{font-family:'Barlow',sans-serif;font-weight:700;font-size:13px;color:var(--steel);text-transform:uppercase;letter-spacing:.3px;margin-bottom:4px}
+.field-box{background:var(--bone);border:1px dashed var(--fog);border-radius:4px;padding:10px 14px;min-height:38px;color:var(--sblue);font-weight:600}
+.header-block{background:var(--bone);border-radius:8px;padding:24px;margin-bottom:32px}
+.header-block p{margin-bottom:4px;font-size:14px;color:var(--steel)}
+.header-block .company{font-family:'Barlow',sans-serif;font-weight:800;font-size:18px;color:var(--navy);margin-bottom:8px}
+table.info{width:100%;border-collapse:collapse;margin:16px 0}
+table.info td{padding:8px 12px;border-bottom:1px solid var(--fog);vertical-align:top}
+table.info td:first-child{font-family:'Barlow',sans-serif;font-weight:700;font-size:13px;color:var(--steel);text-transform:uppercase;letter-spacing:.3px;width:180px;white-space:nowrap}
+table.info td:last-child{color:var(--iron)}
+@media(max-width:600px){
+  .doc{padding:28px 20px 60px}
+  h1{font-size:26px}
+  .sig-block{grid-template-columns:1fr}
+  .field-row,.field-row.three,.field-row.four{grid-template-columns:1fr}
+}
+</style>
+</head>
+<body>
+<div class="doc">
+
+<h1>W-9 Request Form</h1>
+<div class="subtitle">Template for requesting W-9 from contractors</div>
+
+
+<div class="header-block">
+<div class="company">Sheepdog Security &amp; Staffing LLC</div>
+<p>Bryan-College Station, TX</p>
+<p>(979) 204-0945 &bull; sheepdogsecurityllc@gmail.com</p>
+</div>
+
+<div class="context">
+<h3>What this is</h3>
+<p>This is not a contract. This is the form Sheepdog sends to new contractors requesting their W-9 information for tax reporting purposes. Sheepdog is required to file 1099s for all contractors paid $600 or more in a calendar year.</p>
+</div>
+
+<h2>Contractor Information</h2>
+<table class="info">
+<tr><td>Full Legal Name</td><td><span class="field">[CONTRACTOR FULL NAME]</span></td></tr>
+<tr><td>Business Name (if different)</td><td><span class="field">[BUSINESS NAME OR N/A]</span></td></tr>
+<tr><td>Address</td><td><span class="field">[STREET ADDRESS]</span></td></tr>
+<tr><td>City, State, ZIP</td><td><span class="field">[CITY, STATE, ZIP]</span></td></tr>
+<tr><td>SSN or EIN</td><td><span class="field">[SSN / EIN]</span></td></tr>
+<tr><td>Tax Classification</td><td><span class="field">[INDIVIDUAL / SOLE PROPRIETOR / LLC / CORPORATION / OTHER]</span></td></tr>
+</table>
+
+<h2>Instructions</h2>
+<ul>
+<li>Complete a W-9 form (IRS Form W-9) and return it to Sheepdog before your first assignment.</li>
+<li>You can download the official W-9 form at <strong>irs.gov/forms-pubs/about-form-w-9</strong>.</li>
+<li>Email your completed W-9 to <strong>sheepdogsecurityllc@gmail.com</strong> or hand it to your team lead.</li>
+<li>No payments will be issued until a valid W-9 is on file.</li>
+<li>Submit within 7 days of signing your Independent Contractor Agreement. Assignments will not be offered until this is received.</li>
+</ul>
+
+<div class="warning">
+<h3>Important</h3>
+<p>Your SSN/EIN will be kept confidential and used solely for IRS tax reporting. Sheepdog does not share this information with clients, venues, or any third party.</p>
+</div>
+
+
+<div class="section">
+<h3>Governing Law</h3>
+<p>This document is governed by the laws of the State of Texas. Any disputes will be resolved in Brazos County, Texas.</p>
+</div>
+
+<div class="divider"></div>
+
+<p>I confirm that the information provided above is accurate and I will submit a completed W-9 form to Sheepdog Security & Staffing LLC.</p>
+
+<div class="sig-block">
+<div>
+<div class="sig-line">
+<div class="label">Contractor Signature</div>
+</div>
+<div class="sig-line">
+<div class="label">Printed Name</div>
+</div>
+<div class="sig-line">
+<div class="label">Date</div>
+</div>
+</div>
+<div></div>
+</div>
+
+
+</div>
+</body>
+</html>

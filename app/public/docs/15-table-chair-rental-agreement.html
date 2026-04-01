@@ -1,0 +1,265 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Table &amp; Chair Rental Agreement | Sheepdog</title>
+<link href="https://fonts.googleapis.com/css2?family=Barlow:wght@400;600;700;800&family=Source+Sans+3:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+:root{--black:#0C0C0C;--char:#161616;--graphite:#2A2A2A;--iron:#4A4A4A;--slate:#6B6B6B;--steel:#7A8490;--fog:#D0D0D0;--bone:#F4F3F1;--white:#FFF;--navy:#1B2A4A;--sblue:#3D5A80;--amber:#C9922E;--red:#C23B22;--green:#357A38}
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:'Source Sans 3',sans-serif;font-size:16px;line-height:1.7;color:var(--iron);background:var(--white)}
+.doc{max-width:800px;margin:0 auto;padding:48px 32px 80px}
+h1{font-family:'Barlow',sans-serif;font-weight:800;font-size:32px;color:var(--black);line-height:1.1;margin-bottom:6px}
+.subtitle{font-family:'Source Sans 3',sans-serif;font-size:15px;color:var(--steel);margin-bottom:48px}
+h2{font-family:'Barlow',sans-serif;font-weight:700;font-size:22px;color:var(--navy);margin-top:48px;margin-bottom:16px;padding-bottom:8px;border-bottom:2px solid var(--bone)}
+h3{font-family:'Barlow',sans-serif;font-weight:700;font-size:17px;color:var(--graphite);margin-top:28px;margin-bottom:10px}
+p{margin-bottom:14px}
+ul,ol{padding-left:20px;margin-bottom:16px}
+li{margin-bottom:6px;color:var(--iron)}
+li::marker{color:var(--sblue)}
+.field{background:var(--bone);border:1px dashed var(--fog);border-radius:4px;padding:2px 8px;font-family:'Source Sans 3',sans-serif;font-weight:600;color:var(--sblue);white-space:nowrap}
+.sig-block{display:grid;grid-template-columns:1fr 1fr;gap:32px;margin-top:32px}
+.sig-line{border-top:1px solid var(--fog);padding-top:8px;margin-top:40px}
+.sig-line .label{font-family:'Barlow',sans-serif;font-weight:700;font-size:13px;color:var(--steel);text-transform:uppercase;letter-spacing:.3px}
+.section{border:1px solid var(--fog);border-radius:8px;padding:24px;margin:16px 0 32px;position:relative;overflow:hidden}
+.section::before{content:'';position:absolute;top:0;left:0;width:4px;height:100%;background:var(--sblue)}
+.section h3{margin-top:0}
+.context{background:rgba(61,90,128,.04);border:1px solid rgba(61,90,128,.15);border-radius:6px;padding:20px;margin:16px 0 24px}
+.context h3{margin-top:0;color:var(--navy)}
+.context li::marker{color:var(--navy)}
+.warning{background:rgba(194,59,34,.04);border:1px solid rgba(194,59,34,.15);border-radius:6px;padding:20px;margin:16px 0 24px}
+.warning h3{margin-top:0;color:var(--red)}
+.divider{height:1px;background:var(--fog);margin:40px 0}
+table.info{width:100%;border-collapse:collapse;margin:16px 0}
+table.info td{padding:8px 12px;border-bottom:1px solid var(--fog);vertical-align:top}
+table.info td:first-child{font-family:'Barlow',sans-serif;font-weight:700;font-size:13px;color:var(--steel);text-transform:uppercase;letter-spacing:.3px;width:180px;white-space:nowrap}
+table.info td:last-child{color:var(--iron)}
+table.inventory{width:100%;border-collapse:collapse;margin:16px 0;font-size:14px}
+table.inventory th{font-family:'Barlow',sans-serif;font-weight:700;font-size:13px;color:var(--steel);text-transform:uppercase;letter-spacing:.3px;text-align:left;padding:10px 12px;border-bottom:2px solid var(--fog);background:var(--bone)}
+table.inventory td{padding:10px 12px;border-bottom:1px solid var(--fog);color:var(--iron);vertical-align:top}
+table.inventory tr:last-child td{border-bottom:2px solid var(--fog)}
+.header-block{background:var(--bone);border-radius:8px;padding:24px;margin-bottom:32px}
+.header-block p{margin-bottom:4px;font-size:14px;color:var(--steel)}
+.header-block .company{font-family:'Barlow',sans-serif;font-weight:800;font-size:18px;color:var(--navy);margin-bottom:8px}
+@media(max-width:600px){
+  .doc{padding:28px 20px 60px}
+  h1{font-size:26px}
+  .sig-block{grid-template-columns:1fr}
+  table.inventory{font-size:13px}
+  table.inventory th,table.inventory td{padding:8px}
+}
+</style>
+</head>
+<body>
+<div class="doc">
+
+<h1>Table &amp; Chair Rental Agreement</h1>
+<div class="subtitle">Equipment rental contract for events</div>
+
+
+<div class="header-block">
+<div class="company">Sheepdog Security &amp; Staffing LLC</div>
+<p>Bryan-College Station, TX</p>
+<p>(979) 204-0945 &bull; sheepdogsecurityllc@gmail.com</p>
+</div>
+
+<h2>Parties</h2>
+<table class="info">
+<tr><td>Client Name</td><td><span class="field">[CLIENT NAME]</span></td></tr>
+<tr><td>Company (if applicable)</td><td><span class="field">[COMPANY NAME]</span></td></tr>
+<tr><td>Phone</td><td><span class="field">[CLIENT PHONE]</span></td></tr>
+<tr><td>Email</td><td><span class="field">[CLIENT EMAIL]</span></td></tr>
+</table>
+
+<h2>Event Details</h2>
+<table class="info">
+<tr><td>Event Name / Type</td><td><span class="field">[EVENT NAME]</span></td></tr>
+<tr><td>Venue</td><td><span class="field">[VENUE NAME AND ADDRESS]</span></td></tr>
+<tr><td>Event Date</td><td><span class="field">[EVENT DATE]</span></td></tr>
+</table>
+
+<h2>Rental Period</h2>
+<table class="info">
+<tr><td>Delivery Date &amp; Time</td><td><span class="field">[DELIVERY DATE AND TIME]</span></td></tr>
+<tr><td>Pickup Date &amp; Time</td><td><span class="field">[PICKUP DATE AND TIME]</span></td></tr>
+<tr><td>Delivery Location</td><td><span class="field">[DELIVERY ADDRESS / SPECIFIC DROP POINT AT VENUE]</span></td></tr>
+</table>
+
+<p>The rental period begins at delivery and ends at pickup. Equipment must be accessible and ready for pickup at the scheduled time. If equipment is not accessible, Sheepdog will attempt one additional pickup. A re-pickup fee of <span class="field">[RE-PICKUP FEE - e.g. $50, $75]</span> will be charged.</p>
+
+<h2>Late Returns</h2>
+<ul>
+<li>If equipment is not available for pickup at the scheduled time, a daily overage rate of <span class="field">[DAILY OVERAGE RATE - e.g. 25% of rental fee per day]</span> applies for each day beyond the agreed pickup date.</li>
+<li>The re-pickup fee listed above also applies each time Sheepdog attempts pickup and equipment is not accessible.</li>
+<li>Sheepdog reserves the right to retrieve equipment without further notice if it is more than <span class="field">[MAX OVERAGE DAYS - e.g. 3 days, 5 days]</span> overdue.</li>
+</ul>
+
+<h2>Rental Inventory</h2>
+<p>See the attached <strong>Equipment Inventory Checklist</strong> for the complete list of items, quantities, and condition at delivery. The checklist will be signed by both parties at delivery and again at pickup.</p>
+
+<table class="info">
+<tr><td>Tables (type / qty)</td><td><span class="field">[e.g. 6ft rectangular x10, 60in round x5]</span></td></tr>
+<tr><td>Chairs (type / qty)</td><td><span class="field">[e.g. White folding x80, Black chiavari x40]</span></td></tr>
+<tr><td>Linens (type / qty)</td><td><span class="field">[e.g. White tablecloths x10, runners x5 - or N/A]</span></td></tr>
+<tr><td>Other Items</td><td><span class="field">[e.g. Cocktail tables, bar stools, arches - or N/A]</span></td></tr>
+</table>
+
+<h2>Pricing</h2>
+<table class="info">
+<tr><td>Rental Fee</td><td><span class="field">[RENTAL FEE TOTAL]</span></td></tr>
+<tr><td>Delivery Fee</td><td><span class="field">[DELIVERY FEE - or INCLUDED]</span></td></tr>
+<tr><td>Pickup Fee</td><td><span class="field">[PICKUP FEE - or INCLUDED]</span></td></tr>
+<tr><td>Setup/Breakdown by Sheepdog?</td><td><span class="field">[YES (additional fee) / NO (client sets up)]</span></td></tr>
+<tr><td>Setup/Breakdown Fee</td><td><span class="field">[SETUP FEE - or N/A]</span></td></tr>
+<tr><td><strong>Total</strong></td><td><strong><span class="field">[TOTAL AMOUNT]</span></strong></td></tr>
+</table>
+
+<h2>Payment Terms</h2>
+<ul>
+<li>A non-refundable deposit of <span class="field">[DEPOSIT AMOUNT]</span> is due at signing to reserve the date and inventory.</li>
+<li>Remaining balance is due <span class="field">[PAYMENT DUE DATE / TERMS - e.g. 3 days before event, day of delivery]</span>.</li>
+<li>Accepted payment methods: <span class="field">[PAYMENT METHODS]</span>.</li>
+</ul>
+
+<h2>Damage &amp; Loss</h2>
+
+<div class="warning">
+<h3>Client is responsible for all equipment from delivery to pickup</h3>
+<ul>
+<li>Client assumes full responsibility for the rented equipment from the moment of delivery until it is picked up by Sheepdog.</li>
+<li>Normal wear (minor scuffs, surface dirt) is expected and will not be charged.</li>
+<li>Damage beyond normal wear (broken legs, torn seats, bent frames, stains on linens, burn marks, water damage) will be charged at replacement cost.</li>
+<li>Lost or stolen items will be charged at full replacement cost.</li>
+<li>Replacement costs are listed on the Equipment Inventory Checklist. If not listed, Sheepdog will provide documentation of replacement cost.</li>
+<li>Damage and loss charges will be invoiced within 7 days of pickup and are due within 15 days.</li>
+</ul>
+</div>
+
+<h2>Damage Deposit (Optional)</h2>
+<table class="info">
+<tr><td>Damage Deposit</td><td><span class="field">[DAMAGE DEPOSIT AMOUNT - or N/A]</span></td></tr>
+</table>
+<p>If a damage deposit is collected, it will be refunded in full within 7 days of pickup if all equipment is returned in acceptable condition. If damage or loss occurs, the cost will be deducted from the deposit first, and any remaining balance will be invoiced separately.</p>
+
+<h2>Client Responsibilities</h2>
+<ul>
+<li>Ensure the delivery location is accessible for Sheepdog's delivery vehicle (clear path, adequate space, no locked gates without prior arrangement).</li>
+<li>If Client is setting up equipment, do so on level, stable ground. Do not use equipment on wet, muddy, or uneven surfaces without Sheepdog's approval.</li>
+<li>Do not modify, paint, nail into, glue, tape, or permanently alter any rented equipment.</li>
+<li>Do not stand on tables or chairs, use chairs as step ladders, or exceed reasonable weight limits. Damage from misuse is billed at full replacement cost.</li>
+<li>Stack chairs and fold/collapse tables for pickup unless Sheepdog is providing breakdown service.</li>
+<li>Keep equipment in a secure location. Equipment left outdoors overnight is the Client's risk.</li>
+<li>Linens should be returned as-is (do not wash). Sheepdog handles cleaning. Linens with permanent stains (wax, paint, bleach, burns) will be charged at replacement cost.</li>
+</ul>
+
+<h2>Equipment Ownership</h2>
+<ul>
+<li>All rented equipment remains the sole property of Sheepdog Security & Staffing LLC at all times.</li>
+<li>Client may not sublease, lend, transfer, or allow any third party to use the equipment outside of the event described in this agreement.</li>
+<li>Client has no lien, ownership claim, or right of retention over any rented equipment. Equipment may not be held to offset any dispute.</li>
+</ul>
+
+<h2>Equipment Substitution</h2>
+<p>If a specific item listed in this agreement becomes unavailable (due to prior damage, inventory shortage, or other circumstances), Sheepdog will notify the Client and offer a comparable substitute at no additional charge. If the Client does not accept the substitute, the item will be removed from the order and the rental fee adjusted accordingly.</p>
+
+<h2>Difficult Access</h2>
+<p>Standard delivery assumes ground-level, truck-accessible drop-off. If the delivery location requires stairs, elevators, long carries (100+ feet from vehicle), or other non-standard access, an additional delivery labor fee of <span class="field">[DIFFICULT ACCESS FEE - e.g. $50, $100, or hourly rate]</span> may apply. Sheepdog will notify the Client of this fee before delivery if known in advance.</p>
+
+<h2>Delivery &amp; Pickup</h2>
+<ul>
+<li>Sheepdog will deliver equipment to the location specified above during the agreed time window.</li>
+<li>Client or Client's designated on-site contact must be present at delivery and pickup to sign the inventory checklist.</li>
+<li>If no one is present at delivery, Sheepdog may leave equipment at the designated location, and Client assumes responsibility from that point. The delivery portion of the checklist will be marked as unsigned.</li>
+<li>If equipment is not accessible at the scheduled pickup time, a re-pickup fee applies (see above).</li>
+</ul>
+
+<h2>Cancellation Policy</h2>
+<ul>
+<li>14+ days before delivery: deposit forfeited, no additional charges.</li>
+<li>7-13 days before delivery: Client owes 50% of rental fee.</li>
+<li>Within 7 days of delivery: Client owes 100% of rental fee.</li>
+</ul>
+
+
+<h2>Force Majeure</h2>
+<ul>
+<li>Neither party is liable for failure to perform due to events beyond reasonable control, including but not limited to: severe weather, natural disasters, government orders, public health emergencies, venue closures, or civil disturbances.</li>
+<li>If a force majeure event prevents the event from occurring, the Client's deposit will be applied as a credit toward a future booking within 12 months. If no rebooking occurs within 12 months, the deposit is forfeited.</li>
+<li>Sheepdog will make reasonable efforts to notify the Client as soon as possible if it cannot fulfill the agreement due to a force majeure event.</li>
+</ul>
+
+
+<h2>Liability &amp; Insurance</h2>
+<ul>
+<li>Sheepdog maintains general liability insurance covering delivery and pickup operations.</li>
+<li>Sheepdog is not liable for injuries caused by improper use, setup, or placement of rented equipment by the Client or their guests.</li>
+<li>Client agrees to indemnify and hold harmless Sheepdog from any claims arising from the use of rented equipment at the event, except where caused by defective equipment that Sheepdog knew or should have known about.</li>
+<li>If Sheepdog identifies equipment as unsafe before or during delivery, Sheepdog will replace it or remove it from the order and adjust the invoice accordingly.</li>
+</ul>
+
+<div class="context">
+<h3>Additional Notes</h3>
+<p><span class="field">[ANY ADDITIONAL NOTES OR SPECIAL INSTRUCTIONS]</span></p>
+</div>
+
+
+<h2>General Provisions</h2>
+
+<div class="section">
+<h3>Governing Law &amp; Jurisdiction</h3>
+<p>This agreement is governed by the laws of the State of Texas. Any disputes arising from this agreement will be resolved in the courts of Brazos County, Texas.</p>
+</div>
+
+<div class="section">
+<h3>Severability</h3>
+<p>If any provision of this agreement is found to be unenforceable or invalid, that provision will be limited or removed to the minimum extent necessary, and the remaining provisions will remain in full effect.</p>
+</div>
+
+<div class="section">
+<h3>Entire Agreement</h3>
+<p>This document represents the complete agreement between the parties. It replaces any prior conversations, emails, or verbal agreements on this subject. No side deals or promises exist outside of this document.</p>
+</div>
+
+<div class="section">
+<h3>Amendments</h3>
+<p>Changes to this agreement must be made in writing and signed by both parties. Verbal changes are not valid.</p>
+</div>
+
+<div class="section">
+<h3>Waiver</h3>
+<p>If either party does not enforce a term of this agreement on one occasion, that does not waive the right to enforce it in the future.</p>
+</div>
+
+
+<div class="divider"></div>
+<p>By signing below, both parties agree to the terms outlined in this Table & Chair Rental Agreement.</p>
+<div class="sig-block">
+<div>
+<div class="sig-line">
+<div class="label">Client Signature</div>
+</div>
+<div class="sig-line">
+<div class="label">Printed Name</div>
+</div>
+<div class="sig-line">
+<div class="label">Date</div>
+</div>
+</div>
+<div>
+<div class="sig-line">
+<div class="label">Sheepdog Representative</div>
+</div>
+<div class="sig-line">
+<div class="label">Printed Name</div>
+</div>
+<div class="sig-line">
+<div class="label">Date</div>
+</div>
+</div>
+</div>
+
+
+</div>
+</body>
+</html>

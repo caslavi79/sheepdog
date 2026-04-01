@@ -1,0 +1,289 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Event Setup, Takedown &amp; Cleanup Agreement | Sheepdog</title>
+<link href="https://fonts.googleapis.com/css2?family=Barlow:wght@400;600;700;800&family=Source+Sans+3:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+:root{--black:#0C0C0C;--char:#161616;--graphite:#2A2A2A;--iron:#4A4A4A;--slate:#6B6B6B;--steel:#7A8490;--fog:#D0D0D0;--bone:#F4F3F1;--white:#FFF;--navy:#1B2A4A;--sblue:#3D5A80;--amber:#C9922E;--red:#C23B22;--green:#357A38}
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:'Source Sans 3',sans-serif;font-size:16px;line-height:1.7;color:var(--iron);background:var(--white)}
+.doc{max-width:800px;margin:0 auto;padding:48px 32px 80px}
+h1{font-family:'Barlow',sans-serif;font-weight:800;font-size:32px;color:var(--black);line-height:1.1;margin-bottom:6px}
+.subtitle{font-family:'Source Sans 3',sans-serif;font-size:15px;color:var(--steel);margin-bottom:48px}
+h2{font-family:'Barlow',sans-serif;font-weight:700;font-size:22px;color:var(--navy);margin-top:48px;margin-bottom:16px;padding-bottom:8px;border-bottom:2px solid var(--bone)}
+h3{font-family:'Barlow',sans-serif;font-weight:700;font-size:17px;color:var(--graphite);margin-top:28px;margin-bottom:10px}
+p{margin-bottom:14px}
+ul,ol{padding-left:20px;margin-bottom:16px}
+li{margin-bottom:6px;color:var(--iron)}
+li::marker{color:var(--sblue)}
+.field{background:var(--bone);border:1px dashed var(--fog);border-radius:4px;padding:2px 8px;font-family:'Source Sans 3',sans-serif;font-weight:600;color:var(--sblue);white-space:nowrap}
+.sig-block{display:grid;grid-template-columns:1fr 1fr;gap:32px;margin-top:32px}
+.sig-line{border-top:1px solid var(--fog);padding-top:8px;margin-top:40px}
+.sig-line .label{font-family:'Barlow',sans-serif;font-weight:700;font-size:13px;color:var(--steel);text-transform:uppercase;letter-spacing:.3px}
+.section{border:1px solid var(--fog);border-radius:8px;padding:24px;margin:16px 0 32px;position:relative;overflow:hidden}
+.section::before{content:'';position:absolute;top:0;left:0;width:4px;height:100%;background:var(--sblue)}
+.section h3{margin-top:0}
+.context{background:rgba(61,90,128,.04);border:1px solid rgba(61,90,128,.15);border-radius:6px;padding:20px;margin:16px 0 24px}
+.context h3{margin-top:0;color:var(--navy)}
+.context li::marker{color:var(--navy)}
+.warning{background:rgba(194,59,34,.04);border:1px solid rgba(194,59,34,.15);border-radius:6px;padding:20px;margin:16px 0 24px}
+.warning h3{margin-top:0;color:var(--red)}
+.divider{height:1px;background:var(--fog);margin:40px 0}
+table.info{width:100%;border-collapse:collapse;margin:16px 0}
+table.info td{padding:8px 12px;border-bottom:1px solid var(--fog);vertical-align:top}
+table.info td:first-child{font-family:'Barlow',sans-serif;font-weight:700;font-size:13px;color:var(--steel);text-transform:uppercase;letter-spacing:.3px;width:180px;white-space:nowrap}
+table.info td:last-child{color:var(--iron)}
+table.inventory{width:100%;border-collapse:collapse;margin:16px 0;font-size:14px}
+table.inventory th{font-family:'Barlow',sans-serif;font-weight:700;font-size:13px;color:var(--steel);text-transform:uppercase;letter-spacing:.3px;text-align:left;padding:10px 12px;border-bottom:2px solid var(--fog);background:var(--bone)}
+table.inventory td{padding:10px 12px;border-bottom:1px solid var(--fog);color:var(--iron);vertical-align:top}
+table.inventory tr:last-child td{border-bottom:2px solid var(--fog)}
+.header-block{background:var(--bone);border-radius:8px;padding:24px;margin-bottom:32px}
+.header-block p{margin-bottom:4px;font-size:14px;color:var(--steel)}
+.header-block .company{font-family:'Barlow',sans-serif;font-weight:800;font-size:18px;color:var(--navy);margin-bottom:8px}
+@media(max-width:600px){
+  .doc{padding:28px 20px 60px}
+  h1{font-size:26px}
+  .sig-block{grid-template-columns:1fr}
+  table.inventory{font-size:13px}
+  table.inventory th,table.inventory td{padding:8px}
+}
+</style>
+</head>
+<body>
+<div class="doc">
+
+<h1>Event Setup, Takedown &amp; Cleanup Agreement</h1>
+<div class="subtitle">Labor contract for event setup, breakdown, and post-event cleaning</div>
+
+
+<div class="header-block">
+<div class="company">Sheepdog Security &amp; Staffing LLC</div>
+<p>Bryan-College Station, TX</p>
+<p>(979) 204-0945 &bull; sheepdogsecurityllc@gmail.com</p>
+</div>
+
+<h2>Parties</h2>
+<table class="info">
+<tr><td>Client Name</td><td><span class="field">[CLIENT NAME]</span></td></tr>
+<tr><td>Company (if applicable)</td><td><span class="field">[COMPANY NAME]</span></td></tr>
+<tr><td>Phone</td><td><span class="field">[CLIENT PHONE]</span></td></tr>
+<tr><td>Email</td><td><span class="field">[CLIENT EMAIL]</span></td></tr>
+</table>
+
+<h2>Event Details</h2>
+<table class="info">
+<tr><td>Event Name / Type</td><td><span class="field">[EVENT NAME]</span></td></tr>
+<tr><td>Venue</td><td><span class="field">[VENUE NAME AND ADDRESS]</span></td></tr>
+<tr><td>Event Date</td><td><span class="field">[EVENT DATE]</span></td></tr>
+<tr><td>Event Start Time</td><td><span class="field">[EVENT START TIME]</span></td></tr>
+<tr><td>Event End Time</td><td><span class="field">[EVENT END TIME]</span></td></tr>
+</table>
+
+<h2>Services Requested</h2>
+<p>Check all that apply. Scope details for each service are described below.</p>
+<table class="info">
+<tr><td>Event Setup</td><td><span class="field">[YES / NO]</span></td></tr>
+<tr><td>Event Takedown</td><td><span class="field">[YES / NO]</span></td></tr>
+<tr><td>Post-Event Cleanup</td><td><span class="field">[YES / NO]</span></td></tr>
+</table>
+
+<h2>Crew &amp; Schedule</h2>
+<table class="info">
+<tr><td>Number of Crew</td><td><span class="field">[NUMBER OF CREW MEMBERS]</span></td></tr>
+<tr><td>Hourly Rate (per person)</td><td><span class="field">[HOURLY RATE]</span></td></tr>
+<tr><td>Setup Arrival Time</td><td><span class="field">[SETUP CREW ARRIVAL TIME]</span></td></tr>
+<tr><td>Setup Complete By</td><td><span class="field">[SETUP DEADLINE - before event starts]</span></td></tr>
+<tr><td>Takedown Start Time</td><td><span class="field">[TAKEDOWN START - e.g. immediately after event ends]</span></td></tr>
+<tr><td>Estimated Takedown Duration</td><td><span class="field">[ESTIMATED HOURS]</span></td></tr>
+<tr><td>Cleanup Complete By</td><td><span class="field">[CLEANUP DEADLINE - e.g. midnight, next morning by 8am]</span></td></tr>
+</table>
+
+<h2>Venue Access &amp; Logistics</h2>
+<ul>
+<li><strong>Vehicle access:</strong> Client must confirm that Sheepdog's crew vehicle(s) can access the venue for loading and unloading. If a loading zone, gate code, or special parking arrangement is needed, provide details here: <span class="field">[VEHICLE ACCESS NOTES - loading zone, gate code, parking instructions, or N/A]</span></li>
+<li><strong>Venue unlocked:</strong> The venue must be unlocked and accessible at least <span class="field">[MINUTES BEFORE - e.g. 15, 30]</span> minutes before the crew's scheduled arrival time.</li>
+<li><strong>Utilities:</strong> Client must ensure power, water, and adequate lighting are available in all areas where setup, takedown, or cleanup will occur. If the venue has limited power or no running water, notify Sheepdog in advance.</li>
+<li><strong>Waste disposal:</strong> Client is responsible for ensuring adequate trash receptacles or dumpster access at the venue. If cleanup is included, Sheepdog crew will bag and stage trash at the designated disposal area. Removal from the premises (e.g., hauling to an off-site dump) is not included unless separately agreed.</li>
+</ul>
+
+<h2>Setup Scope of Work</h2>
+<p>If setup is included, Sheepdog crew will perform the following:</p>
+<ul>
+<li><span class="field">[DESCRIBE SETUP TASKS - e.g. arrange tables and chairs per layout diagram, set up tent/canopy, hang string lights, place signage, set up bar area, lay dance floor, arrange centerpieces per client instructions]</span></li>
+</ul>
+
+<div class="context">
+<h3>What Sheepdog needs from the Client for setup</h3>
+<ul>
+<li>A layout diagram, floor plan, or clear written instructions showing where everything goes. Sheepdog crew are not event designers. Without a plan, we set up to our best judgment and the Client accepts the result.</li>
+<li>All materials, decor, signage, and equipment on-site and accessible before the crew arrival time.</li>
+<li>A Client contact (or designated on-site person) available by phone during setup for questions.</li>
+<li>Venue access confirmed and unlocked before crew arrival.</li>
+</ul>
+</div>
+
+<h2>Takedown Scope of Work</h2>
+<p>If takedown is included, Sheepdog crew will perform the following:</p>
+<ul>
+<li><span class="field">[DESCRIBE TAKEDOWN TASKS - e.g. break down tables and chairs, remove tent/canopy, take down string lights and decor, disassemble bar area, stack/stage rental equipment for pickup, load client-owned items into designated area]</span></li>
+</ul>
+
+<h2>Cleanup Scope of Work</h2>
+<p>If cleanup is included, Sheepdog crew will perform the following:</p>
+<ul>
+<li><span class="field">[DESCRIBE CLEANUP TASKS - e.g. trash removal and bagging, sweep/mop hard floors, wipe down tables and surfaces, clean bar area, remove all event debris, return venue to pre-event condition]</span></li>
+</ul>
+
+<div class="warning">
+<h3>What cleanup does NOT include (unless separately agreed)</h3>
+<ul>
+<li>Deep carpet cleaning or stain removal</li>
+<li>Bathroom cleaning beyond basic trash and tidying</li>
+<li>Kitchen or commercial kitchen cleaning</li>
+<li>Removal of large equipment, staging, or structures not set up by Sheepdog</li>
+<li>Hazardous material cleanup (broken glass beyond normal event breakage, biohazards)</li>
+<li>Landscaping, outdoor grounds maintenance, or parking lot cleanup beyond the event footprint</li>
+</ul>
+</div>
+
+<h2>Pricing</h2>
+<table class="info">
+<tr><td>Setup (estimated hours x crew x rate)</td><td><span class="field">[SETUP SUBTOTAL]</span></td></tr>
+<tr><td>Takedown (estimated hours x crew x rate)</td><td><span class="field">[TAKEDOWN SUBTOTAL]</span></td></tr>
+<tr><td>Cleanup (estimated hours x crew x rate)</td><td><span class="field">[CLEANUP SUBTOTAL]</span></td></tr>
+<tr><td>Flat Rate Option (if applicable)</td><td><span class="field">[FLAT RATE - or N/A]</span></td></tr>
+<tr><td><strong>Total Estimate</strong></td><td><strong><span class="field">[TOTAL ESTIMATED AMOUNT]</span></strong></td></tr>
+</table>
+
+<p>If billed hourly, the final amount may vary from the estimate based on actual hours worked. Sheepdog will notify the Client's on-site contact if the job is running significantly over the estimated time.</p>
+
+<h2>Payment Terms</h2>
+<ul>
+<li>A non-refundable deposit of <span class="field">[DEPOSIT AMOUNT]</span> is due at signing.</li>
+<li>Remaining balance is due <span class="field">[PAYMENT DUE DATE / TERMS - e.g. day of event, upon completion, net 15]</span>.</li>
+<li>If billed hourly, the final invoice will be sent within 48 hours of job completion.</li>
+<li>Accepted payment methods: <span class="field">[PAYMENT METHODS]</span>.</li>
+</ul>
+
+<h2>On-Site Changes</h2>
+<ul>
+<li>If the Client requests additional work, crew, or hours on the day of the event, Sheepdog will make reasonable efforts to accommodate.</li>
+<li>Additional work will be billed at the hourly rate listed in this agreement.</li>
+<li>Verbal on-site approvals from the Client's designated contact are considered binding for billing purposes.</li>
+</ul>
+
+<h2>Third-Party Vendor Coordination</h2>
+<ul>
+<li>Client is responsible for coordinating the schedules of all other vendors (caterers, DJs, florists, photographers, etc.) working the event.</li>
+<li>Sheepdog crew takes direction from the Client's designated on-site contact only, not from other vendors.</li>
+<li>If another vendor's delay prevents Sheepdog from starting or completing work on time, the additional time is billable at the hourly rate in this agreement.</li>
+</ul>
+
+<h2>Delays &amp; Standby Time</h2>
+<ul>
+<li>If the crew arrives at the scheduled time and cannot begin work (venue not open, another vendor blocking the space, client not available, required materials not on-site), standby time is billed at the full hourly rate from the scheduled arrival time.</li>
+<li>If the delay exceeds <span class="field">[MAX WAIT TIME - e.g. 1 hour, 2 hours]</span>, Sheepdog may reschedule or leave the site. The minimum call time (below) still applies.</li>
+</ul>
+
+<h2>Minimum Call Time</h2>
+<p>Once the crew is dispatched, a minimum of <span class="field">[MINIMUM HOURS - e.g. 2 hours, 4 hours]</span> per crew member will be billed, regardless of how long the actual work takes. This applies even if the job is cancelled after the crew is en route or on-site.</p>
+
+<h2>Cancellation Policy</h2>
+<ul>
+<li>7+ days out: deposit forfeited, no additional charges.</li>
+<li>Within 7 days: Client owes 50% of estimated total.</li>
+<li>Within 48 hours: Client owes 100% of estimated total.</li>
+</ul>
+
+
+<h2>Force Majeure</h2>
+<ul>
+<li>Neither party is liable for failure to perform due to events beyond reasonable control, including but not limited to: severe weather, natural disasters, government orders, public health emergencies, venue closures, or civil disturbances.</li>
+<li>If a force majeure event prevents the event from occurring, the Client's deposit will be applied as a credit toward a future booking within 12 months. If no rebooking occurs within 12 months, the deposit is forfeited.</li>
+<li>Sheepdog will make reasonable efforts to notify the Client as soon as possible if it cannot fulfill the agreement due to a force majeure event.</li>
+</ul>
+
+
+<h2>Venue Condition &amp; Damage</h2>
+<ul>
+<li>Sheepdog recommends both parties complete a <strong>Setup/Takedown Walkthrough Checklist</strong> documenting the venue condition before setup begins and after cleanup is complete.</li>
+<li>Sheepdog is not responsible for pre-existing venue damage, wear, or conditions noted on the walkthrough checklist.</li>
+<li>If Sheepdog crew damages the venue or Client property during setup, takedown, or cleanup, Sheepdog will notify the Client immediately and is responsible for repair or replacement costs resulting from Sheepdog's negligence.</li>
+<li>Sheepdog is not responsible for damage caused by event guests, weather, vendor equipment, or conditions outside Sheepdog's control.</li>
+<li>Client agrees to indemnify and hold harmless Sheepdog from claims related to the event that are not the direct result of Sheepdog's negligence.</li>
+</ul>
+
+<h2>Liability &amp; Insurance</h2>
+<ul>
+<li>Sheepdog maintains general liability insurance.</li>
+<li>Sheepdog crew will exercise reasonable care when handling Client property, decor, and equipment. However, Sheepdog is not liable for damage to fragile, irreplaceable, or high-value items unless the Client has identified them in advance and Sheepdog has agreed in writing to handle them.</li>
+<li>Client is responsible for removing or securing any high-value personal items, heirlooms, or irreplaceable decor before takedown/cleanup begins, or clearly marking them and communicating handling instructions to the crew lead.</li>
+</ul>
+
+<div class="context">
+<h3>Additional Notes</h3>
+<p><span class="field">[ANY ADDITIONAL NOTES, SPECIAL INSTRUCTIONS, OR LAYOUT DIAGRAM REFERENCE]</span></p>
+</div>
+
+
+<h2>General Provisions</h2>
+
+<div class="section">
+<h3>Governing Law &amp; Jurisdiction</h3>
+<p>This agreement is governed by the laws of the State of Texas. Any disputes arising from this agreement will be resolved in the courts of Brazos County, Texas.</p>
+</div>
+
+<div class="section">
+<h3>Severability</h3>
+<p>If any provision of this agreement is found to be unenforceable or invalid, that provision will be limited or removed to the minimum extent necessary, and the remaining provisions will remain in full effect.</p>
+</div>
+
+<div class="section">
+<h3>Entire Agreement</h3>
+<p>This document represents the complete agreement between the parties. It replaces any prior conversations, emails, or verbal agreements on this subject. No side deals or promises exist outside of this document.</p>
+</div>
+
+<div class="section">
+<h3>Amendments</h3>
+<p>Changes to this agreement must be made in writing and signed by both parties. Verbal changes are not valid.</p>
+</div>
+
+<div class="section">
+<h3>Waiver</h3>
+<p>If either party does not enforce a term of this agreement on one occasion, that does not waive the right to enforce it in the future.</p>
+</div>
+
+
+<div class="divider"></div>
+<p>By signing below, both parties agree to the terms outlined in this Event Setup, Takedown & Cleanup Agreement.</p>
+<div class="sig-block">
+<div>
+<div class="sig-line">
+<div class="label">Client Signature</div>
+</div>
+<div class="sig-line">
+<div class="label">Printed Name</div>
+</div>
+<div class="sig-line">
+<div class="label">Date</div>
+</div>
+</div>
+<div>
+<div class="sig-line">
+<div class="label">Sheepdog Representative</div>
+</div>
+<div class="sig-line">
+<div class="label">Printed Name</div>
+</div>
+<div class="sig-line">
+<div class="label">Date</div>
+</div>
+</div>
+</div>
+
+
+</div>
+</body>
+</html>

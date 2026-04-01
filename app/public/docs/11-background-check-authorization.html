@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Background Check Authorization | Sheepdog</title>
+<link href="https://fonts.googleapis.com/css2?family=Barlow:wght@400;600;700;800&family=Source+Sans+3:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+:root{--black:#0C0C0C;--char:#161616;--graphite:#2A2A2A;--iron:#4A4A4A;--slate:#6B6B6B;--steel:#7A8490;--fog:#D0D0D0;--bone:#F4F3F1;--white:#FFF;--navy:#1B2A4A;--sblue:#3D5A80;--amber:#C9922E;--red:#C23B22;--green:#357A38}
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:'Source Sans 3',sans-serif;font-size:16px;line-height:1.7;color:var(--iron);background:var(--white)}
+.doc{max-width:800px;margin:0 auto;padding:48px 32px 80px}
+h1{font-family:'Barlow',sans-serif;font-weight:800;font-size:32px;color:var(--black);line-height:1.1;margin-bottom:6px}
+.subtitle{font-family:'Source Sans 3',sans-serif;font-size:15px;color:var(--steel);margin-bottom:48px}
+h2{font-family:'Barlow',sans-serif;font-weight:700;font-size:22px;color:var(--navy);margin-top:48px;margin-bottom:16px;padding-bottom:8px;border-bottom:2px solid var(--bone)}
+h3{font-family:'Barlow',sans-serif;font-weight:700;font-size:17px;color:var(--graphite);margin-top:28px;margin-bottom:10px}
+p{margin-bottom:14px}
+ul,ol{padding-left:20px;margin-bottom:16px}
+li{margin-bottom:6px;color:var(--iron)}
+li::marker{color:var(--sblue)}
+.field{background:var(--bone);border:1px dashed var(--fog);border-radius:4px;padding:2px 8px;font-family:'Source Sans 3',sans-serif;font-weight:600;color:var(--sblue);white-space:nowrap}
+.sig-block{display:grid;grid-template-columns:1fr 1fr;gap:32px;margin-top:32px}
+.sig-line{border-top:1px solid var(--fog);padding-top:8px;margin-top:40px}
+.sig-line .label{font-family:'Barlow',sans-serif;font-weight:700;font-size:13px;color:var(--steel);text-transform:uppercase;letter-spacing:.3px}
+.section{border:1px solid var(--fog);border-radius:8px;padding:24px;margin:16px 0 32px;position:relative;overflow:hidden}
+.section::before{content:'';position:absolute;top:0;left:0;width:4px;height:100%;background:var(--sblue)}
+.section h3{margin-top:0}
+.context{background:rgba(61,90,128,.04);border:1px solid rgba(61,90,128,.15);border-radius:6px;padding:20px;margin:16px 0 24px}
+.context h3{margin-top:0;color:var(--navy)}
+.context li::marker{color:var(--navy)}
+.warning{background:rgba(194,59,34,.04);border:1px solid rgba(194,59,34,.15);border-radius:6px;padding:20px;margin:16px 0 24px}
+.warning h3{margin-top:0;color:var(--red)}
+.divider{height:1px;background:var(--fog);margin:40px 0}
+.field-row{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:14px}
+.field-row.three{grid-template-columns:1fr 1fr 1fr}
+.field-row.four{grid-template-columns:1fr 1fr 1fr 1fr}
+.field-label{font-family:'Barlow',sans-serif;font-weight:700;font-size:13px;color:var(--steel);text-transform:uppercase;letter-spacing:.3px;margin-bottom:4px}
+.field-box{background:var(--bone);border:1px dashed var(--fog);border-radius:4px;padding:10px 14px;min-height:38px;color:var(--sblue);font-weight:600}
+.header-block{background:var(--bone);border-radius:8px;padding:24px;margin-bottom:32px}
+.header-block p{margin-bottom:4px;font-size:14px;color:var(--steel)}
+.header-block .company{font-family:'Barlow',sans-serif;font-weight:800;font-size:18px;color:var(--navy);margin-bottom:8px}
+table.info{width:100%;border-collapse:collapse;margin:16px 0}
+table.info td{padding:8px 12px;border-bottom:1px solid var(--fog);vertical-align:top}
+table.info td:first-child{font-family:'Barlow',sans-serif;font-weight:700;font-size:13px;color:var(--steel);text-transform:uppercase;letter-spacing:.3px;width:180px;white-space:nowrap}
+table.info td:last-child{color:var(--iron)}
+@media(max-width:600px){
+  .doc{padding:28px 20px 60px}
+  h1{font-size:26px}
+  .sig-block{grid-template-columns:1fr}
+  .field-row,.field-row.three,.field-row.four{grid-template-columns:1fr}
+}
+</style>
+</head>
+<body>
+<div class="doc">
+
+<h1>Background Check Authorization</h1>
+<div class="subtitle">Consent form for running background checks on staff</div>
+
+
+<div class="header-block">
+<div class="company">Sheepdog Security &amp; Staffing LLC</div>
+<p>Bryan-College Station, TX</p>
+<p>(979) 204-0945 &bull; sheepdogsecurityllc@gmail.com</p>
+</div>
+
+<h2>Applicant / Contractor Information</h2>
+<table class="info">
+<tr><td>Full Legal Name</td><td><span class="field">[FULL LEGAL NAME]</span></td></tr>
+<tr><td>Date of Birth</td><td><span class="field">[DATE OF BIRTH]</span></td></tr>
+<tr><td>Social Security Number</td><td><span class="field">[SSN (last 4 may be used for initial screening)]</span></td></tr>
+<tr><td>Current Address</td><td><span class="field">[STREET ADDRESS]</span></td></tr>
+<tr><td>City, State, ZIP</td><td><span class="field">[CITY, STATE, ZIP]</span></td></tr>
+<tr><td>Driver's License Number</td><td><span class="field">[DL NUMBER]</span></td></tr>
+<tr><td>Driver's License State</td><td><span class="field">[DL STATE]</span></td></tr>
+</table>
+
+<h2>Disclosure (Fair Credit Reporting Act)</h2>
+<p>Sheepdog Security & Staffing LLC ("Sheepdog") may obtain a consumer report and/or investigative consumer report about you from a third-party consumer reporting agency in connection with your engagement as an independent contractor. This report may include information about your criminal history, identity, driving record, and sex offender registry status.</p>
+<p>This disclosure is being provided to you in accordance with the Fair Credit Reporting Act (FCRA), 15 U.S.C. § 1681 et seq.</p>
+
+<h2>Your Rights Under the FCRA</h2>
+<ul>
+<li>You have the right to request a copy of any consumer report obtained about you.</li>
+<li>Before Sheepdog takes any adverse action based in whole or in part on the report (such as declining to engage you or terminating your engagement), Sheepdog will provide you with a copy of the report and a summary of your rights under the FCRA.</li>
+<li>You have the right to dispute the accuracy or completeness of any information in the report directly with the consumer reporting agency.</li>
+<li>The consumer reporting agency did not make the decision to take adverse action and cannot explain why any such decision was made.</li>
+</ul>
+
+<h2>Authorization</h2>
+<p>By signing below, I authorize Sheepdog to obtain a consumer report about me for the purpose of evaluating my engagement as an independent contractor. This may include:</p>
+<ul>
+<li>Criminal history (county, state, and/or federal records)</li>
+<li>Sex offender registry check</li>
+<li>Identity verification</li>
+<li>Driving record (if applicable to the role)</li>
+</ul>
+
+<p>I further acknowledge the following:</p>
+<ol>
+<li>Sheepdog may use a third-party consumer reporting agency to conduct this check.</li>
+<li>The information I have provided is true and complete. False or misleading information may result in denial of engagement or termination.</li>
+<li>Sheepdog will keep all results confidential and will not share them with clients, venues, or third parties unless required by law.</li>
+<li>This authorization remains valid for the duration of my contractor relationship with Sheepdog. Sheepdog may obtain additional reports periodically with prior written notice.</li>
+<li>I may request a copy of any report obtained about me by contacting Sheepdog at sheepdogsecurityllc@gmail.com.</li>
+</ol>
+
+
+<div class="section">
+<h3>Governing Law</h3>
+<p>This document is governed by the laws of the State of Texas. Any disputes will be resolved in Brazos County, Texas.</p>
+</div>
+
+<div class="divider"></div>
+
+<p>I have read and understand this authorization and voluntarily consent to the background check described above.</p>
+
+<div class="sig-block">
+<div>
+<div class="sig-line">
+<div class="label">Applicant / Contractor Signature</div>
+</div>
+<div class="sig-line">
+<div class="label">Printed Name</div>
+</div>
+<div class="sig-line">
+<div class="label">Date</div>
+</div>
+</div>
+<div>
+<div class="sig-line">
+<div class="label">Sheepdog Representative</div>
+</div>
+<div class="sig-line">
+<div class="label">Date</div>
+</div>
+</div>
+</div>
+
+
+</div>
+</body>
+</html>
