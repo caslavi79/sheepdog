@@ -4,7 +4,7 @@
   --dark: #1E1E1E;
   --white: #FFFFFF;
   --red: #C23B22;
-  --steel: #7A8490;
+  --steel: #929BAA;
   --slate: #A0A0A0;
   --green: #357A38;
   --fh: 'Barlow', sans-serif;
@@ -850,7 +850,7 @@ a { color: inherit; text-decoration: none; }
 }
 .pipeline-header {
   display: flex;
-  align-items: flex-start;
+  align-items: baseline;
   justify-content: space-between;
   margin-bottom: 24px;
   flex-shrink: 0;

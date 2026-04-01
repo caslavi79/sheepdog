@@ -324,6 +324,7 @@ export default function Pipeline() {
   const [selected, setSelected] = useState(null)
   const [dragOverStage, setDragOverStage] = useState(null)
   const [dragError, setDragError] = useState('')
+  const [loadError, setLoadError] = useState('')
   const [toast, setToast] = useState('')
   const dragDeal = useRef(null)
 
@@ -332,7 +333,8 @@ export default function Pipeline() {
   const loadDeals = async () => {
     setLoading(true)
     const { data, error } = await supabase.from('pipeline').select('*').order('created_at', { ascending: false })
-    if (error) { console.error('Load deals error:', error.message) }
+    if (error) { setLoadError('Failed to load deals. Please refresh.'); console.error('Load deals error:', error.message) }
+    else { setLoadError('') }
     setDeals(data || [])
     setLoading(false)
   }
@@ -381,19 +383,25 @@ export default function Pipeline() {
   return (
     <div className="pipeline-page">
       <div className="pipeline-header">
-        <div>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
           <h1>Pipeline</h1>
-          <p>{deals.filter(d => d.stage !== 'lost').length} active deals
-            {totalPipelineValue > 0 && ` · $${totalPipelineValue.toLocaleString()} in play`}
-            {wonValue > 0 && ` · $${wonValue.toLocaleString()} under contract`}
-          </p>
+          <button className="clients-add-btn" onClick={() => setShowAdd(true)}>+ Add Deal</button>
         </div>
-        <button className="clients-add-btn" onClick={() => setShowAdd(true)}>+ Add Deal</button>
+        <p>{deals.filter(d => d.stage !== 'lost').length} active deals
+          {totalPipelineValue > 0 && ` · $${totalPipelineValue.toLocaleString()} in play`}
+          {wonValue > 0 && ` · $${wonValue.toLocaleString()} under contract`}
+        </p>
       </div>
 
       {dragError && (
         <div style={{ background: '#3d2020', border: '1px solid #C23B2244', color: '#C23B22', padding: '10px 16px', borderRadius: 4, fontSize: 13, marginBottom: 12 }}>
           {dragError}
+        </div>
+      )}
+
+      {loadError && (
+        <div style={{ background: '#3d2020', border: '1px solid #C23B2244', color: '#C23B22', padding: '10px 16px', borderRadius: 4, fontSize: 13, marginBottom: 12 }}>
+          {loadError} <button onClick={loadDeals} style={{ marginLeft: 8, background: 'none', border: '1px solid #C23B22', color: '#C23B22', padding: '4px 12px', borderRadius: 3, cursor: 'pointer' }}>Retry</button>
         </div>
       )}
 

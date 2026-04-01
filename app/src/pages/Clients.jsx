@@ -280,16 +280,18 @@ export default function Clients() {
   const [showAdd, setShowAdd] = useState(false)
   const [selected, setSelected] = useState(null)
   const [toast, setToast] = useState('')
+  const [loadError, setLoadError] = useState('')
 
   const showToast = (msg) => { setToast(msg); setTimeout(() => setToast(''), 3000) }
 
   const loadClients = async () => {
     setLoading(true)
+    setLoadError('')
     let q = supabase.from('clients').select('*').order('created_at', { ascending: false })
     if (filterLine) q = q.eq('service_line', filterLine)
     if (filterStatus) q = q.eq('status', filterStatus)
     const { data, error } = await q
-    if (error) { console.error('Load clients error:', error.message) }
+    if (error) { setLoadError('Failed to load clients. Please refresh.'); console.error('Load clients error:', error.message) }
     setClients(data || [])
     setLoading(false)
   }
@@ -331,6 +333,12 @@ export default function Clients() {
           {STATUSES.map(s => <option key={s} value={s}>{s}</option>)}
         </select>
       </div>
+
+      {loadError && (
+        <div style={{ background: '#3d2020', border: '1px solid #C23B2244', color: '#C23B22', padding: '10px 16px', borderRadius: 4, fontSize: 13, marginBottom: 12 }}>
+          {loadError} <button onClick={loadClients} style={{ marginLeft: 8, background: 'none', border: '1px solid #C23B22', color: '#C23B22', padding: '4px 12px', borderRadius: 3, cursor: 'pointer' }}>Retry</button>
+        </div>
+      )}
 
       {loading ? (
         <div className="clients-loading">Loading...</div>

@@ -26,6 +26,7 @@ export default function App() {
           <Route path="clients" element={<Clients />} />
           <Route path="financials" element={<Placeholder />} />
           <Route path="compliance" element={<Placeholder />} />
+          <Route path="*" element={<div className="placeholder"><h1>Page Not Found</h1><p>This page doesn't exist.</p></div>} />
         </Route>
       </Routes>
     </BrowserRouter>

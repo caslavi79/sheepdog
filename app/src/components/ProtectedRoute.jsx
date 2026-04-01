@@ -7,13 +7,11 @@ export default function ProtectedRoute({ children }) {
   const [user, setUser] = useState(null)
 
   useEffect(() => {
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      setUser(session?.user ?? null)
-      setLoading(false)
-    })
-
+    // Rely solely on onAuthStateChange to avoid race condition where
+    // getSession returns null before the recovery token exchange completes
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
       setUser(session?.user ?? null)
+      setLoading(false)
     })
 
     return () => subscription.unsubscribe()

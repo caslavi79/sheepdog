@@ -12,3 +12,4 @@ supabase/.temp/
 Item_2_InfoLetterEntity.pdf
 *.png
 !og-image.png
+*.pdf

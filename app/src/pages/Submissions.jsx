@@ -63,21 +63,22 @@ function SubmissionDetail({ sub, onClose }) {
 export default function Submissions() {
   const [submissions, setSubmissions] = useState([])
   const [loading, setLoading] = useState(true)
+  const [loadError, setLoadError] = useState('')
   const [selected, setSelected] = useState(null)
 
-  useEffect(() => {
-    const load = async () => {
-      setLoading(true)
-      const { data, error } = await supabase
-        .from('contact_submissions')
-        .select('*')
-        .order('created_at', { ascending: false })
-      if (error) console.error('Load submissions error:', error.message)
-      setSubmissions(data || [])
-      setLoading(false)
-    }
-    load()
-  }, [])
+  const load = async () => {
+    setLoading(true)
+    setLoadError('')
+    const { data, error } = await supabase
+      .from('contact_submissions')
+      .select('*')
+      .order('created_at', { ascending: false })
+    if (error) { setLoadError('Failed to load submissions. Please refresh.'); console.error('Load submissions error:', error.message) }
+    setSubmissions(data || [])
+    setLoading(false)
+  }
+
+  useEffect(() => { load() }, [])
 
   return (
     <div className="clients-page">
@@ -87,6 +88,12 @@ export default function Submissions() {
           <p>{submissions.length} contact form submission{submissions.length !== 1 ? 's' : ''}</p>
         </div>
       </div>
+
+      {loadError && (
+        <div style={{ background: '#3d2020', border: '1px solid #C23B2244', color: '#C23B22', padding: '10px 16px', borderRadius: 4, fontSize: 13, marginBottom: 12 }}>
+          {loadError} <button onClick={load} style={{ marginLeft: 8, background: 'none', border: '1px solid #C23B22', color: '#C23B22', padding: '4px 12px', borderRadius: 3, cursor: 'pointer' }}>Retry</button>
+        </div>
+      )}
 
       {loading ? (
         <div className="clients-loading">Loading...</div>
