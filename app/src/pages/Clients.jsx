@@ -231,7 +231,7 @@ function ClientDetail({ client, onClose, onUpdated, onDeleted }) {
                   {contracts.map(c => (
                     <div key={c.id} className="detail-list-item">
                       {c.sign_token ? (
-                        <a href={`https://sezzqhmsfulclcqmfwja.supabase.co/functions/v1/contract-sign?token=${c.sign_token}`} target="_blank" rel="noopener noreferrer" style={{ color: '#7EAAF2', textDecoration: 'none' }}>{c.title || c.template_name}</a>
+                        <a href={`${import.meta.env.VITE_SUPABASE_URL}/functions/v1/contract-sign?token=${c.sign_token}`} target="_blank" rel="noopener noreferrer" style={{ color: '#7EAAF2', textDecoration: 'none' }}>{c.title || c.template_name}</a>
                       ) : (
                         <span>{c.title || c.template_name}</span>
                       )}
