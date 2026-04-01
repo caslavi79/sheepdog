@@ -1,7 +1,7 @@
-import { useState, useEffect, useCallback } from 'react'
+import { useState, useEffect } from 'react'
 import { supabase } from '../lib/supabase'
 import { useEscapeKey, useBodyLock, useToast } from '../lib/hooks'
-import { badgeStyle, COLORS } from '../lib/format'
+import { COLORS } from '../lib/format'
 
 const CONTRACT_CATEGORIES = ['Client Contracts — Events', 'Client Contracts — Staffing', 'Staff & Contractor', 'Reporting & Operations']
 
@@ -69,17 +69,18 @@ function FillSendModal({ resource, onClose, showToast }) {
 
   // Load template and extract fields
   useEffect(() => {
-    fetch(resource.file).then(r => r.text()).then(html => {
-      setTemplateHtml(html)
-      // Extract [FIELD NAME] from <span class="field"> tags
-      const matches = html.match(/<span class="field">\[([^\]]+)\]/g) || []
-      const fieldNames = [...new Set(matches.map(m => m.replace(/<span class="field">\[/, '').replace(/\].*/, '')))]
-      setFields(fieldNames)
-      const initial = {}
-      fieldNames.forEach(f => { initial[f] = '' })
-      setValues(initial)
-    })
-    // Load clients for autocomplete
+    fetch(resource.file)
+      .then(r => { if (!r.ok) throw new Error(`HTTP ${r.status}`); return r.text() })
+      .then(html => {
+        setTemplateHtml(html)
+        const matches = html.match(/<span class="field">\[([^\]]+)\]/g) || []
+        const fieldNames = [...new Set(matches.map(m => m.replace(/<span class="field">\[/, '').replace(/\].*/, '')))]
+        setFields(fieldNames)
+        const initial = {}
+        fieldNames.forEach(f => { initial[f] = '' })
+        setValues(initial)
+      })
+      .catch(err => { setError(`Failed to load template: ${err.message}`); if (import.meta.env.DEV) console.error('Template fetch:', err) })
     supabase.from('clients').select('id, contact_name, business_name, email, phone').order('business_name').then(({ data }) => setClients(data || []))
   }, [resource.file])
 
@@ -133,11 +134,13 @@ function FillSendModal({ resource, onClose, showToast }) {
     if (insertErr || !contract) { setError(insertErr?.message || 'Failed to create contract'); setSaving(false); return }
 
     // Send via edge function
+    const { data: { session } } = await supabase.auth.getSession()
+    if (!session?.access_token) { setError('Session expired. Please refresh and try again.'); setSaving(false); return }
     const res = await fetch(`${import.meta.env.VITE_SUPABASE_URL}/functions/v1/contract-send`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        'Authorization': `Bearer ${(await supabase.auth.getSession()).data.session?.access_token}`,
+        'Authorization': `Bearer ${session.access_token}`,
       },
       body: JSON.stringify({ contract_id: contract.id }),
     })
@@ -185,7 +188,7 @@ function FillSendModal({ resource, onClose, showToast }) {
             )}
             <div className="modal-actions" style={{ marginTop: 16 }}>
               <button className="modal-btn-cancel" onClick={onClose}>Cancel</button>
-              <button className="modal-btn-save" onClick={() => setStep('preview')}>Preview Contract</button>
+              <button className="modal-btn-save" onClick={() => setStep('preview')} disabled={!Object.values(values).some(v => v.trim())}>Preview Contract</button>
             </div>
           </div>
         )}
@@ -194,11 +197,11 @@ function FillSendModal({ resource, onClose, showToast }) {
         {step === 'preview' && (
           <div>
             <div style={{ background: '#fff', borderRadius: 8, padding: 24, maxHeight: 500, overflow: 'auto', border: '1px solid rgba(255,255,255,0.1)' }}>
-              <iframe srcDoc={filledHtml} style={{ width: '100%', height: 500, border: 'none', background: '#fff' }} title="Contract Preview" />
+              <iframe srcDoc={filledHtml} sandbox="allow-same-origin" style={{ width: '100%', height: 500, border: 'none', background: '#fff' }} title="Contract Preview" />
             </div>
             <div className="modal-actions" style={{ marginTop: 16 }}>
               <button className="modal-btn-cancel" onClick={() => setStep('fill')}>Back to Edit</button>
-              <button className="modal-btn-save" onClick={() => setStep('send')}>Continue to Send</button>
+              <button className="modal-btn-save" onClick={() => setStep('send')} disabled={!signerEmail.trim()}>Continue to Send</button>
             </div>
           </div>
         )}

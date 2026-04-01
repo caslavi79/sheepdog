@@ -66,5 +66,27 @@ else
   echo "  Check: https://supabase.com/dashboard/project/$PROJECT_REF/functions/license-reminders/logs"
 fi
 
+# Verify contract-sign
+RESPONSE3=$(curl -s -o /dev/null -w "%{http_code}" \
+  "https://$PROJECT_REF.supabase.co/functions/v1/contract-sign?token=00000000-0000-0000-0000-000000000000")
+
+if [ "$RESPONSE3" = "404" ]; then
+  echo "  contract-sign: alive (GET $RESPONSE3 — expected for invalid token)"
+else
+  echo "  contract-sign: WARNING — returned $RESPONSE3"
+  echo "  Check: https://supabase.com/dashboard/project/$PROJECT_REF/functions/contract-sign/logs"
+fi
+
+# Verify contract-send (expects 405 on GET since it's POST-only)
+RESPONSE4=$(curl -s -o /dev/null -w "%{http_code}" \
+  "https://$PROJECT_REF.supabase.co/functions/v1/contract-send")
+
+if [ "$RESPONSE4" = "405" ]; then
+  echo "  contract-send: alive (GET $RESPONSE4 — expected, POST only)"
+else
+  echo "  contract-send: WARNING — returned $RESPONSE4"
+  echo "  Check: https://supabase.com/dashboard/project/$PROJECT_REF/functions/contract-send/logs"
+fi
+
 echo ""
 echo "Done."

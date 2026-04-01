@@ -135,7 +135,7 @@ CREATE TABLE IF NOT EXISTS public.contracts (
 
 CREATE INDEX IF NOT EXISTS idx_contracts_client ON public.contracts (client_id);
 CREATE INDEX IF NOT EXISTS idx_contracts_status ON public.contracts (status);
-CREATE INDEX IF NOT EXISTS idx_contracts_token ON public.contracts (sign_token);
+CREATE UNIQUE INDEX IF NOT EXISTS idx_contracts_token ON public.contracts (sign_token);
 CREATE TABLE IF NOT EXISTS public.placements (
   id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
   client_id uuid REFERENCES public.clients(id),

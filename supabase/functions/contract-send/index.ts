@@ -6,7 +6,7 @@ const RESEND_API_KEY = Deno.env.get("RESEND_API_KEY")!;
 const BRAND_NAME = Deno.env.get("BRAND_NAME") || "Company";
 const BRAND_FROM_EMAIL = Deno.env.get("BRAND_FROM_EMAIL") || "noreply@example.com";
 const BRAND_REPLY_TO = Deno.env.get("BRAND_REPLY_TO") || "";
-const BRAND_COLOR = Deno.env.get("BRAND_COLOR") || "#0C0C0C";
+const BRAND_COLOR = (Deno.env.get("BRAND_COLOR") || "#0C0C0C").replace(/[^#0-9A-Fa-f]/g, "").slice(0, 7) || "#0C0C0C";
 const BRAND_LOGO_URL = Deno.env.get("BRAND_LOGO_URL") || "";
 const SIGNING_BASE_URL = Deno.env.get("SIGNING_BASE_URL") || "";
 
@@ -57,6 +57,18 @@ Deno.serve(async (req: Request) => {
       });
     }
 
+    if (contract.status === "signed") {
+      return new Response(JSON.stringify({ success: false, error: "Contract is already signed" }), {
+        status: 400, headers: { "Content-Type": "application/json" },
+      });
+    }
+
+    if (!SIGNING_BASE_URL) {
+      return new Response(JSON.stringify({ success: false, error: "Signing URL not configured" }), {
+        status: 500, headers: { "Content-Type": "application/json" },
+      });
+    }
+
     const signingUrl = `${SIGNING_BASE_URL}?token=${contract.sign_token}`;
     const title = contract.title || contract.template_name || "Contract";
 
@@ -102,7 +114,7 @@ Deno.serve(async (req: Request) => {
 
     if (!emailRes.ok) {
       console.error("Resend error:", JSON.stringify(emailResult));
-      return new Response(JSON.stringify({ success: false, error: "Failed to send email", detail: emailResult }), {
+      return new Response(JSON.stringify({ success: false, error: "Failed to send email" }), {
         status: 500, headers: { "Content-Type": "application/json" },
       });
     }

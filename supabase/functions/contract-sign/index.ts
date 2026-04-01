@@ -6,7 +6,7 @@ const RESEND_API_KEY = Deno.env.get("RESEND_API_KEY")!;
 const BRAND_NAME = Deno.env.get("BRAND_NAME") || "Company";
 const BRAND_FROM_EMAIL = Deno.env.get("BRAND_FROM_EMAIL") || "noreply@example.com";
 const BRAND_REPLY_TO = Deno.env.get("BRAND_REPLY_TO") || "";
-const BRAND_COLOR = Deno.env.get("BRAND_COLOR") || "#0C0C0C";
+const BRAND_COLOR = (Deno.env.get("BRAND_COLOR") || "#0C0C0C").replace(/[^#0-9A-Fa-f]/g, "").slice(0, 7) || "#0C0C0C";
 const BRAND_LOGO_URL = Deno.env.get("BRAND_LOGO_URL") || "";
 
 const NOTIFY_EMAILS = [
@@ -115,7 +115,7 @@ Deno.serve(async (req: Request) => {
           const draw = (e) => { if (!drawing) return; e.preventDefault(); hasDrawn = true; const [x,y] = getPos(e); ctx.lineTo(x,y); ctx.strokeStyle = '${BRAND_COLOR}'; ctx.lineWidth = 2.5; ctx.lineCap = 'round'; ctx.stroke(); };
           const stop = () => { drawing = false; };
           canvas.addEventListener('mousedown', start); canvas.addEventListener('mousemove', draw); canvas.addEventListener('mouseup', stop); canvas.addEventListener('mouseleave', stop);
-          canvas.addEventListener('touchstart', start); canvas.addEventListener('touchmove', draw); canvas.addEventListener('touchend', stop);
+          canvas.addEventListener('touchstart', start); canvas.addEventListener('touchmove', draw); canvas.addEventListener('touchend', stop); canvas.addEventListener('touchcancel', stop);
           document.getElementById('clearBtn').addEventListener('click', () => { ctx.clearRect(0, 0, canvas.width, canvas.height); hasDrawn = false; });
 
           document.getElementById('signForm').addEventListener('submit', async (e) => {
@@ -171,16 +171,23 @@ Deno.serve(async (req: Request) => {
         });
       }
 
-      const signerIp = req.headers.get("x-real-ip") || req.headers.get("cf-connecting-ip") || req.headers.get("x-forwarded-for") || "unknown";
+      const signerIp = req.headers.get("x-real-ip") || req.headers.get("cf-connecting-ip") || req.headers.get("x-forwarded-for")?.split(",")[0]?.trim() || "unknown";
 
-      const { error: updateErr } = await supabase.from("contracts").update({
+      // Atomic update: only sign if still in signable state (prevents double-sign race)
+      const { data: updated, error: updateErr } = await supabase.from("contracts").update({
         status: "signed",
         signer_name,
         signature_data,
         signed_at: new Date().toISOString(),
         signer_ip: signerIp,
         updated_at: new Date().toISOString(),
-      }).eq("id", contract.id);
+      }).eq("id", contract.id).in("status", ["sent", "viewed"]).select("id");
+
+      if (!updated || updated.length === 0) {
+        return new Response(JSON.stringify({ success: false, error: "Contract was already signed" }), {
+          status: 409, headers: { ...corsHeaders, "Content-Type": "application/json" },
+        });
+      }
 
       if (updateErr) {
         return new Response(JSON.stringify({ success: false, error: "Failed to save signature" }), {
@@ -218,7 +225,8 @@ Deno.serve(async (req: Request) => {
         }),
       ];
 
-      await Promise.allSettled(emailPromises);
+      const results = await Promise.allSettled(emailPromises);
+      results.forEach((r, i) => { if (r.status === 'rejected') console.error(`Email ${i} failed:`, r.reason) });
 
       return new Response(JSON.stringify({ success: true }), {
         status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" },
