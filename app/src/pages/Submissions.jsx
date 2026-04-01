@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react'
 import { supabase } from '../lib/supabase'
+import { useEscapeKey, useBodyLock } from '../lib/hooks'
 
 const SERVICE_LABELS = {
   'events-security': 'Event Security',
@@ -15,16 +16,11 @@ const SERVICE_LABELS = {
   'other': 'Not sure yet',
 }
 
-function useEscapeKey(onClose) {
-  useEffect(() => {
-    const handler = (e) => { if (e.key === 'Escape') onClose() }
-    document.addEventListener('keydown', handler)
-    return () => document.removeEventListener('keydown', handler)
-  }, [onClose])
-}
+const PAGE_SIZE = 25
 
 function SubmissionDetail({ sub, onClose }) {
   useEscapeKey(onClose)
+  useBodyLock()
   const date = new Date(sub.created_at)
 
   return (
@@ -65,27 +61,35 @@ export default function Submissions() {
   const [loading, setLoading] = useState(true)
   const [loadError, setLoadError] = useState('')
   const [selected, setSelected] = useState(null)
+  const [page, setPage] = useState(0)
+  const [totalCount, setTotalCount] = useState(0)
 
   const load = async () => {
     setLoading(true)
     setLoadError('')
-    const { data, error } = await supabase
+    const from = page * PAGE_SIZE
+    const to = from + PAGE_SIZE - 1
+    const { data, count, error } = await supabase
       .from('contact_submissions')
-      .select('*')
+      .select('*', { count: 'exact' })
       .order('created_at', { ascending: false })
+      .range(from, to)
     if (error) { setLoadError('Failed to load submissions. Please refresh.'); if (import.meta.env.DEV) console.error('Load submissions error:', error.message) }
     setSubmissions(data || [])
+    setTotalCount(count || 0)
     setLoading(false)
   }
 
-  useEffect(() => { load() }, [])
+  useEffect(() => { load() }, [page])
+
+  const totalPages = Math.ceil(totalCount / PAGE_SIZE)
 
   return (
     <div className="clients-page">
       <div className="clients-header">
         <div>
           <h1>Submissions</h1>
-          <p>{submissions.length} contact form submission{submissions.length !== 1 ? 's' : ''}</p>
+          <p>{totalCount} contact form submission{totalCount !== 1 ? 's' : ''}</p>
         </div>
       </div>
 
@@ -126,6 +130,14 @@ export default function Submissions() {
               })}
             </tbody>
           </table>
+        </div>
+      )}
+
+      {totalPages > 1 && (
+        <div className="pagination">
+          <button className="pagination-btn" disabled={page === 0} onClick={() => setPage(p => p - 1)}>Prev</button>
+          <span className="pagination-info">Page {page + 1} of {totalPages}</span>
+          <button className="pagination-btn" disabled={page >= totalPages - 1} onClick={() => setPage(p => p + 1)}>Next</button>
         </div>
       )}
 

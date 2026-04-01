@@ -9,13 +9,12 @@ const ALLOWED_ORIGINS = [
   "https://www.sheepdogtexas.com",
 ];
 
-function getCorsHeaders(requestOrigin: string | null): Record<string, string> {
-  const origin =
-    requestOrigin && ALLOWED_ORIGINS.includes(requestOrigin)
-      ? requestOrigin
-      : ALLOWED_ORIGINS[0];
+function getCorsHeaders(requestOrigin: string | null): Record<string, string> | null {
+  if (!requestOrigin || !ALLOWED_ORIGINS.includes(requestOrigin)) {
+    return null;
+  }
   return {
-    "Access-Control-Allow-Origin": origin,
+    "Access-Control-Allow-Origin": requestOrigin,
     "Access-Control-Allow-Headers":
       "authorization, x-client-info, apikey, content-type",
     "Access-Control-Allow-Methods": "POST, OPTIONS",
@@ -74,13 +73,14 @@ Deno.serve(async (req) => {
   const corsHeaders = getCorsHeaders(requestOrigin);
 
   if (req.method === "OPTIONS") {
+    if (!corsHeaders) return new Response("Forbidden", { status: 403 });
     return new Response("ok", { headers: corsHeaders });
   }
 
   if (req.method !== "POST") {
     return new Response(JSON.stringify({ error: "Method not allowed" }), {
       status: 405,
-      headers: { ...corsHeaders, "Content-Type": "application/json" },
+      headers: { ...(corsHeaders || {}), "Content-Type": "application/json" },
     });
   }
 
@@ -92,14 +92,14 @@ Deno.serve(async (req) => {
     } catch {
       return new Response(JSON.stringify({ error: "Invalid JSON body" }), {
         status: 400,
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
+        headers: { ...(corsHeaders || {}), "Content-Type": "application/json" },
       });
     }
 
     // Honeypot
     if (body.website || body.confirm_email_hp) {
       return new Response(JSON.stringify({ success: true }), {
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
+        headers: { ...(corsHeaders || {}), "Content-Type": "application/json" },
       });
     }
 
@@ -115,7 +115,7 @@ Deno.serve(async (req) => {
         typeof service !== "string" || typeof message !== "string") {
       return new Response(JSON.stringify({ error: "Invalid field types" }), {
         status: 400,
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
+        headers: { ...(corsHeaders || {}), "Content-Type": "application/json" },
       });
     }
 
@@ -123,7 +123,7 @@ Deno.serve(async (req) => {
     if (!name || !email || !service || !message) {
       return new Response(
         JSON.stringify({ error: "Name, email, service, and message are required" }),
-        { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } },
+        { status: 400, headers: { ...(corsHeaders || {}), "Content-Type": "application/json" } },
       );
     }
 
@@ -131,7 +131,7 @@ Deno.serve(async (req) => {
     if (name.length > 200 || email.length > 320 || message.length > 5000) {
       return new Response(JSON.stringify({ error: "Input too long" }), {
         status: 400,
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
+        headers: { ...(corsHeaders || {}), "Content-Type": "application/json" },
       });
     }
 
@@ -139,7 +139,7 @@ Deno.serve(async (req) => {
     if (!VALID_SERVICES.includes(service)) {
       return new Response(JSON.stringify({ error: "Invalid service type" }), {
         status: 400,
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
+        headers: { ...(corsHeaders || {}), "Content-Type": "application/json" },
       });
     }
 
@@ -148,7 +148,7 @@ Deno.serve(async (req) => {
     if (!emailRegex.test(email)) {
       return new Response(JSON.stringify({ error: "Invalid email format" }), {
         status: 400,
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
+        headers: { ...(corsHeaders || {}), "Content-Type": "application/json" },
       });
     }
 
@@ -175,14 +175,14 @@ Deno.serve(async (req) => {
       // Fail closed
       return new Response(
         JSON.stringify({ error: "Too many requests. Please try again in a few minutes." }),
-        { status: 429, headers: { ...corsHeaders, "Content-Type": "application/json" } },
+        { status: 429, headers: { ...(corsHeaders || {}), "Content-Type": "application/json" } },
       );
     }
 
     if ((count ?? 0) >= RATE_LIMIT_MAX) {
       return new Response(
         JSON.stringify({ error: "Too many requests. Please try again in a few minutes." }),
-        { status: 429, headers: { ...corsHeaders, "Content-Type": "application/json" } },
+        { status: 429, headers: { ...(corsHeaders || {}), "Content-Type": "application/json" } },
       );
     }
 
@@ -203,7 +203,7 @@ Deno.serve(async (req) => {
       if (!dns || dns.length === 0) {
         return new Response(JSON.stringify({ error: "Email domain does not accept mail" }), {
           status: 400,
-          headers: { ...corsHeaders, "Content-Type": "application/json" },
+          headers: { ...(corsHeaders || {}), "Content-Type": "application/json" },
         });
       }
     } catch {
@@ -330,13 +330,13 @@ Deno.serve(async (req) => {
     else if (!confRes.value.ok) console.error("Confirmation email error:", await confRes.value.text());
 
     return new Response(JSON.stringify({ success: true }), {
-      headers: { ...corsHeaders, "Content-Type": "application/json" },
+      headers: { ...(corsHeaders || {}), "Content-Type": "application/json" },
     });
   } catch (err) {
     console.error("Contact submit error:", err);
     return new Response(JSON.stringify({ error: "Internal server error" }), {
       status: 500,
-      headers: { ...getCorsHeaders(req.headers.get("origin")), "Content-Type": "application/json" },
+      headers: { ...(getCorsHeaders(req.headers.get("origin")) || {}), "Content-Type": "application/json" },
     });
   }
 });

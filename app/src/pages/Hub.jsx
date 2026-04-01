@@ -1,4 +1,6 @@
+import { useState, useEffect } from 'react'
 import { Link } from 'react-router-dom'
+import { supabase } from '../lib/supabase'
 
 const icons = {
   resources: <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><path d="M4 19.5v-15A2.5 2.5 0 0 1 6.5 2H20v20H6.5a2.5 2.5 0 0 1 0-5H20"/><path d="M8 7h6"/><path d="M8 11h4"/></svg>,
@@ -56,11 +58,50 @@ const modules = [
 ]
 
 export default function Hub() {
+  const [stats, setStats] = useState({ leads: '—', pipelineValue: '—', submissions7d: '—', activeClients: '—' })
+
+  useEffect(() => {
+    const sevenDaysAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString()
+    Promise.all([
+      supabase.from('pipeline').select('stage, value'),
+      supabase.from('contact_submissions').select('id', { count: 'exact', head: true }).gte('created_at', sevenDaysAgo),
+      supabase.from('clients').select('id', { count: 'exact', head: true }).eq('status', 'active'),
+    ]).then(([pipelineRes, subsRes, clientsRes]) => {
+      const deals = pipelineRes.data || []
+      const leads = deals.filter(d => d.stage === 'lead').length
+      const pipelineValue = deals.filter(d => d.stage !== 'lost').reduce((sum, d) => sum + (parseFloat(d.value) || 0), 0)
+      setStats({
+        leads,
+        pipelineValue: pipelineValue > 0 ? `$${pipelineValue.toLocaleString()}` : '$0',
+        submissions7d: subsRes.count ?? 0,
+        activeClients: clientsRes.count ?? 0,
+      })
+    })
+  }, [])
+
   return (
     <div className="hub">
       <div className="hub-header">
         <h1>Sheepdog HQ</h1>
         <p>Operations dashboard for Sheepdog Security LLC</p>
+      </div>
+      <div className="hub-stats">
+        <div className="hub-stat-card">
+          <div className="hub-stat-value">{stats.leads}</div>
+          <div className="hub-stat-label">New Leads</div>
+        </div>
+        <div className="hub-stat-card">
+          <div className="hub-stat-value">{stats.pipelineValue}</div>
+          <div className="hub-stat-label">Pipeline Value</div>
+        </div>
+        <div className="hub-stat-card">
+          <div className="hub-stat-value">{stats.submissions7d}</div>
+          <div className="hub-stat-label">Submissions (7d)</div>
+        </div>
+        <div className="hub-stat-card">
+          <div className="hub-stat-value">{stats.activeClients}</div>
+          <div className="hub-stat-label">Active Clients</div>
+        </div>
       </div>
       <div className="hub-grid">
         {modules.map((mod) => (

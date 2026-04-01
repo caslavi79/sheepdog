@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback } from 'react'
 import { supabase } from '../lib/supabase'
+import { useEscapeKey, useBodyLock, useToast } from '../lib/hooks'
 
 const SERVICE_LINES = ['events', 'staffing', 'both']
 const STATUSES = ['active', 'inactive', 'prospect']
@@ -45,16 +46,9 @@ function ServiceBadge({ line }) {
   )
 }
 
-function useEscapeKey(onClose) {
-  useEffect(() => {
-    const handler = (e) => { if (e.key === 'Escape') onClose() }
-    document.addEventListener('keydown', handler)
-    return () => document.removeEventListener('keydown', handler)
-  }, [onClose])
-}
-
 function AddClientModal({ onClose, onSaved }) {
   useEscapeKey(onClose)
+  useBodyLock()
   const [form, setForm] = useState({
     contact_name: '', business_name: '', phone: '', email: '',
     address: '', service_line: 'events', client_type: '', status: 'prospect', notes: ''
@@ -137,29 +131,39 @@ function AddClientModal({ onClose, onSaved }) {
   )
 }
 
-function ClientDetail({ client, onClose, onUpdated }) {
+function ClientDetail({ client, onClose, onUpdated, onDeleted }) {
   useEscapeKey(onClose)
+  useBodyLock()
   const [editing, setEditing] = useState(false)
   const [form, setForm] = useState(client)
   const [saving, setSaving] = useState(false)
   const [saveError, setSaveError] = useState('')
+  const [confirmDelete, setConfirmDelete] = useState(false)
   const [events, setEvents] = useState([])
   const [invoices, setInvoices] = useState([])
 
   useEffect(() => {
     supabase.from('events').select('*').eq('client_id', client.id).order('date', { ascending: false }).limit(5)
-      .then(({ data, error }) => { if (!error) setEvents(data || []) })
+      .then(({ data, error }) => { if (error) { if (import.meta.env.DEV) console.error('Events fetch error:', error.message) } else setEvents(data || []) })
     supabase.from('invoices').select('*').eq('client_id', client.id).order('created_at', { ascending: false }).limit(5)
-      .then(({ data, error }) => { if (!error) setInvoices(data || []) })
+      .then(({ data, error }) => { if (error) { if (import.meta.env.DEV) console.error('Invoices fetch error:', error.message) } else setInvoices(data || []) })
   }, [client.id])
 
   const handleSave = async () => {
     setSaving(true)
     setSaveError('')
-    const { error } = await supabase.from('clients').update({ ...form, updated_at: new Date().toISOString() }).eq('id', client.id)
+    const { id, created_at, ...rest } = form
+    const { error } = await supabase.from('clients').update({ ...rest, updated_at: new Date().toISOString() }).eq('id', client.id)
     setSaving(false)
     if (error) { setSaveError(error.message); return }
     setEditing(false); onUpdated()
+  }
+
+  const handleDelete = async () => {
+    const { error } = await supabase.from('clients').delete().eq('id', client.id)
+    if (error) { if (import.meta.env.DEV) console.error('Delete error:', error.message); setConfirmDelete(false); return }
+    onDeleted()
+    onClose()
   }
 
   return (
@@ -217,7 +221,16 @@ function ClientDetail({ client, onClose, onUpdated }) {
               )}
             </div>
 
-            <div className="detail-actions">
+            <div className="detail-actions" style={{ justifyContent: 'space-between' }}>
+              {confirmDelete ? (
+                <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
+                  <span style={{ fontSize: 13, color: '#C23B22' }}>Delete this client?</span>
+                  <button className="modal-btn-cancel" onClick={() => setConfirmDelete(false)}>No</button>
+                  <button className="modal-btn-save" style={{ background: '#C23B22' }} onClick={handleDelete}>Yes, Delete</button>
+                </div>
+              ) : (
+                <button className="modal-btn-cancel" style={{ color: '#C23B22', borderColor: '#C23B2244' }} onClick={() => setConfirmDelete(true)}>Delete</button>
+              )}
               <button className="modal-btn-save" onClick={() => setEditing(true)}>Edit Client</button>
             </div>
           </div>
@@ -271,6 +284,8 @@ function ClientDetail({ client, onClose, onUpdated }) {
   )
 }
 
+const CLIENTS_PAGE_SIZE = 25
+
 export default function Clients() {
   const [clients, setClients] = useState([])
   const [loading, setLoading] = useState(true)
@@ -281,22 +296,30 @@ export default function Clients() {
   const [selected, setSelected] = useState(null)
   const [toast, setToast] = useState('')
   const [loadError, setLoadError] = useState('')
+  const [page, setPage] = useState(0)
+  const [totalCount, setTotalCount] = useState(0)
 
-  const showToast = (msg) => { setToast(msg); setTimeout(() => setToast(''), 3000) }
+  const fireToast = useToast()
+  const showToast = (msg) => fireToast(setToast, msg)
 
   const loadClients = async () => {
     setLoading(true)
     setLoadError('')
-    let q = supabase.from('clients').select('*').order('created_at', { ascending: false })
+    const from = page * CLIENTS_PAGE_SIZE
+    const to = from + CLIENTS_PAGE_SIZE - 1
+    let q = supabase.from('clients').select('*', { count: 'exact' }).order('created_at', { ascending: false })
     if (filterLine) q = q.eq('service_line', filterLine)
     if (filterStatus) q = q.eq('status', filterStatus)
-    const { data, error } = await q
+    q = q.range(from, to)
+    const { data, count, error } = await q
     if (error) { setLoadError('Failed to load clients. Please refresh.'); if (import.meta.env.DEV) console.error('Load clients error:', error.message) }
     setClients(data || [])
+    setTotalCount(count || 0)
     setLoading(false)
   }
 
-  useEffect(() => { loadClients() }, [filterLine, filterStatus])
+  useEffect(() => { setPage(0) }, [filterLine, filterStatus])
+  useEffect(() => { loadClients() }, [filterLine, filterStatus, page])
 
   const filtered = clients.filter(c => {
     if (!search) return true
@@ -312,7 +335,7 @@ export default function Clients() {
       <div className="clients-header">
         <div>
           <h1>Clients</h1>
-          <p>{clients.length} total clients</p>
+          <p>{totalCount} total client{totalCount !== 1 ? 's' : ''}</p>
         </div>
         <button className="clients-add-btn" onClick={() => setShowAdd(true)}>+ Add Client</button>
       </div>
@@ -375,9 +398,17 @@ export default function Clients() {
         </div>
       )}
 
+      {Math.ceil(totalCount / CLIENTS_PAGE_SIZE) > 1 && (
+        <div className="pagination">
+          <button className="pagination-btn" disabled={page === 0} onClick={() => setPage(p => p - 1)}>Prev</button>
+          <span className="pagination-info">Page {page + 1} of {Math.ceil(totalCount / CLIENTS_PAGE_SIZE)}</span>
+          <button className="pagination-btn" disabled={page >= Math.ceil(totalCount / CLIENTS_PAGE_SIZE) - 1} onClick={() => setPage(p => p + 1)}>Next</button>
+        </div>
+      )}
+
       {toast && <div className="toast">{toast}</div>}
       {showAdd && <AddClientModal onClose={() => setShowAdd(false)} onSaved={() => { loadClients(); showToast('Client added') }} />}
-      {selected && <ClientDetail client={selected} onClose={() => setSelected(null)} onUpdated={() => { loadClients(); setSelected(null); showToast('Client updated') }} />}
+      {selected && <ClientDetail client={selected} onClose={() => setSelected(null)} onUpdated={() => { loadClients(); setSelected(null); showToast('Client updated') }} onDeleted={() => { loadClients(); setSelected(null); showToast('Client deleted') }} />}
     </div>
   )
 }

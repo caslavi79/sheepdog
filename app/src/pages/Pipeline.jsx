@@ -1,13 +1,6 @@
 import { useState, useEffect, useRef } from 'react'
 import { supabase } from '../lib/supabase'
-
-function useEscapeKey(onClose) {
-  useEffect(() => {
-    const handler = (e) => { if (e.key === 'Escape') onClose() }
-    document.addEventListener('keydown', handler)
-    return () => document.removeEventListener('keydown', handler)
-  }, [onClose])
-}
+import { useEscapeKey, useBodyLock, useToast } from '../lib/hooks'
 
 const STAGES = [
   { id: 'lead', label: 'Lead' },
@@ -45,13 +38,6 @@ function ServiceDot({ line }) {
       flexShrink: 0,
     }} />
   )
-}
-
-function useBodyLock() {
-  useEffect(() => {
-    document.body.classList.add('modal-open')
-    return () => document.body.classList.remove('modal-open')
-  }, [])
 }
 
 function AddDealModal({ onClose, onSaved }) {
@@ -149,8 +135,9 @@ function DealDetailModal({ deal, onClose, onUpdated, onDeleted }) {
   const handleSave = async () => {
     setSaving(true)
     setSaveError('')
+    const { id, created_at, ...rest } = form
     const payload = {
-      ...form,
+      ...rest,
       value: form.value !== '' && form.value !== null ? parseFloat(form.value) : null,
       updated_at: new Date().toISOString(),
     }
@@ -195,6 +182,7 @@ function DealDetailModal({ deal, onClose, onUpdated, onDeleted }) {
                 <div className="detail-item"><span className="detail-label">Email</span><span>{deal.email || '—'}</span></div>
                 <div className="detail-item"><span className="detail-label">Service</span><span style={{ display: 'flex', alignItems: 'center' }}><ServiceDot line={deal.service_line} />{deal.service_line}</span></div>
                 <div className="detail-item"><span className="detail-label">Est. Value</span><span>{deal.value != null ? `$${Number(deal.value).toLocaleString()}` : '—'}</span></div>
+                <div className="detail-item"><span className="detail-label">Source</span><span>{deal.source === 'contact_form' ? 'Contact Form' : deal.source || 'Manual'}</span></div>
               </div>
               {deal.notes && <div className="detail-notes"><span className="detail-label">Notes</span><p>{deal.notes}</p></div>}
             </div>
@@ -352,12 +340,13 @@ export default function Pipeline() {
   const [loadError, setLoadError] = useState('')
   const [toast, setToast] = useState('')
   const dragDeal = useRef(null)
+  const fireToast = useToast()
 
-  const showToast = (msg) => { setToast(msg); setTimeout(() => setToast(''), 3000) }
+  const showToast = (msg) => fireToast(setToast, msg)
 
   const loadDeals = async () => {
     setLoading(true)
-    const { data, error } = await supabase.from('pipeline').select('*').order('created_at', { ascending: false })
+    const { data, error } = await supabase.from('pipeline').select('*').order('created_at', { ascending: false }).limit(100)
     if (error) { setLoadError('Failed to load deals. Please refresh.'); if (import.meta.env.DEV) console.error('Load deals error:', error.message) }
     else { setLoadError('') }
     setDeals(data || [])

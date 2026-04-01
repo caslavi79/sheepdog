@@ -538,7 +538,7 @@ a:focus-visible,button:focus-visible{outline:2px solid var(--amber);outline-offs
 <h1 class="sr-only">Event Security &amp; Mobile Bartending in Bryan-College Station TX</h1>
 <!-- HERO = DUAL CARDS -->
 <section class="hero">
-<div class="hero-card hero-card--sec si-left" id="cardSec" onclick="expandCard('sec')">
+<div class="hero-card hero-card--sec si-left" id="cardSec" role="button" tabindex="0" onclick="expandCard('sec')" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();expandCard('sec')}">
 <div class="hero-intro">
 <h2 style="color:var(--amber)">Event<br>Security</h2>
 <div class="hero-mood">A presence that protects</div>
@@ -573,7 +573,7 @@ a:focus-visible,button:focus-visible{outline:2px solid var(--amber);outline-offs
 <a href="#contact" class="hero-exp-cta" onclick="event.stopPropagation();document.getElementById('contact').scrollIntoView({behavior:'smooth'})">Get a Security Quote</a>
 </div>
 </div>
-<div class="hero-card hero-card--bar si-right" id="cardBar" onclick="expandCard('bar')">
+<div class="hero-card hero-card--bar si-right" id="cardBar" role="button" tabindex="0" onclick="expandCard('bar')" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();expandCard('bar')}">
 <div class="hero-intro">
 <h2 style="color:var(--red)">Mobile<br>Bartending</h2>
 <div class="hero-mood">Best bar at the party</div>
@@ -762,42 +762,10 @@ function expandCard(which) {
   }
   window.scrollTo({ top: 0, behavior: 'smooth' });
 }
-function collapseCards() {
-  var hero = document.querySelector('.hero');
-  var sec = document.getElementById('cardSec');
-  var bar = document.getElementById('cardBar');
-  hero.classList.remove('expanded');
-  sec.classList.remove('active', 'collapsed');
-  bar.classList.remove('active', 'collapsed');
-  hero.insertBefore(sec, bar);
-  // slide both cards' content back in
-  [sec, bar].forEach(function(card) {
-    var intro = card.querySelector('.hero-intro');
-    if (!intro) return;
-    var els = intro.children;
-    for (var i = 0; i < els.length; i++) {
-      els[i].style.opacity = '0';
-      els[i].style.transform = 'translateY(10px)';
-    }
-    requestAnimationFrame(function() {
-      requestAnimationFrame(function() {
-        for (var i = 0; i < els.length; i++) {
-          (function(el, d) {
-            el.style.transition = 'opacity .4s ease ' + d + 's, transform .4s ease ' + d + 's';
-            el.style.opacity = '1';
-            el.style.transform = 'translateY(0)';
-            setTimeout(function() { el.style.transition = ''; el.style.opacity = ''; el.style.transform = ''; }, 600);
-          })(els[i], i * 0.05);
-        }
-      });
-    });
-  });
-  window.scrollTo({ top: 0, behavior: 'smooth' });
-}
 
 </script>
 <div id="cookie-banner" style="display:none;position:fixed;bottom:0;left:0;right:0;background:#161616;border-top:1px solid rgba(255,255,255,0.08);padding:14px 24px;z-index:9999;font-family:'Source Sans 3',sans-serif;font-size:14px;color:#A0A0A0;text-align:center;">
-We use cookies for analytics to improve your experience. <button onclick="localStorage.setItem('cookie_consent','true');gtag('consent','update',{analytics_storage:'granted'});document.getElementById('cookie-banner').style.display='none'" style="background:#C23B22;color:#fff;border:none;padding:6px 16px;border-radius:3px;font-family:'Barlow',sans-serif;font-weight:700;font-size:12px;letter-spacing:1px;text-transform:uppercase;cursor:pointer;margin-left:12px">Accept</button><button onclick="localStorage.setItem('cookie_consent','false');document.getElementById('cookie-banner').style.display='none'" style="background:none;color:#7A8490;border:1px solid rgba(255,255,255,0.1);padding:6px 16px;border-radius:3px;font-family:'Barlow',sans-serif;font-weight:700;font-size:12px;letter-spacing:1px;text-transform:uppercase;cursor:pointer;margin-left:8px">Decline</button>
+We use cookies for analytics to improve your experience. <button onclick="localStorage.setItem('cookie_consent','true');gtag('consent','update',{analytics_storage:'granted'});document.getElementById('cookie-banner').style.display='none'" style="background:#C23B22;color:#fff;border:none;padding:6px 16px;border-radius:3px;font-family:'Barlow',sans-serif;font-weight:700;font-size:12px;letter-spacing:1px;text-transform:uppercase;cursor:pointer;margin-left:12px">Accept</button><button onclick="localStorage.setItem('cookie_consent','false');gtag('consent','update',{analytics_storage:'denied'});document.getElementById('cookie-banner').style.display='none'" style="background:none;color:#7A8490;border:1px solid rgba(255,255,255,0.1);padding:6px 16px;border-radius:3px;font-family:'Barlow',sans-serif;font-weight:700;font-size:12px;letter-spacing:1px;text-transform:uppercase;cursor:pointer;margin-left:8px">Decline</button>
 </div>
 <script>if(!localStorage.getItem('cookie_consent'))document.getElementById('cookie-banner').style.display='block';</script>
 </body>

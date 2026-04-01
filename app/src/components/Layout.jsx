@@ -14,6 +14,7 @@ export default function Layout() {
 
   return (
     <div className="app-layout">
+      <a href="#main-content" className="skip-link">Skip to content</a>
       <aside className="sidebar">
         <div className="sidebar-brand">
           <img src="/sheepdog-stacked-white.svg" alt="Sheepdog" className="sidebar-logo" />
@@ -23,12 +24,12 @@ export default function Layout() {
           <NavLink to="/" end className="sidebar-link">Dashboard</NavLink>
           <NavLink to="/clients" className="sidebar-link">Clients</NavLink>
           <NavLink to="/pipeline" className="sidebar-link">Pipeline</NavLink>
-          <NavLink to="/financials" className="sidebar-link sidebar-link--stub">Financials</NavLink>
+          <span className="sidebar-link sidebar-link--stub" aria-disabled="true">Financials</span>
           {/* Secondary tabs — hidden on mobile, shown in More menu */}
           <NavLink to="/resources" className="sidebar-link sidebar-link--secondary">Resources</NavLink>
           <NavLink to="/submissions" className="sidebar-link sidebar-link--secondary">Submissions</NavLink>
-          <NavLink to="/scheduling" className="sidebar-link sidebar-link--secondary sidebar-link--stub">Scheduling</NavLink>
-          <NavLink to="/compliance" className="sidebar-link sidebar-link--secondary sidebar-link--stub">Compliance</NavLink>
+          <span className="sidebar-link sidebar-link--secondary sidebar-link--stub" aria-disabled="true">Scheduling</span>
+          <span className="sidebar-link sidebar-link--secondary sidebar-link--stub" aria-disabled="true">Compliance</span>
 
           {/* Mobile "More" button — only visible on mobile via CSS */}
           <button
@@ -46,15 +47,15 @@ export default function Layout() {
           <div className="sidebar-more-menu" onClick={() => setMoreOpen(false)}>
             <NavLink to="/submissions" className="sidebar-more-link">Submissions</NavLink>
             <NavLink to="/resources" className="sidebar-more-link">Resources</NavLink>
-            <NavLink to="/scheduling" className="sidebar-more-link sidebar-link--stub">Scheduling</NavLink>
-            <NavLink to="/compliance" className="sidebar-more-link sidebar-link--stub">Compliance</NavLink>
+            <span className="sidebar-more-link sidebar-link--stub" aria-disabled="true">Scheduling</span>
+            <span className="sidebar-more-link sidebar-link--stub" aria-disabled="true">Compliance</span>
             <button onClick={handleLogout} className="sidebar-more-link sidebar-more-logout">Log Out</button>
           </div>
         )}
 
         <button onClick={handleLogout} className="sidebar-logout">Log Out</button>
       </aside>
-      <main className="app-main">
+      <main className="app-main" id="main-content">
         <Outlet />
       </main>
     </div>

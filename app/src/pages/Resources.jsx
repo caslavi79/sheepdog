@@ -103,11 +103,13 @@ export default function Resources() {
   const [deadLinks, setDeadLinks] = useState(new Set())
 
   useEffect(() => {
+    const controller = new AbortController()
     resources.filter(r => r.file).forEach(r => {
-      fetch(r.file, { method: 'HEAD' }).then(res => {
+      fetch(r.file, { method: 'HEAD', signal: controller.signal }).then(res => {
         if (!res.ok) setDeadLinks(prev => new Set([...prev, r.file]))
-      }).catch(() => setDeadLinks(prev => new Set([...prev, r.file])))
+      }).catch(e => { if (e.name !== 'AbortError') setDeadLinks(prev => new Set([...prev, r.file])) })
     })
+    return () => controller.abort()
   }, [])
 
   const toggle = (cat) => setOpen(prev => ({ ...prev, [cat]: !prev[cat] }))

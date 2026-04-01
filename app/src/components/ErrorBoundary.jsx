@@ -34,7 +34,7 @@ export default class ErrorBoundary extends Component {
           </p>
           <h1 style={{ fontSize: 24, fontWeight: 800, marginBottom: 12 }}>Application Error</h1>
           <p style={{ color: '#7A8490', fontSize: 14, maxWidth: 420, lineHeight: 1.6, marginBottom: 32 }}>
-            {this.state.error?.message || 'An unexpected error occurred.'}
+            {import.meta.env.DEV ? (this.state.error?.message || 'An unexpected error occurred.') : 'An unexpected error occurred. Please reload the page.'}
           </p>
           <button
             onClick={() => window.location.reload()}
