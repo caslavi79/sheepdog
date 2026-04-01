@@ -47,8 +47,16 @@ function ServiceDot({ line }) {
   )
 }
 
+function useBodyLock() {
+  useEffect(() => {
+    document.body.classList.add('modal-open')
+    return () => document.body.classList.remove('modal-open')
+  }, [])
+}
+
 function AddDealModal({ onClose, onSaved }) {
   useEscapeKey(onClose)
+  useBodyLock()
   const [form, setForm] = useState({
     contact_name: '', business_name: '', phone: '', email: '',
     service_line: 'events', stage: 'lead', value: '', notes: ''
@@ -131,6 +139,7 @@ function AddDealModal({ onClose, onSaved }) {
 
 function DealDetailModal({ deal, onClose, onUpdated, onDeleted }) {
   useEscapeKey(onClose)
+  useBodyLock()
   const [editing, setEditing] = useState(false)
   const [form, setForm] = useState(deal)
   const [saving, setSaving] = useState(false)
@@ -252,14 +261,15 @@ function DealDetailModal({ deal, onClose, onUpdated, onDeleted }) {
   )
 }
 
-function DealCard({ deal, onDragStart, onDragEnd, onClick }) {
+function DealCard({ deal, onDragStart, onDragEnd, onClick, onStageChange }) {
   const stageColor = STAGE_COLORS[deal.stage] || '#7A8490'
+  const isMobile = typeof window !== 'undefined' && window.innerWidth <= 768
   return (
     <div
       className="pipeline-card"
-      draggable
-      onDragStart={e => onDragStart(e, deal)}
-      onDragEnd={onDragEnd}
+      draggable={!isMobile}
+      onDragStart={e => !isMobile && onDragStart(e, deal)}
+      onDragEnd={!isMobile ? onDragEnd : undefined}
       onClick={() => onClick(deal)}
     >
       <div className="pipeline-card-top">
@@ -276,12 +286,26 @@ function DealCard({ deal, onDragStart, onDragEnd, onClick }) {
           <ServiceDot line={deal.service_line} />
           {deal.service_line}
         </span>
+        {isMobile && (
+          <select
+            value={deal.stage}
+            onClick={e => e.stopPropagation()}
+            onChange={e => { e.stopPropagation(); onStageChange(deal, e.target.value) }}
+            style={{
+              marginLeft: 'auto', background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.1)',
+              color: 'var(--white)', fontFamily: 'var(--fh)', fontSize: 10, fontWeight: 600,
+              letterSpacing: '1px', textTransform: 'uppercase', padding: '4px 8px', borderRadius: 3, cursor: 'pointer'
+            }}
+          >
+            {STAGES.map(s => <option key={s.id} value={s.id}>{s.label}</option>)}
+          </select>
+        )}
       </div>
     </div>
   )
 }
 
-function PipelineColumn({ stage, deals, onDragOver, onDrop, onDragStart, onDragEnd, onCardClick, isDragOver }) {
+function PipelineColumn({ stage, deals, onDragOver, onDrop, onDragStart, onDragEnd, onCardClick, onStageChange, isDragOver }) {
   const stageColor = STAGE_COLORS[stage.id] || '#7A8490'
   const totalValue = deals.reduce((sum, d) => sum + (d.value || 0), 0)
 
@@ -310,6 +334,7 @@ function PipelineColumn({ stage, deals, onDragOver, onDrop, onDragStart, onDragE
             onDragStart={onDragStart}
             onDragEnd={onDragEnd}
             onClick={onCardClick}
+            onStageChange={onStageChange}
           />
         ))}
       </div>
@@ -419,6 +444,17 @@ export default function Pipeline() {
               onDragStart={handleDragStart}
               onDragEnd={handleDragEnd}
               onCardClick={setSelected}
+              onStageChange={async (deal, newStage) => {
+                if (deal.stage === newStage) return
+                const prev = deal.stage
+                setDeals(d => d.map(x => x.id === deal.id ? { ...x, stage: newStage } : x))
+                const { error } = await supabase.from('pipeline').update({ stage: newStage, updated_at: new Date().toISOString() }).eq('id', deal.id)
+                if (error) {
+                  setDeals(d => d.map(x => x.id === deal.id ? { ...x, stage: prev } : x))
+                  setDragError('Failed to move card — changes reverted.')
+                  setTimeout(() => setDragError(''), 4000)
+                }
+              }}
               isDragOver={dragOverStage === stage.id}
             />
           ))}
