@@ -170,7 +170,7 @@ function ClientDetail({ client, onClose, onUpdated, onDeleted }) {
   }
 
   return (
-    <div className="modal-overlay" onClick={onClose}>
+    <div className="modal-overlay" role="presentation" onClick={onClose}>
       <div className="detail-panel" role="dialog" aria-modal="true" onClick={e => e.stopPropagation()}>
         <div className="detail-header">
           <div>

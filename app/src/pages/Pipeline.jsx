@@ -157,7 +157,7 @@ function DealDetailModal({ deal, onClose, onUpdated, onDeleted }) {
   const stageColor = STAGE_COLORS[deal.stage] || '#7A8490'
 
   return (
-    <div className="modal-overlay" onClick={onClose}>
+    <div className="modal-overlay" role="presentation" onClick={onClose}>
       <div className="detail-panel" role="dialog" aria-modal="true" onClick={e => e.stopPropagation()} style={{ maxWidth: 520 }}>
         <div className="detail-header">
           <div>
