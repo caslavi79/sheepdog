@@ -474,9 +474,8 @@ body.scroll-locked{overflow:hidden}
 <p class="contact-sub fi">Tell us about your event or staffing need. We respond within 24 hours with a clear quote.</p>
 <div class="contact-actions fi">
 <a href="mailto:sheepdogsecurityllc@gmail.com" class="contact-btn contact-btn--primary">Email Us</a>
-<button type="button" class="contact-btn contact-btn--secondary" onclick="toggleForm()" id="quoteToggle">Request a Quote</button>
 </div>
-<form class="quote-form" id="quoteForm" onsubmit="return submitForm(event)">
+<form class="quote-form open" id="quoteForm" onsubmit="return submitForm(event)">
 <div class="qf-grid">
 <div style="position:absolute;left:-9999px" aria-hidden="true"><input type="text" name="website" tabindex="-1" autocomplete="off"></div>
 <div class="qf-field"><label class="qf-label" for="qf-name">Name</label><input type="text" id="qf-name" name="name" class="qf-input" placeholder="Your name" required></div>
