@@ -29,7 +29,7 @@ export default function Layout() {
           <NavLink to="/resources" className="sidebar-link sidebar-link--secondary">Resources</NavLink>
           <NavLink to="/submissions" className="sidebar-link sidebar-link--secondary">Submissions</NavLink>
           <span className="sidebar-link sidebar-link--secondary sidebar-link--stub" aria-disabled="true">Scheduling</span>
-          <span className="sidebar-link sidebar-link--secondary sidebar-link--stub" aria-disabled="true">Compliance</span>
+          <NavLink to="/compliance" className="sidebar-link sidebar-link--secondary">Compliance</NavLink>
 
           {/* Mobile "More" button — only visible on mobile via CSS */}
           <button
@@ -48,7 +48,7 @@ export default function Layout() {
             <NavLink to="/submissions" className="sidebar-more-link">Submissions</NavLink>
             <NavLink to="/resources" className="sidebar-more-link">Resources</NavLink>
             <span className="sidebar-more-link sidebar-link--stub" aria-disabled="true">Scheduling</span>
-            <span className="sidebar-more-link sidebar-link--stub" aria-disabled="true">Compliance</span>
+            <NavLink to="/compliance" className="sidebar-more-link">Compliance</NavLink>
             <button onClick={handleLogout} className="sidebar-more-link sidebar-more-logout">Log Out</button>
           </div>
         )}

@@ -98,11 +98,10 @@ CREATE TABLE IF NOT EXISTS public.rate_limits (
 );
 
 -- Stub tables (exist but not yet populated)
-CREATE TABLE IF NOT EXISTS public.contractor_docs (id uuid PRIMARY KEY DEFAULT gen_random_uuid(), created_at timestamptz DEFAULT now());
 CREATE TABLE IF NOT EXISTS public.contracts (id uuid PRIMARY KEY DEFAULT gen_random_uuid(), created_at timestamptz DEFAULT now());
-CREATE TABLE IF NOT EXISTS public.licenses (id uuid PRIMARY KEY DEFAULT gen_random_uuid(), created_at timestamptz DEFAULT now());
 CREATE TABLE IF NOT EXISTS public.placements (id uuid PRIMARY KEY DEFAULT gen_random_uuid(), created_at timestamptz DEFAULT now());
 CREATE TABLE IF NOT EXISTS public.shifts (id uuid PRIMARY KEY DEFAULT gen_random_uuid(), created_at timestamptz DEFAULT now());
+
 CREATE TABLE IF NOT EXISTS public.staff (
   id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
   name text NOT NULL DEFAULT '',
@@ -110,11 +109,43 @@ CREATE TABLE IF NOT EXISTS public.staff (
   email text,
   role text,
   default_pay_rate numeric,
+  status text DEFAULT 'active',
+  background_check text DEFAULT 'none',
   created_at timestamptz DEFAULT now(),
   updated_at timestamptz DEFAULT now()
 );
 
 CREATE INDEX IF NOT EXISTS idx_staff_name ON public.staff (name);
+
+CREATE TABLE IF NOT EXISTS public.licenses (
+  id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+  staff_id uuid REFERENCES public.staff(id),
+  license_type text NOT NULL DEFAULT 'general',
+  license_number text,
+  issuing_authority text,
+  issue_date date,
+  expiration_date date,
+  status text DEFAULT 'active',
+  notes text,
+  created_at timestamptz DEFAULT now(),
+  updated_at timestamptz DEFAULT now()
+);
+
+CREATE INDEX IF NOT EXISTS idx_licenses_staff ON public.licenses (staff_id);
+CREATE INDEX IF NOT EXISTS idx_licenses_expiration ON public.licenses (expiration_date);
+
+CREATE TABLE IF NOT EXISTS public.contractor_docs (
+  id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+  staff_id uuid REFERENCES public.staff(id),
+  doc_type text NOT NULL DEFAULT 'other',
+  status text DEFAULT 'missing',
+  signature_date date,
+  notes text,
+  created_at timestamptz DEFAULT now(),
+  updated_at timestamptz DEFAULT now()
+);
+
+CREATE INDEX IF NOT EXISTS idx_contractor_docs_staff ON public.contractor_docs (staff_id);
 
 CREATE TABLE IF NOT EXISTS public.pay_rate_defaults (
   id uuid PRIMARY KEY DEFAULT gen_random_uuid(),

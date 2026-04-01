@@ -50,10 +50,10 @@ const modules = [
   },
   {
     title: 'Compliance',
-    desc: 'Licensing, TABC, contractor paperwork',
+    desc: 'Staff roster, licenses, TABC, contractor docs',
     path: '/compliance',
     icon: icons.compliance,
-    ready: false,
+    ready: true,
   },
 ]
 

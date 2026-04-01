@@ -172,105 +172,6 @@ function StaffAssignmentsEditor({ items, onChange, staffRoster, payRateDefaults,
 }
 
 /* ═══════════════════════════════════════════════════════════
-   STAFF ROSTER MODAL
-   ═══════════════════════════════════════════════════════════ */
-function StaffRosterModal({ onClose, staffRoster, onRefresh, showToast }) {
-  useEscapeKey(onClose)
-  useBodyLock()
-  const [staff, setStaff] = useState(staffRoster)
-  const [adding, setAdding] = useState(false)
-  const [newRow, setNewRow] = useState({ name: '', role: '', phone: '', email: '', default_pay_rate: '' })
-  const [editId, setEditId] = useState(null)
-  const [editRow, setEditRow] = useState({})
-  const [confirmDeleteId, setConfirmDeleteId] = useState(null)
-  const [search, setSearch] = useState('')
-
-  useEffect(() => { setStaff(staffRoster) }, [staffRoster])
-
-  const handleAdd = async () => {
-    if (!newRow.name.trim()) return
-    const { error } = await supabase.from('staff').insert([{ ...newRow, default_pay_rate: parseFloat(newRow.default_pay_rate) || null }])
-    if (error) { if (import.meta.env.DEV) console.error('Add staff:', error.message); return }
-    setNewRow({ name: '', role: '', phone: '', email: '', default_pay_rate: '' }); setAdding(false); onRefresh(); showToast('Staff member added')
-  }
-
-  const handleSaveEdit = async () => {
-    const { id, created_at, ...rest } = editRow
-    const { error } = await supabase.from('staff').update({ ...rest, default_pay_rate: parseFloat(rest.default_pay_rate) || null, updated_at: new Date().toISOString() }).eq('id', editId)
-    if (error) { if (import.meta.env.DEV) console.error('Edit staff:', error.message); return }
-    setEditId(null); onRefresh(); showToast('Staff updated')
-  }
-
-  const handleDelete = async (id) => {
-    const { error } = await supabase.from('staff').delete().eq('id', id)
-    if (error) { if (import.meta.env.DEV) console.error('Delete staff:', error.message); return }
-    setConfirmDeleteId(null); onRefresh(); showToast('Staff removed')
-  }
-
-  const filtered = staff.filter(s => !search || s.name.toLowerCase().includes(search.toLowerCase()) || (s.role || '').toLowerCase().includes(search.toLowerCase()))
-
-  return (
-    <div className="modal-overlay" onClick={onClose}>
-      <div className="modal-card modal-card--wide" onClick={e => e.stopPropagation()}>
-        <h2 className="modal-title">Staff Roster</h2>
-        <input className="clients-search" style={{ marginBottom: 16 }} placeholder="Search staff..." value={search} onChange={e => setSearch(e.target.value)} />
-        <div className="clients-table-wrap" style={{ maxHeight: 400, overflow: 'auto' }}>
-          <table className="clients-table">
-            <thead><tr><th>Name</th><th>Role</th><th>Phone</th><th>Default Rate</th><th style={{ width: 100 }}></th></tr></thead>
-            <tbody>
-              {filtered.map(s => (
-                editId === s.id ? (
-                  <tr key={s.id}>
-                    <td><input value={editRow.name} onChange={e => setEditRow({ ...editRow, name: e.target.value })} style={{ background: 'var(--char)', border: '1px solid #333', borderRadius: 4, padding: '4px 8px', color: 'var(--white)', width: '100%' }} /></td>
-                    <td><input value={editRow.role || ''} onChange={e => setEditRow({ ...editRow, role: e.target.value })} style={{ background: 'var(--char)', border: '1px solid #333', borderRadius: 4, padding: '4px 8px', color: 'var(--white)', width: '100%' }} /></td>
-                    <td><input value={editRow.phone || ''} onChange={e => setEditRow({ ...editRow, phone: e.target.value })} style={{ background: 'var(--char)', border: '1px solid #333', borderRadius: 4, padding: '4px 8px', color: 'var(--white)', width: '100%' }} /></td>
-                    <td><input type="number" step="0.01" value={editRow.default_pay_rate || ''} onChange={e => setEditRow({ ...editRow, default_pay_rate: e.target.value })} style={{ background: 'var(--char)', border: '1px solid #333', borderRadius: 4, padding: '4px 8px', color: 'var(--white)', width: '100%' }} /></td>
-                    <td><button className="modal-btn-save" style={{ fontSize: 12, padding: '4px 10px' }} onClick={handleSaveEdit}>Save</button> <button className="modal-btn-cancel" style={{ fontSize: 12, padding: '4px 10px' }} onClick={() => setEditId(null)}>×</button></td>
-                  </tr>
-                ) : (
-                  <tr key={s.id}>
-                    <td className="clients-name">{s.name}</td>
-                    <td>{s.role || '—'}</td>
-                    <td>{s.phone || '—'}</td>
-                    <td>{s.default_pay_rate ? `$${s.default_pay_rate}/hr` : '—'}</td>
-                    <td>
-                      {confirmDeleteId === s.id ? (
-                        <span style={{ display: 'flex', gap: 4, alignItems: 'center' }}>
-                          <button className="modal-btn-save" style={{ fontSize: 11, padding: '2px 8px', background: 'var(--red)' }} onClick={() => handleDelete(s.id)}>Yes</button>
-                          <button className="modal-btn-cancel" style={{ fontSize: 11, padding: '2px 8px' }} onClick={() => setConfirmDeleteId(null)}>No</button>
-                        </span>
-                      ) : (
-                        <span style={{ display: 'flex', gap: 4 }}>
-                          <button style={{ background: 'none', border: 'none', color: 'var(--steel)', cursor: 'pointer', fontSize: 12, fontFamily: 'var(--fh)', fontWeight: 600 }} onClick={() => { setEditId(s.id); setEditRow(s) }}>Edit</button>
-                          <button style={{ background: 'none', border: 'none', color: 'var(--red)', cursor: 'pointer', fontSize: 12, fontFamily: 'var(--fh)', fontWeight: 600 }} onClick={() => setConfirmDeleteId(s.id)}>Del</button>
-                        </span>
-                      )}
-                    </td>
-                  </tr>
-                )
-              ))}
-              {adding && (
-                <tr>
-                  <td><input placeholder="Name *" value={newRow.name} onChange={e => setNewRow({ ...newRow, name: e.target.value })} style={{ background: 'var(--char)', border: '1px solid #333', borderRadius: 4, padding: '4px 8px', color: 'var(--white)', width: '100%' }} /></td>
-                  <td><input placeholder="Role" value={newRow.role} onChange={e => setNewRow({ ...newRow, role: e.target.value })} style={{ background: 'var(--char)', border: '1px solid #333', borderRadius: 4, padding: '4px 8px', color: 'var(--white)', width: '100%' }} /></td>
-                  <td><input placeholder="Phone" value={newRow.phone} onChange={e => setNewRow({ ...newRow, phone: e.target.value })} style={{ background: 'var(--char)', border: '1px solid #333', borderRadius: 4, padding: '4px 8px', color: 'var(--white)', width: '100%' }} /></td>
-                  <td><input type="number" step="0.01" placeholder="$/hr" value={newRow.default_pay_rate} onChange={e => setNewRow({ ...newRow, default_pay_rate: e.target.value })} style={{ background: 'var(--char)', border: '1px solid #333', borderRadius: 4, padding: '4px 8px', color: 'var(--white)', width: '100%' }} /></td>
-                  <td><button className="modal-btn-save" style={{ fontSize: 12, padding: '4px 10px' }} onClick={handleAdd}>Add</button> <button className="modal-btn-cancel" style={{ fontSize: 12, padding: '4px 10px' }} onClick={() => setAdding(false)}>×</button></td>
-                </tr>
-              )}
-            </tbody>
-          </table>
-        </div>
-        {!adding && <button type="button" className="line-items-add" style={{ marginTop: 12 }} onClick={() => setAdding(true)}>+ Add Staff Member</button>}
-        <div className="modal-actions" style={{ marginTop: 16 }}>
-          <button className="modal-btn-cancel" onClick={onClose}>Close</button>
-        </div>
-      </div>
-    </div>
-  )
-}
-
-/* ═══════════════════════════════════════════════════════════
    PAY RATE DEFAULTS MODAL
    ═══════════════════════════════════════════════════════════ */
 function PayRateDefaultsModal({ onClose, payRateDefaults, onRefresh, showToast }) {
@@ -781,7 +682,6 @@ export default function Financials() {
   const [filterLine, setFilterLine] = useState('')
   const [selected, setSelected] = useState(null)
   const [showAdd, setShowAdd] = useState(false)
-  const [showRoster, setShowRoster] = useState(false)
   const [showPayRates, setShowPayRates] = useState(false)
   const [toast, setToast] = useState('')
   const fireToast = useToast()
@@ -852,7 +752,7 @@ export default function Financials() {
           <p className="clients-subtitle">Create, track, and manage invoices</p>
         </div>
         <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
-          <button className="modal-btn-cancel" style={{ fontSize: 13 }} onClick={() => setShowRoster(true)}>Staff Roster</button>
+          <button className="modal-btn-cancel" style={{ fontSize: 13 }} onClick={() => navigate('/compliance')}>Staff Roster</button>
           <button className="modal-btn-cancel" style={{ fontSize: 13 }} onClick={() => setShowPayRates(true)}>Pay Rates</button>
           <button className="clients-add-btn" onClick={() => setShowAdd(true)}>+ New Invoice</button>
         </div>
@@ -915,7 +815,6 @@ export default function Financials() {
 
       {showAdd && <AddInvoiceModal onClose={() => setShowAdd(false)} onSaved={handleSaved} clients={clients} onGoToClients={() => { setShowAdd(false); navigate('/clients') }} staffRoster={staffRoster} payRateDefaults={payRateDefaults} onStaffRefresh={loadStaff} />}
       {selected && <InvoiceDetail invoice={selected} clients={clients} onClose={() => setSelected(null)} onUpdated={handleUpdated} onDeleted={handleDeleted} showToast={showToast} staffRoster={staffRoster} payRateDefaults={payRateDefaults} onStaffRefresh={loadStaff} />}
-      {showRoster && <StaffRosterModal onClose={() => setShowRoster(false)} staffRoster={staffRoster} onRefresh={loadStaff} showToast={showToast} />}
       {showPayRates && <PayRateDefaultsModal onClose={() => setShowPayRates(false)} payRateDefaults={payRateDefaults} onRefresh={loadPayRates} showToast={showToast} />}
       {toast && <div className="toast">{toast}</div>}
     </div>
