@@ -163,6 +163,11 @@ Deno.serve(async (req) => {
       "unknown";
 
     const windowStart = new Date(Date.now() - RATE_LIMIT_WINDOW_MS).toISOString();
+
+    // Insert first, then count — closes TOCTOU race window
+    const { error: insertRlErr } = await supabase.from("rate_limits").insert({ ip, endpoint: "contact-submit" });
+    if (insertRlErr) console.error("Rate limit insert failed:", insertRlErr.message);
+
     const { count, error: rlError } = await supabase
       .from("rate_limits")
       .select("*", { count: "exact", head: true })
@@ -172,22 +177,18 @@ Deno.serve(async (req) => {
 
     if (rlError) {
       console.error("Rate limit check failed:", rlError.message);
-      // Fail closed
       return new Response(
         JSON.stringify({ error: "Too many requests. Please try again in a few minutes." }),
         { status: 429, headers: { ...(corsHeaders || {}), "Content-Type": "application/json" } },
       );
     }
 
-    if ((count ?? 0) >= RATE_LIMIT_MAX) {
+    if ((count ?? 0) > RATE_LIMIT_MAX) {
       return new Response(
         JSON.stringify({ error: "Too many requests. Please try again in a few minutes." }),
         { status: 429, headers: { ...(corsHeaders || {}), "Content-Type": "application/json" } },
       );
     }
-
-    // Record rate limit hit
-    await supabase.from("rate_limits").insert({ ip, endpoint: "contact-submit" });
 
     // Cleanup old rate limit entries (fire-and-forget)
     supabase.from("rate_limits").delete().lt("created_at", windowStart)
@@ -195,6 +196,13 @@ Deno.serve(async (req) => {
 
     // MX check with timeout (non-blocking on failure)
     const domain = email.split("@")[1];
+    // Block obviously invalid or suspicious domains (no dots, localhost, IP literals)
+    if (!domain || !domain.includes(".") || /^(\d+\.){3}\d+$/.test(domain) || /^(localhost|127\.|10\.|192\.168\.|172\.(1[6-9]|2\d|3[01]))/.test(domain)) {
+      return new Response(JSON.stringify({ error: "Invalid email domain" }), {
+        status: 400,
+        headers: { ...(corsHeaders || {}), "Content-Type": "application/json" },
+      });
+    }
     try {
       const dns = await Promise.race([
         Deno.resolveDns(domain, "MX"),
@@ -234,10 +242,9 @@ Deno.serve(async (req) => {
         const { error: retryErr } = await supabase
           .from("contact_submissions")
           .insert({ name, phone: typeof phone === "string" ? phone : null, email, service, message });
-        if (retryErr) throw retryErr;
-      } else {
-        throw dbError;
+        if (retryErr) console.error("DB retry also failed:", retryErr.message);
       }
+      // Don't throw — still send emails so the lead isn't lost
     }
 
     // Auto-create pipeline deal

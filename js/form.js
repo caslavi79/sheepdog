@@ -11,6 +11,16 @@ async function submitForm(e) {
   var form = e.target;
   var btn = form.querySelector('.qf-submit');
   var orig = btn.textContent;
+  // Validate phone if provided
+  var phoneVal = form.elements['phone'].value.replace(/\D/g, '');
+  if (phoneVal.length > 0 && phoneVal.length !== 10) {
+    btn.textContent = 'Enter a valid 10-digit phone number';
+    btn.style.background = '#C23B22';
+    btn.style.color = '#FFF';
+    setTimeout(function() { btn.textContent = orig; btn.style.background = ''; btn.style.color = ''; btn.disabled = false; }, 3000);
+    return false;
+  }
+
   btn.textContent = 'Sending...';
   btn.disabled = true;
 
