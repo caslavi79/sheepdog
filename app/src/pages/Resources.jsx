@@ -76,23 +76,20 @@ const resources = [
   {
     title: 'Review Staff Script',
     desc: 'Word-for-word scripts for asking clients for Google reviews',
-    file: null,
+    file: '/docs/review-staff-script.html',
     category: 'Reviews',
-    coming: true,
   },
   {
     title: 'Review Response Templates',
     desc: 'Pre-built replies for positive, neutral, and negative Google reviews',
-    file: null,
+    file: '/docs/review-response-templates.html',
     category: 'Reviews',
-    coming: true,
   },
   {
     title: 'Review Momentum Strategy',
     desc: 'System for building and maintaining a steady flow of Google reviews',
-    file: null,
+    file: '/docs/review-momentum-strategy.html',
     category: 'Reviews',
-    coming: true,
   },
 ]
 

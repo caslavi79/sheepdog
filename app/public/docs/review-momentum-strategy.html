@@ -1,0 +1,289 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Review Momentum Strategy | Sheepdog</title>
+<link href="https://fonts.googleapis.com/css2?family=Barlow:wght@400;600;700;800&family=Source+Sans+3:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+:root{--black:#0C0C0C;--char:#161616;--graphite:#2A2A2A;--iron:#4A4A4A;--slate:#6B6B6B;--steel:#7A8490;--fog:#D0D0D0;--bone:#F4F3F1;--white:#FFF;--navy:#1B2A4A;--sblue:#3D5A80;--amber:#C9922E;--red:#C23B22;--green:#357A38}
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:'Source Sans 3',sans-serif;font-size:16px;line-height:1.7;color:var(--iron);background:var(--white)}
+.doc{max-width:800px;margin:0 auto;padding:48px 32px 80px}
+h1{font-family:'Barlow',sans-serif;font-weight:800;font-size:32px;color:var(--black);line-height:1.1;margin-bottom:6px}
+.subtitle{font-family:'Source Sans 3',sans-serif;font-size:15px;color:var(--steel);margin-bottom:48px}
+h2{font-family:'Barlow',sans-serif;font-weight:700;font-size:22px;color:var(--navy);margin-top:48px;margin-bottom:16px;padding-bottom:8px;border-bottom:2px solid var(--bone)}
+h3{font-family:'Barlow',sans-serif;font-weight:700;font-size:17px;color:var(--graphite);margin-top:28px;margin-bottom:10px}
+p{margin-bottom:14px}
+ul{padding-left:20px;margin-bottom:16px}
+ol{padding-left:20px;margin-bottom:16px}
+li{margin-bottom:6px;color:var(--iron)}
+li::marker{color:var(--sblue)}
+.phase{border:1px solid var(--fog);border-radius:8px;padding:24px;margin:16px 0 32px;position:relative;overflow:hidden}
+.phase::before{content:'';position:absolute;top:0;left:0;width:4px;height:100%}
+.phase-1::before{background:var(--amber)}
+.phase-2::before{background:var(--sblue)}
+.phase-3::before{background:var(--green)}
+.phase .phase-header{font-family:'Barlow',sans-serif;font-weight:800;font-size:14px;text-transform:uppercase;letter-spacing:.5px;margin-bottom:4px}
+.phase-1 .phase-header{color:var(--amber)}
+.phase-2 .phase-header{color:var(--sblue)}
+.phase-3 .phase-header{color:var(--green)}
+.phase .phase-title{font-family:'Barlow',sans-serif;font-weight:700;font-size:20px;color:var(--black);margin-bottom:4px}
+.phase .phase-goal{font-size:14px;color:var(--steel);margin-bottom:16px}
+.milestone{display:inline-flex;align-items:center;gap:6px;background:var(--bone);border-radius:4px;padding:6px 12px;font-family:'Barlow',sans-serif;font-weight:700;font-size:13px;color:var(--navy);margin-top:12px}
+.milestone .num{background:var(--navy);color:var(--white);border-radius:50%;width:22px;height:22px;display:flex;align-items:center;justify-content:center;font-size:12px}
+.tracker{background:var(--bone);border-radius:6px;padding:20px;margin:16px 0 24px}
+.tracker h3{margin-top:0;color:var(--navy)}
+.tracker-table{width:100%;border-collapse:collapse;margin-top:12px;font-size:14px}
+.tracker-table th{font-family:'Barlow',sans-serif;font-weight:700;font-size:13px;color:var(--steel);text-transform:uppercase;letter-spacing:.3px;text-align:left;padding:8px 10px;border-bottom:2px solid var(--fog)}
+.tracker-table td{padding:8px 10px;border-bottom:1px solid var(--fog);color:var(--iron)}
+.context{background:rgba(61,90,128,.04);border:1px solid rgba(61,90,128,.15);border-radius:6px;padding:20px;margin:16px 0 24px}
+.context h3{margin-top:0;color:var(--navy)}
+.context li::marker{color:var(--navy)}
+.cadence-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:12px}
+.cadence-item{background:var(--bone);padding:14px 16px;border-radius:6px}
+.cadence-item strong{font-family:'Barlow',sans-serif;font-size:14px;color:var(--navy);display:block;margin-bottom:2px}
+.cadence-item span{font-size:14px;color:var(--iron)}
+.warning{background:rgba(194,59,34,.04);border:1px solid rgba(194,59,34,.15);border-radius:6px;padding:20px;margin:16px 0 24px}
+.warning h3{margin-top:0;color:var(--red)}
+.warning li::marker{color:var(--red)}
+.divider{height:1px;background:var(--fog);margin:40px 0}
+.ref-banner{display:flex;gap:12px;margin-bottom:40px;flex-wrap:wrap}
+.ref-banner a{display:flex;align-items:center;gap:8px;background:var(--bone);border:1px solid var(--fog);border-radius:6px;padding:12px 18px;text-decoration:none;color:var(--navy);font-family:'Barlow',sans-serif;font-weight:600;font-size:14px;transition:border-color .2s}
+.ref-banner a:hover{border-color:var(--sblue)}
+.ref-banner .arrow{color:var(--sblue);font-size:16px}
+@media(max-width:600px){
+  .doc{padding:28px 20px 60px}
+  h1{font-size:26px}
+  .cadence-grid{grid-template-columns:1fr}
+  .tracker-table{font-size:13px}
+  .tracker-table th,.tracker-table td{padding:6px 8px}
+}
+</style>
+</head>
+<body>
+<div class="doc">
+
+<h1>Review Momentum Strategy</h1>
+<div class="subtitle">0 to 25 Google reviews - then keep the engine running</div>
+
+<div class="ref-banner">
+<a href="review-staff-script.html"><span>Staff Review Script</span><span class="arrow">&rarr;</span></a>
+<a href="review-response-templates.html"><span>Response Templates</span><span class="arrow">&rarr;</span></a>
+<a href="sheepdog-review-card.html"><span>Review Business Card</span><span class="arrow">&rarr;</span></a>
+<a href="sheepdog-review-flyer.html"><span>Review Flyer (4x6)</span><span class="arrow">&rarr;</span></a>
+</div>
+
+<!-- ============================================ -->
+<!-- PHASE 1: REVIEWS 1-10 (SEED ROUND)            -->
+<!-- ============================================ -->
+
+<div class="phase phase-1">
+<div class="phase-header">Phase 1</div>
+<div class="phase-title">The Seed Round - Reviews 1-10</div>
+<div class="phase-goal">Goal: 2-3 reviews per week &bull; Timeline: 3-4 weeks</div>
+
+<p>Start with people who already know your work is good. Don't cold-ask anyone yet.</p>
+
+<h3>Who to ask first</h3>
+<p>Make a list of 15-20 people. You only need 10 to say yes. Start here:</p>
+<ul>
+<li><strong>Past event clients</strong> - Text them using the Staff Script. Start with venues you've worked more than once. Send 2-3 texts per week, not all at once.</li>
+<li><strong>Personal network</strong> - Friends and family who have actually seen the team work. Only ask people who can speak to the business honestly. Google detects fake reviews.</li>
+<li><strong>Friendly venue managers</strong> - Bar managers who like working with you. Quick text or ask at the end of your next shift there.</li>
+</ul>
+
+<h3>Pacing</h3>
+<p>Don't rush it. Google flags profiles that get a bunch of reviews overnight.</p>
+<ul>
+<li>Don't get 10 reviews in 2 days - it looks fake to Google and may trigger a filter</li>
+<li>Aim for 2-3 per week, spread across different days</li>
+<li>Mix of review sources (different Google accounts, different devices) happens naturally when you ask real clients</li>
+</ul>
+
+<div class="milestone"><span class="num">10</span> Hit 10 reviews - you now show a star rating on Google Search</div>
+</div>
+
+<!-- ============================================ -->
+<!-- PHASE 2: REVIEWS 11-25 (SYSTEM MODE)          -->
+<!-- ============================================ -->
+
+<div class="phase phase-2">
+<div class="phase-header">Phase 2</div>
+<div class="phase-title">System Mode - Reviews 11-25</div>
+<div class="phase-goal">Goal: 2-3 reviews per week &bull; Timeline: 5-6 weeks</div>
+
+<p>You have a star rating on Google now. From here on, asking for reviews happens after every single job. No thinking about it, just do it.</p>
+
+<h3>Integrate into the post-job workflow</h3>
+<p>Follow this sequence after every job. Use the <a href="review-staff-script.html" style="color:var(--sblue);font-weight:600">Staff Review Script</a> for exact wording.</p>
+<ul>
+<li><strong>On-site:</strong> Team lead asks at wrap-up + hands over review card (every job, no exceptions)</li>
+<li><strong>Next-day text:</strong> Office sends the text script within 24 hours</li>
+<li><strong>48-hour email:</strong> For corporate/staffing clients, send the email version</li>
+<li><strong>3-day nudge:</strong> One follow-up text if no review. Then stop.</li>
+</ul>
+
+<h3>Physical materials in rotation</h3>
+<p>Keep review cards and flyers stocked. If you run out, you're not using them enough.</p>
+<ul>
+<li>Review cards in every team lead's pocket (replenish weekly)</li>
+<li>Review flyer on the table at vendor check-in areas</li>
+<li>QR code added to the bottom of invoices and post-event recap emails</li>
+</ul>
+
+<h3>Track it</h3>
+<p>Use the tracker below. After every job, log whether you asked and whether they reviewed. This keeps the team accountable and shows you which channels convert best.</p>
+
+<div class="milestone"><span class="num">25</span> Hit 25 reviews - you outrank most local competitors on Google Maps</div>
+</div>
+
+<!-- ============================================ -->
+<!-- PHASE 3: ONGOING VELOCITY                     -->
+<!-- ============================================ -->
+
+<div class="phase phase-3">
+<div class="phase-header">Phase 3</div>
+<div class="phase-title">Ongoing - Maintain Velocity</div>
+<div class="phase-goal">Goal: 3-5 reviews per month &bull; Timeline: Indefinite</div>
+
+<p>The system is built. Now just keep it running. Don't let it go idle.</p>
+
+<h3>Monthly review goal</h3>
+<p>3-5 new reviews a month. That's about one a week. Google cares about recent reviews more than total reviews. 20 reviews with 3 from this month beats 25 reviews that are all six months old.</p>
+
+<h3>Review gap protocol</h3>
+<p>Two weeks without a new review? Something broke. Check these:</p>
+<ul>
+<li>Check: are team leads still asking on-site? (If not, retrain.)</li>
+<li>Check: are next-day texts still going out? (If not, assign someone.)</li>
+<li>Reach back to recent clients who didn't review - one polite text, no pressure</li>
+</ul>
+
+<h3>Seasonal adjustments</h3>
+<p>Busy months (spring/fall) = more jobs = more review chances. Stack up reviews then. Slow months (winter) = lean on staffing clients and circle back to past clients you haven't asked yet. Don't go dark for three months. Even one or two reviews a month in the off-season keeps you visible.</p>
+</div>
+
+<div class="divider"></div>
+
+<!-- ============================================ -->
+<!-- TRACKING                                      -->
+<!-- ============================================ -->
+
+<h2>Review Tracker</h2>
+<p>Simple spreadsheet or checklist. One row per completed job. Track it weekly.</p>
+
+<div class="tracker">
+<h3>Template</h3>
+<table class="tracker-table">
+<thead>
+<tr>
+<th>Date</th>
+<th>Client / Venue</th>
+<th>Service</th>
+<th>Asked?</th>
+<th>Method</th>
+<th>Reviewed?</th>
+<th>Stars</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="color:var(--steel)">03/15</td>
+<td style="color:var(--steel)">The Rusty Nail</td>
+<td style="color:var(--steel)">Security</td>
+<td style="color:var(--steel)">Yes</td>
+<td style="color:var(--steel)">In-person + text</td>
+<td style="color:var(--steel)">Yes</td>
+<td style="color:var(--amber)">&#9733;&#9733;&#9733;&#9733;&#9733;</td>
+</tr>
+<tr>
+<td style="color:var(--steel)">03/17</td>
+<td style="color:var(--steel)">Johnson Wedding</td>
+<td style="color:var(--steel)">Security + Bar</td>
+<td style="color:var(--steel)">Yes</td>
+<td style="color:var(--steel)">Email</td>
+<td style="color:var(--steel)">Pending</td>
+<td style="color:var(--steel)">—</td>
+</tr>
+<tr>
+<td style="color:var(--steel)">03/20</td>
+<td style="color:var(--steel)">Acme Corp</td>
+<td style="color:var(--steel)">Staffing</td>
+<td style="color:var(--steel)">Yes</td>
+<td style="color:var(--steel)">Email</td>
+<td style="color:var(--steel)">No</td>
+<td style="color:var(--steel)">—</td>
+</tr>
+</tbody>
+</table>
+</div>
+
+<div class="divider"></div>
+
+<!-- ============================================ -->
+<!-- CONVERSION CADENCE                            -->
+<!-- ============================================ -->
+
+<h2>Ask Cadence Summary</h2>
+<p>Every completed job follows this sequence. No exceptions, no improvising.</p>
+
+<div class="cadence-grid">
+<div class="cadence-item">
+<strong>Day 0 (On-Site)</strong>
+<span>Team lead asks in person at wrap-up. Hands over review card.</span>
+</div>
+<div class="cadence-item">
+<strong>Day 1 (Text)</strong>
+<span>Send text script between 10am-2pm. Include direct review link.</span>
+</div>
+<div class="cadence-item">
+<strong>Day 1-2 (Email)</strong>
+<span>For corporate/staffing clients, send email version instead of or in addition to text.</span>
+</div>
+<div class="cadence-item">
+<strong>Day 4 (Nudge)</strong>
+<span>One follow-up text if no review. Then stop. No third ask.</span>
+</div>
+</div>
+
+<div class="divider"></div>
+
+<!-- ============================================ -->
+<!-- NEGATIVE REVIEW DURING PUSH                   -->
+<!-- ============================================ -->
+
+<h2>If You Get a Negative Review During the Push</h2>
+
+<div class="warning">
+<h3>Don't panic. Don't stop asking for reviews.</h3>
+<ul>
+<li>One negative review among 15+ positive ones actually looks more authentic than a perfect 5.0</li>
+<li>Respond using the Response Templates - stay professional, take it offline</li>
+<li>Do NOT ask friends/family to flood positive reviews to "bury" it - Google detects this and it can get reviews removed</li>
+<li>Keep following the system. The best response to one bad review is ten more good ones earned honestly over the next few weeks</li>
+<li>If the reviewer is willing to talk and you resolve the issue, they may update their review on their own</li>
+</ul>
+</div>
+
+<div class="divider"></div>
+
+<!-- ============================================ -->
+<!-- RESPOND TO EVERY REVIEW                       -->
+<!-- ============================================ -->
+
+<h2>Respond to Every Single Review</h2>
+
+<div class="context">
+<h3>Why this matters</h3>
+<ul>
+<li>Google's algorithm factors in business responsiveness - responding to reviews improves your ranking</li>
+<li>Potential clients read responses. A thoughtful reply to a 3-star review can convert a prospect better than a 5-star review with no reply.</li>
+<li>It signals to future reviewers that their review will actually be seen and appreciated - which makes the next person more likely to leave one</li>
+<li>Use the <a href="review-response-templates.html" style="color:var(--sblue);font-weight:600">Response Templates</a> for every reply. Customize the name and event details, but follow the structure.</li>
+</ul>
+</div>
+
+</div>
+</body>
+</html>
