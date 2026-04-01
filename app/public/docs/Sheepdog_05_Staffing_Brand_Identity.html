@@ -1,0 +1,384 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Sheepdog Staffing - #05 Brand Identity</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Barlow:wght@600;700;800;900&family=Barlow+Semi+Condensed:wght@700;800;900&family=Source+Sans+3:ital,wght@0,300;0,400;0,600;0,700;1,400;1,600&display=swap" rel="stylesheet">
+<style>
+:root{--black:#0C0C0C;--char:#161616;--dark:#2A2A2A;--mid:#4A4A4A;--steel:#7A8490;--light:#A0A0A0;--fog:#D0D0D0;--bdr:#D6D6D6;--tint:#F4F3F1;--white:#FFF;--red:#C23B22;--navy:#1B2A4A;--sblue:#3D5A80;--grn:#357A38;--fd:'Barlow Semi Condensed','Barlow',sans-serif;--fh:'Barlow',sans-serif;--fb:'Source Sans 3','Source Sans Pro',sans-serif}
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{font-family:var(--fb);font-size:17px;line-height:1.65;color:var(--dark);background:var(--white);-webkit-font-smoothing:antialiased;overflow-x:hidden}
+
+.snav{position:fixed;top:0;left:0;right:0;z-index:100;background:rgba(12,12,12,.95);backdrop-filter:blur(12px);padding:0 40px;display:flex;align-items:center;height:56px;transform:translateY(-100%);transition:transform .35s ease}
+.snav.show{transform:translateY(0)}
+.snav-brand{font-family:var(--fd);font-weight:800;font-size:15px;color:var(--white);text-transform:uppercase;letter-spacing:1.5px;margin-right:auto}
+.snav a{font-family:var(--fb);font-size:11px;font-weight:600;letter-spacing:1.5px;text-transform:uppercase;color:var(--steel);text-decoration:none;margin-left:20px;transition:color .2s}
+.snav a:hover,.snav a.active{color:var(--white)}
+
+.cover{min-height:100vh;background:var(--black);color:var(--white);display:flex;flex-direction:column;justify-content:flex-end;padding:64px;position:relative;overflow:hidden}
+.cover::before{content:'';position:absolute;inset:0;background:radial-gradient(ellipse at 70% 40%,rgba(61,90,128,.1),transparent 55%),radial-gradient(ellipse at 20% 70%,rgba(27,42,74,.08),transparent 50%);pointer-events:none}
+.cover-grid{position:absolute;inset:0;background:repeating-linear-gradient(90deg,transparent,transparent 79px,rgba(255,255,255,.02) 79px,rgba(255,255,255,.02) 80px),repeating-linear-gradient(0deg,transparent,transparent 79px,rgba(255,255,255,.02) 79px,rgba(255,255,255,.02) 80px);pointer-events:none}
+.cover-tag{font-family:var(--fb);font-size:12px;font-weight:600;letter-spacing:3px;text-transform:uppercase;color:var(--steel);margin-bottom:24px;opacity:0;animation:fu .6s ease forwards .2s}
+.cover h1{font-family:var(--fd);font-weight:800;font-size:clamp(48px,8vw,100px);line-height:.88;letter-spacing:-2px;text-transform:uppercase;margin-bottom:32px}
+.cover h1 .line{display:block;opacity:0;transform:translateY(30px);animation:cr .7s cubic-bezier(.16,1,.3,1) forwards}
+.cover h1 .line:nth-child(1){animation-delay:.4s}
+.cover h1 .line:nth-child(2){animation-delay:.55s;color:var(--steel)}
+.cover-desc{font-size:16px;line-height:1.6;color:var(--light);max-width:520px;border-top:1px solid rgba(255,255,255,.12);padding-top:24px;opacity:0;animation:fu .6s ease forwards .8s}
+.cover-desc strong{color:var(--white);font-weight:600}
+.cover-num{position:absolute;top:50%;right:64px;transform:translateY(-50%);font-family:var(--fd);font-weight:900;font-size:min(30vw,320px);color:rgba(255,255,255,.02);line-height:1;pointer-events:none}
+@keyframes cr{to{opacity:1;transform:translateY(0)}}
+@keyframes fu{to{opacity:1}}
+
+.s{padding:96px 64px;border-bottom:1px solid var(--bdr)}
+.s--dk{background:var(--char);color:var(--white);border-bottom-color:rgba(255,255,255,.06)}
+.s--blk{background:var(--black);color:var(--white);border-bottom-color:rgba(255,255,255,.06)}
+.s--tint{background:var(--tint)}
+.s--navy{background:var(--navy);color:var(--white);border-bottom-color:rgba(0,0,0,.1)}
+.tag{font-family:var(--fb);font-size:11px;font-weight:600;letter-spacing:3px;text-transform:uppercase;color:var(--sblue);margin-bottom:10px}
+.s--dk .tag,.s--blk .tag,.s--navy .tag{color:var(--steel)}
+.title{font-family:var(--fh);font-weight:800;font-size:42px;line-height:1.08;color:var(--black);margin-bottom:16px}
+.s--dk .title,.s--blk .title,.s--navy .title{color:var(--white)}
+.lead{font-size:18px;line-height:1.6;color:var(--mid);max-width:660px;margin-bottom:56px}
+.s--dk .lead,.s--blk .lead,.s--navy .lead{color:var(--steel)}
+.sub{font-family:var(--fh);font-weight:700;font-size:22px;color:var(--black);margin-bottom:24px}
+.s--dk .sub,.s--blk .sub,.s--navy .sub{color:var(--white)}
+
+.pos{background:var(--tint);border-radius:10px;padding:48px;margin-bottom:48px;border-left:4px solid var(--navy)}
+.pos p{font-family:var(--fb);font-size:20px;line-height:1.7;color:var(--dark);max-width:700px}
+.pos strong{color:var(--black);font-weight:600}
+
+/* WHAT WE ARE / AREN'T */
+.wwa{display:grid;grid-template-columns:1fr 1fr;gap:0;border-radius:10px;overflow:hidden;margin-bottom:48px;border:1px solid var(--bdr)}
+.wwa-side{padding:32px}
+.wwa-side h4{font-family:var(--fh);font-weight:700;font-size:18px;margin-bottom:14px}
+.wwa-side ul{list-style:none;padding:0}
+.wwa-side li{font-size:14px;line-height:1.7;padding-left:18px;position:relative;margin-bottom:4px}
+.wwa-y{background:rgba(53,122,56,.04)}.wwa-y h4{color:var(--grn)}.wwa-y li{color:var(--mid)}.wwa-y li::before{content:'✓';position:absolute;left:0;color:var(--grn);font-weight:700;font-size:13px}
+.wwa-n{background:rgba(194,59,34,.03)}.wwa-n h4{color:var(--red)}.wwa-n li{color:var(--mid)}.wwa-n li::before{content:'✗';position:absolute;left:0;color:var(--red);font-weight:700;font-size:13px}
+
+.vg{display:grid;grid-template-columns:1fr 1fr;gap:28px;margin-bottom:48px}
+.vc{border:1px solid var(--bdr);border-radius:10px;overflow:hidden;transition:box-shadow .3s}
+.vc:hover{box-shadow:0 8px 30px rgba(0,0,0,.08)}
+.vc-head{padding:28px;border-bottom:1px solid var(--bdr)}
+.vc-word{font-family:var(--fd);font-weight:800;font-size:36px;text-transform:uppercase;color:var(--black);margin-bottom:6px}
+.vc-def{font-size:15px;color:var(--mid);line-height:1.6}
+.vc-body{padding:28px}
+.vc-ex{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+.vc-do,.vc-dont{padding:16px;border-radius:6px;font-size:14px;line-height:1.6}
+.vc-do{background:rgba(53,122,56,.06);border:1px solid rgba(53,122,56,.15)}
+.vc-dont{background:rgba(194,59,34,.05);border:1px solid rgba(194,59,34,.12)}
+.vc-dl{font-family:var(--fh);font-weight:700;font-size:12px;letter-spacing:1.5px;text-transform:uppercase;margin-bottom:8px;color:var(--grn)}
+.vc-dnl{font-family:var(--fh);font-weight:700;font-size:12px;letter-spacing:1.5px;text-transform:uppercase;margin-bottom:8px;color:var(--red)}
+.vc-do p,.vc-dont p{color:var(--dark)}
+
+.pg{display:grid;grid-template-columns:1fr 1fr 1fr;gap:24px;margin-bottom:48px}
+.pil{padding:32px;border-radius:10px;border:1px solid rgba(255,255,255,.1);background:rgba(255,255,255,.03);transition:background .3s}
+.pil:hover{background:rgba(255,255,255,.06)}
+.pil-num{font-family:var(--fd);font-weight:800;font-size:48px;color:var(--steel);line-height:1;margin-bottom:12px}
+.pil h4{font-family:var(--fh);font-weight:700;font-size:20px;color:var(--white);margin-bottom:10px}
+.pil p{font-size:15px;line-height:1.6;color:var(--steel)}
+
+.tl{margin-bottom:48px}
+.tl-row{padding:28px 0;border-bottom:1px solid var(--bdr);display:flex;align-items:baseline;gap:20px;transition:padding-left .2s}
+.tl-row:hover{padding-left:12px}
+.tl-row:first-child{border-top:1px solid var(--bdr)}
+.tl-num{font-family:var(--fb);font-size:11px;font-weight:600;letter-spacing:2px;text-transform:uppercase;color:var(--sblue);flex-shrink:0;width:30px}
+.tl-text{font-family:var(--fd);font-weight:800;font-size:clamp(26px,3.5vw,38px);text-transform:uppercase;color:var(--black);line-height:1.1}
+
+.cb{border-radius:10px;overflow:hidden;margin-bottom:32px;border:1px solid var(--bdr)}
+.cb-label{font-family:var(--fb);font-size:11px;font-weight:600;letter-spacing:2px;text-transform:uppercase;color:var(--steel);padding:14px 24px;border-bottom:1px solid var(--bdr);background:var(--tint)}
+.cb-body{padding:40px;max-width:640px}
+.sp-ol{font-family:var(--fb);font-size:12px;font-weight:600;letter-spacing:2.5px;text-transform:uppercase;color:var(--sblue);margin-bottom:14px}
+.sp-h1{font-family:var(--fd);font-weight:800;font-size:38px;line-height:.98;letter-spacing:-.5px;color:var(--black);margin-bottom:16px}
+.sp-h2{font-family:var(--fh);font-weight:700;font-size:24px;line-height:1.2;color:var(--dark);margin-bottom:14px}
+.sp-p{font-family:var(--fb);font-size:17px;line-height:1.65;color:var(--mid);margin-bottom:16px}
+.sp-sm{font-family:var(--fb);font-size:13px;color:var(--light);margin-bottom:20px}
+.sp-btn{display:inline-block;font-family:var(--fh);font-weight:700;font-size:15px;letter-spacing:1.5px;text-transform:uppercase;color:var(--white);background:var(--navy);padding:15px 36px;border-radius:4px;text-decoration:none}
+.sp-dm{font-family:var(--fb);font-size:16px;line-height:1.65;color:var(--dark);font-style:italic;margin-bottom:12px}
+
+/* SERVICES GRID */
+.svc{display:grid;grid-template-columns:1fr 1fr 1fr;gap:20px;margin-bottom:48px}
+.svc-card{padding:24px;border:1px solid var(--bdr);border-radius:8px}
+.svc-card h4{font-family:var(--fh);font-weight:700;font-size:16px;color:var(--black);margin-bottom:8px}
+.svc-card p{font-size:14px;line-height:1.6;color:var(--mid)}
+
+/* PALETTE SWATCHES */
+.sw-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:14px;margin-bottom:48px}
+.sw{border-radius:10px;overflow:hidden;transition:transform .2s;border:1px solid var(--bdr)}
+.sw:hover{transform:translateY(-3px)}
+.sw-color{height:90px;position:relative}
+.sw-name{position:absolute;bottom:8px;left:12px;font-family:var(--fh);font-weight:700;font-size:12px}
+.sw-info{padding:12px 14px}
+.sw-hex{font-family:'SFMono-Regular','Consolas',monospace;font-size:13px;font-weight:600;color:var(--mid)}
+.sw-use{font-family:var(--fb);font-size:11px;color:var(--steel);margin-top:4px;line-height:1.4}
+
+/* COMPONENTS */
+.comp{border-radius:10px;overflow:hidden;margin-bottom:24px;border:1px solid rgba(255,255,255,.08)}
+.comp-label{font-family:var(--fb);font-size:11px;font-weight:600;letter-spacing:2px;text-transform:uppercase;color:var(--steel);padding:12px 20px;border-bottom:1px solid rgba(255,255,255,.06);background:rgba(255,255,255,.02)}
+
+/* FAQ */
+.faq{margin-bottom:48px}
+.faq-item{border-bottom:1px solid var(--bdr);padding:24px 0}
+.faq-item:first-child{border-top:1px solid var(--bdr)}
+.faq-q{font-family:var(--fh);font-weight:700;font-size:18px;color:var(--black);margin-bottom:8px}
+.faq-a{font-size:15px;line-height:1.65;color:var(--mid);max-width:640px}
+
+/* COMPARISON */
+.compare{display:grid;grid-template-columns:1fr 1fr;gap:0;border-radius:10px;overflow:hidden;margin-bottom:48px;border:1px solid rgba(255,255,255,.08)}
+.compare-side{padding:32px}
+.compare-side h4{font-family:var(--fh);font-weight:700;font-size:16px;margin-bottom:16px}
+.compare-side p{font-size:14px;line-height:1.6}
+.compare-label{font-family:var(--fb);font-size:11px;font-weight:600;letter-spacing:2px;text-transform:uppercase;margin-bottom:6px}
+.compare-events{background:var(--char)}.compare-events .compare-label{color:rgba(255,255,255,.3)}.compare-events h4{color:#C9922E}.compare-events p{color:var(--steel)}
+.compare-staffing{background:var(--black)}.compare-staffing .compare-label{color:var(--steel)}.compare-staffing h4{color:var(--white)}.compare-staffing p{color:var(--steel)}
+
+/* VIS EXPRESSION */
+.ve{display:grid;grid-template-columns:1fr 1fr;gap:28px;margin-bottom:48px}
+.ve-card{padding:28px;border:1px solid var(--bdr);border-radius:8px}
+.ve-card h4{font-family:var(--fh);font-weight:700;font-size:18px;color:var(--black);margin-bottom:10px}
+.ve-card p,.ve-card li{font-size:15px;line-height:1.6;color:var(--mid)}
+.ve-card ul{list-style:none;padding:0}
+.ve-card li{padding-left:18px;position:relative;margin-bottom:5px}
+.ve-card li::before{content:'\2013';position:absolute;left:0;color:var(--sblue);font-weight:700}
+.ve-card code{background:rgba(0,0,0,.04);padding:2px 6px;border-radius:3px;font-size:12px;font-family:'SFMono-Regular','Consolas',monospace}
+
+.note{display:flex;gap:16px;padding:24px;border-radius:0 8px 8px 0;margin-bottom:40px;background:rgba(27,42,74,.06);border-left:3px solid var(--navy)}
+.note-i{flex-shrink:0;width:22px;height:22px;border-radius:50%;background:var(--navy);color:var(--white);font-size:12px;font-weight:700;display:flex;align-items:center;justify-content:center}
+.note p{font-size:14px;line-height:1.6;color:var(--mid)}
+.note strong{color:var(--dark)}
+.note code{background:rgba(0,0,0,.04);padding:2px 6px;border-radius:3px;font-size:12px;font-family:'SFMono-Regular','Consolas',monospace}
+.s--dk .note p,.s--blk .note p,.s--navy .note p{color:var(--light)}
+.s--dk .note strong,.s--blk .note strong,.s--navy .note strong{color:var(--white)}
+.s--dk .note code,.s--blk .note code,.s--navy .note code{background:rgba(255,255,255,.08);color:var(--fog)}
+
+.foot{padding:56px 64px;background:var(--black);text-align:center}
+.foot-brand{font-family:var(--fd);font-weight:800;font-size:18px;text-transform:uppercase;letter-spacing:2px;color:var(--white);margin-bottom:8px}
+.foot p{font-size:14px;color:var(--steel);line-height:1.6}
+.foot strong{color:var(--white)}
+.fi{opacity:0;transform:translateY(20px);transition:opacity .6s ease,transform .6s ease}
+.fi.vis{opacity:1;transform:translateY(0)}
+@media print{.cover{min-height:auto;page-break-after:always}.s{page-break-inside:avoid;padding:40px}body{font-size:10.5pt}.snav{display:none}}
+@media(max-width:900px){.vg,.ve,.svc{grid-template-columns:1fr}.pg{grid-template-columns:1fr}.compare,.wwa{grid-template-columns:1fr}}
+@media(max-width:768px){.s{padding:48px 24px}.cover{padding:40px 24px}.cover h1{font-size:48px}.sw-grid{grid-template-columns:1fr 1fr}}
+@media(max-width:600px){.vc-ex{grid-template-columns:1fr}.svc{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+
+<nav class="snav" id="snav"><div class="snav-brand">Sheepdog Staffing</div><a href="#positioning">Positioning</a><a href="#voice">Voice</a><a href="#pillars">Pillars</a><a href="#copy">Copy</a><a href="#palette">Palette</a><a href="#faq">FAQ</a><a href="#visual">Visual</a></nav>
+
+<div class="cover"><div class="cover-grid"></div><div class="cover-num">05</div>
+<div class="cover-tag">Deliverable #05 · Foundation › Brand Architecture</div>
+<h1><span class="line">Sheepdog</span><span class="line">Staffing</span></h1>
+<div class="cover-desc"><strong>Sub-Brand Identity</strong> - Positioning, voice, messaging pillars, sample copy, color palette, FAQ copy, and visual expression for Sheepdog Staffing. Contracted labor and workforce solutions for companies that need workers at scale.<br><br>References <strong>#01 Color Palette</strong>, <strong>#02 Typography System</strong>, <strong>#03 Visual Standards Guide</strong>.</div></div>
+
+<!-- 01 POSITIONING -->
+<div class="s" id="positioning">
+<div class="fi"><div class="tag">01 - Brand Positioning</div><div class="title">What Sheepdog Staffing Is</div><p class="lead">One paragraph. What it is, who it serves, why it's different. Every piece of Staffing marketing traces back to this.</p></div>
+<div class="pos fi"><p><strong>Sheepdog Staffing</strong> is the contracted labor and workforce solutions arm of Sheepdog, providing vetted, dependable workers for companies that need personnel at scale. We serve businesses across industries - from GPS tagging deployments and field logistics to facility maintenance, warehouse operations, and project-based labor. Our clients are companies, HR departments, operations managers, and project leads who need reliable people on-site without the overhead of hiring, vetting, and managing them directly. What makes us different: <strong>we handle everything end-to-end</strong> - recruiting, background checks, onboarding paperwork, scheduling, and compliance - so the client gets a fully managed workforce with a single point of contact. You define the scope. We deliver the people.</p></div>
+
+<div class="note fi"><div class="note-i">!</div><div><p><strong>Critical distinction:</strong> Sheepdog Staffing is <strong>not limited to security personnel</strong>. It is a general contracted labor service. While the parent brand has roots in security, the Staffing line serves any company that needs workers deployed at scale for any task. Copy should never box the offering into "security staffing."</p></div></div>
+
+<div class="sub fi">What We Are vs. What We Aren't</div>
+<div class="wwa fi">
+<div class="wwa-side wwa-y"><h4>What We Are</h4><ul>
+<li>A managed workforce provider - we recruit, vet, deploy, and manage</li>
+<li>A single point of contact for contracted labor at any scale</li>
+<li>Industry-flexible - field ops, logistics, facilities, warehouse, project labor</li>
+<li>Compliance-handled - W-9s, background checks, insurance, onboarding</li>
+<li>A partner that scales up and down with the client's needs</li>
+</ul></div>
+<div class="wwa-side wwa-n"><h4>What We Aren't</h4><ul>
+<li>A temp app or gig platform - we don't do marketplace matching</li>
+<li>A staffing agency that sends resumes for you to sort through</li>
+<li>Limited to security - we staff any contracted labor role</li>
+<li>A body shop - every worker is vetted, briefed, and managed by us</li>
+<li>A one-off provider - we build ongoing workforce relationships</li>
+</ul></div>
+</div>
+</div>
+
+<!-- 02 VOICE -->
+<div class="s s--tint" id="voice">
+<div class="fi"><div class="tag">02 - Brand Voice</div><div class="title">How Sheepdog Staffing Sounds</div><p class="lead">Four attributes. This is a corporate audience - operations managers, HR leads, project directors. The voice should make them feel like they're working with a capable, professional partner.</p></div>
+<div class="vg fi">
+<div class="vc"><div class="vc-head"><div class="vc-word">Professional</div><div class="vc-def">Buttoned-up, polished, competent. We speak the language of businesses - deliverables, timelines, compliance, SLAs.</div></div><div class="vc-body"><div class="vc-ex"><div class="vc-do"><div class="vc-dl">✓ Do</div><p>"We deploy vetted personnel within 48 hours of contract execution, with full documentation provided on day one."</p></div><div class="vc-dont"><div class="vc-dnl">✗ Don't</div><p>"Just hit us up and we'll get some guys out to your site ASAP."</p></div></div></div></div>
+<div class="vc"><div class="vc-head"><div class="vc-word">Reliable</div><div class="vc-def">The single most important thing a staffing partner can be. Workers show up. On time. Every shift. No gaps, no excuses.</div></div><div class="vc-body"><div class="vc-ex"><div class="vc-do"><div class="vc-dl">✓ Do</div><p>"Zero missed shifts across 340 placement hours last quarter. That's the standard we hold ourselves to."</p></div><div class="vc-dont"><div class="vc-dnl">✗ Don't</div><p>"We do our best to make sure workers show up on time."</p></div></div></div></div>
+<div class="vc"><div class="vc-head"><div class="vc-word">Efficient</div><div class="vc-def">We don't waste your time. Proposals are fast, onboarding is streamlined, communication is clear. Everything reduces friction for the client.</div></div><div class="vc-body"><div class="vc-ex"><div class="vc-do"><div class="vc-dl">✓ Do</div><p>"Scope received Monday. Proposal delivered Tuesday. Workers on-site Thursday."</p></div><div class="vc-dont"><div class="vc-dnl">✗ Don't</div><p>"Once we receive your detailed requirements, our team will initiate a comprehensive evaluation process to determine the optimal staffing configuration for your needs."</p></div></div></div></div>
+<div class="vc"><div class="vc-head"><div class="vc-word">No-Nonsense</div><div class="vc-def">We don't oversell, don't overpromise, and don't pad proposals with fluff. Clients get exactly what they asked for - clearly scoped, clearly priced, clearly delivered.</div></div><div class="vc-body"><div class="vc-ex"><div class="vc-do"><div class="vc-dl">✓ Do</div><p>"12 workers, 5 days, $22/hr billed. W-9s, background checks, and workers' comp included. Here's the contract."</p></div><div class="vc-dont"><div class="vc-dnl">✗ Don't</div><p>"Our holistic workforce ecosystem leverages synergistic human capital strategies to optimize your operational throughput."</p></div></div></div></div>
+</div></div>
+
+<!-- 03 PILLARS -->
+<div class="s s--blk" id="pillars">
+<div class="fi"><div class="tag">03 - Messaging Pillars</div><div class="title">Three Themes We Always Return To</div><p class="lead">Every piece of Sheepdog Staffing marketing ties back to at least one of these.</p></div>
+<div class="pg fi">
+<div class="pil"><div class="pil-num">01</div><h4>Vetted &amp; Ready</h4><p>Every worker we place is background-checked, documented, and prepared for the job. We don't send warm bodies - we send people who've been vetted, briefed on the scope, and cleared to work. Compliance paperwork is handled before anyone sets foot on-site.</p></div>
+<div class="pil"><div class="pil-num">02</div><h4>Fully Managed</h4><p>Clients don't manage our workers - we do. Recruiting, vetting, onboarding, scheduling, compliance, and payroll all run through us. The client gets a single point of contact and total visibility into coverage. No juggling subcontractors. No HR overhead. One partner, fully managed.</p></div>
+<div class="pil"><div class="pil-num">03</div><h4>Scalable Workforce</h4><p>Need 3 people for a week or 30 for a quarter? We scale to match the scope. Ramp up fast, ramp down clean. From one-off field deployments to ongoing operational support, the model flexes to fit.</p></div>
+</div></div>
+
+<!-- 04 COPY -->
+<div class="s" id="copy">
+<div class="fi"><div class="tag">04 - Taglines, Services &amp; Sample Copy</div><div class="title">Words That Work</div><p class="lead">Taglines, website copy, service descriptions, and outreach - all in the Sheepdog Staffing B2B voice.</p></div>
+
+<div class="tl fi">
+<div class="tl-row"><div class="tl-num">01</div><div class="tl-text">The People You Need.<br>The Reliability You Expect.</div></div>
+<div class="tl-row"><div class="tl-num">02</div><div class="tl-text">Contract Workforce Solutions,<br>On Demand.</div></div>
+<div class="tl-row"><div class="tl-num">03</div><div class="tl-text">One Partner. Fully Managed.</div></div>
+</div>
+
+<div class="sub fi">Services List</div>
+<div class="svc fi">
+<div class="svc-card"><h4>Field Operations</h4><p>GPS tagging, survey work, utility locating, site assessments. Workers deployed with equipment knowledge and field safety training.</p></div>
+<div class="svc-card"><h4>Logistics Support</h4><p>Warehouse receiving, inventory management, distribution support, loading/unloading. Scaled teams for peak periods or ongoing ops.</p></div>
+<div class="svc-card"><h4>Facility Maintenance</h4><p>Grounds maintenance, janitorial, light repair, property upkeep. Ongoing placements or project-based crews for facility operators.</p></div>
+<div class="svc-card"><h4>Warehouse Staffing</h4><p>Pick-pack-ship, order fulfillment, quality control, forklift operators. Vetted workers ready for high-throughput environments.</p></div>
+<div class="svc-card"><h4>Project-Based Labor</h4><p>Short-term deployments for construction support, event buildout, installations, rollouts. Scoped, quoted, and delivered on deadline.</p></div>
+<div class="svc-card"><h4>Ongoing Placements</h4><p>Long-term contracted workers embedded with the client's operations. Managed by us, dedicated to you. Continuity without the hiring overhead.</p></div>
+</div>
+
+<div class="cb fi"><div class="cb-label">Hero Section - sheepdogtexas.com/staffing</div><div class="cb-body">
+<div class="sp-ol">Sheepdog Staffing</div><div class="sp-h1">Contract Workforce<br>Solutions, On Demand</div><div class="sp-h2">The people you need. The reliability you expect.</div>
+<div class="sp-p">Sheepdog Staffing provides vetted, dependable contracted workers for companies that need labor at scale - from GPS tagging deployments and field logistics to facility maintenance and warehouse operations. You define the scope. We deliver the workforce. Recruiting, background checks, onboarding, scheduling, and compliance are all handled, so you get a fully managed team with a single point of contact.</div>
+<div class="sp-sm">Background-checked · Insured · W-9 &amp; contractor agreements handled</div><a class="sp-btn" href="#">Request Staff</a>
+</div></div>
+
+<div class="cb fi"><div class="cb-label">How It Works Section</div><div class="cb-body">
+<div class="sp-h1" style="font-size:30px;">How It Works</div>
+<div class="sp-p"><strong style="color:var(--black);">1. Tell us your staffing needs.</strong> Number of workers, type of work, location, duration, and any specific requirements. We'll scope it within 24 hours.</div>
+<div class="sp-p"><strong style="color:var(--black);">2. We match vetted personnel.</strong> Background-checked, documented, and briefed on the job before they arrive. All compliance paperwork handled by us.</div>
+<div class="sp-p"><strong style="color:var(--black);">3. Fully managed, fully compliant.</strong> One point of contact manages scheduling, check-ins, and any adjustments. You get workers on-site, on time - and a single invoice at the end.</div>
+</div></div>
+
+<div class="cb fi"><div class="cb-label">LinkedIn / Email - B2B Cold Outreach</div><div class="cb-body"><div class="sp-dm">"Hi [Name] - I lead Sheepdog Staffing, a contracted workforce provider based in College Station. We help companies staff field operations, logistics, and project-based work without the overhead of direct hiring. If [Company] ever needs to scale a team quickly for a project, I'd be happy to walk you through how we work. No pitch - just a quick intro. Either way, appreciate your time."</div><div class="sp-sm">Professional, concise, respects their time. Surfaces the value prop (scale without overhead) and offers a low-commitment next step.</div></div></div>
+
+<div class="cb fi"><div class="cb-label">Follow-Up Email - After Initial Contact</div><div class="cb-body"><div class="sp-dm">"Hi [Name] - following up on my note from last week. Wanted to share a quick overview of how Sheepdog Staffing works in case it's useful: we handle recruiting, vetting, onboarding, and compliance for contracted workers, so your team doesn't have to. Clients typically come to us when they need people on-site fast without the hiring timeline. Happy to send over a one-pager or set up a 10-minute call - whichever's easier."</div><div class="sp-sm">Second touch. Still no pressure. Provides context they can forward internally. Two low-friction options.</div></div></div>
+
+<div class="cb fi"><div class="cb-label">Proposal Introduction - Scope of Work Opening</div><div class="cb-body"><div class="sp-dm">"Thank you for the opportunity to propose on this engagement. Sheepdog Staffing provides fully managed contracted labor for [Client Company], covering recruiting, vetting, onboarding, scheduling, and on-site supervision for the scope outlined below. All workers are background-checked, documented, and briefed prior to deployment. A single point of contact will manage the engagement end-to-end."</div><div class="sp-sm">Clean, professional, no fluff. Establishes the "fully managed" positioning immediately. Drops directly into the SOW scope section.</div></div></div>
+</div>
+
+<!-- 05 PALETTE -->
+<div class="s s--dk" id="palette">
+<div class="fi"><div class="tag">05 - Staffing Color Palette</div><div class="title">Navy + Structure</div><p class="lead">Two Staffing-exclusive colors added to the parent palette. Cooler, more corporate than Events. No amber, no cream. Full color reference in <strong style="color:var(--white);">#01 Color Palette</strong>.</p></div>
+
+<div class="sw-grid fi">
+<div class="sw" style="border-color:rgba(255,255,255,.08)"><div class="sw-color" style="background:#1B2A4A"><div class="sw-name" style="color:#fff">Navy</div></div><div class="sw-info" style="background:var(--char)"><div class="sw-hex" style="color:#ddd">#1B2A4A</div><div class="sw-use" style="color:var(--steel)">Primary Staffing accent. CTAs, hero sections, data headers. 14.2:1 AAA on white.</div></div></div>
+<div class="sw" style="border-color:rgba(255,255,255,.08)"><div class="sw-color" style="background:#3D5A80"><div class="sw-name" style="color:#fff">Slate Blue</div></div><div class="sw-info" style="background:var(--char)"><div class="sw-hex" style="color:#ddd">#3D5A80</div><div class="sw-use" style="color:var(--steel)">Secondary accent. Tags, overlines, links, secondary CTAs. 7.1:1 AAA on white.</div></div></div>
+</div>
+
+<div class="note fi"><div class="note-i">i</div><div><p><strong>Staffing stays cool.</strong> Navy and Slate Blue are the only additions. Combined with parent neutrals (Midnight through White + Signal Red for errors), this gives Staffing a clean corporate identity. No warm tones - if you see amber or cream, it's Events territory.</p></div></div>
+
+<div class="sub fi" style="color:var(--white);">Rendered Components</div>
+<div class="comp fi"><div class="comp-label">Staffing Hero</div>
+<div style="background:var(--white);padding:48px 28px;text-align:center;">
+<div style="font-family:var(--fb);font-size:11px;font-weight:600;letter-spacing:2.5px;text-transform:uppercase;color:var(--sblue);margin-bottom:12px;">Sheepdog Staffing</div>
+<div style="font-family:var(--fd);font-weight:800;font-size:30px;line-height:1;color:var(--black);margin-bottom:12px;">Contract Workforce Solutions,<br>On Demand</div>
+<div style="font-family:var(--fb);font-size:15px;color:var(--mid);margin-bottom:20px;max-width:420px;margin-left:auto;margin-right:auto;">Vetted, managed contracted workers for companies that need labor at scale.</div>
+<span style="display:inline-block;font-family:var(--fh);font-weight:700;font-size:13px;letter-spacing:1.5px;text-transform:uppercase;color:var(--white);background:var(--navy);padding:12px 28px;border-radius:4px;">Request Staff</span>
+</div></div>
+
+<div class="comp fi"><div class="comp-label">Staffing CTA Banner</div>
+<div style="background:var(--navy);padding:40px 28px;text-align:center;">
+<div style="font-family:var(--fd);font-weight:800;font-size:28px;text-transform:uppercase;color:var(--white);margin-bottom:8px;">Ready to Scale Your Team?</div>
+<div style="font-family:var(--fb);font-size:15px;color:var(--steel);margin-bottom:20px;">Tell us your staffing needs. We respond within 24 hours.</div>
+<span style="display:inline-block;font-family:var(--fh);font-weight:700;font-size:13px;letter-spacing:1.5px;text-transform:uppercase;color:var(--navy);background:var(--white);padding:12px 28px;border-radius:4px;">Get a Proposal</span>
+</div></div>
+
+<div class="comp fi"><div class="comp-label">Service Card (Staffing Style)</div>
+<div style="background:var(--tint);padding:32px;display:grid;grid-template-columns:1fr 1fr;gap:20px;">
+<div style="background:var(--white);border-radius:8px;padding:28px;border:1px solid var(--bdr);">
+<div style="font-family:var(--fb);font-size:10px;font-weight:600;letter-spacing:2px;text-transform:uppercase;color:var(--sblue);margin-bottom:8px;">Field Operations</div>
+<div style="font-family:var(--fh);font-weight:700;font-size:18px;color:var(--black);margin-bottom:8px;">GPS Tagging &amp; Survey</div>
+<div style="font-family:var(--fb);font-size:14px;color:var(--mid);line-height:1.6;">Workers deployed with equipment knowledge and field safety training.</div>
+</div>
+<div style="background:var(--white);border-radius:8px;padding:28px;border:1px solid var(--bdr);">
+<div style="font-family:var(--fb);font-size:10px;font-weight:600;letter-spacing:2px;text-transform:uppercase;color:var(--sblue);margin-bottom:8px;">Warehouse</div>
+<div style="font-family:var(--fh);font-weight:700;font-size:18px;color:var(--black);margin-bottom:8px;">Pick-Pack-Ship</div>
+<div style="font-family:var(--fb);font-size:14px;color:var(--mid);line-height:1.6;">Vetted workers for high-throughput fulfillment environments.</div>
+</div>
+</div></div>
+</div>
+
+<!-- 06 FAQ -->
+<div class="s" id="faq">
+<div class="fi"><div class="tag">06 - FAQ Copy</div><div class="title">Questions B2B Buyers Ask</div><p class="lead">Pre-written answers for the /staffing page FAQ section. Written in the Staffing voice - direct, no fluff, answers the question then stops.</p></div>
+<div class="faq fi">
+<div class="faq-item"><div class="faq-q">What types of work do you staff for?</div><div class="faq-a">Anything that requires contracted workers at scale. Our most common engagements are field operations (GPS tagging, survey work), logistics and warehouse staffing, facility maintenance, and project-based labor. We're not limited to any single industry - if you need vetted people on-site, we can scope it.</div></div>
+<div class="faq-item"><div class="faq-q">How quickly can you deploy workers?</div><div class="faq-a">For standard engagements, we can have vetted workers on-site within 48–72 hours of contract execution. For larger deployments or specialized roles, we'll provide a timeline during the scoping process. Ongoing placements with repeating schedules are set up once and run continuously.</div></div>
+<div class="faq-item"><div class="faq-q">Do you handle background checks and compliance?</div><div class="faq-a">Yes - everything. Background checks, W-9 collection, independent contractor agreements, insurance verification, and any client-specific onboarding requirements. Workers are fully documented before they set foot on your site.</div></div>
+<div class="faq-item"><div class="faq-q">What's the minimum contract size?</div><div class="faq-a">We don't have a hard minimum, but our model is built for engagements of 3+ workers. Single-person placements can work for ongoing roles but aren't cost-effective for one-off shifts. We'll be upfront during scoping if a project isn't the right fit.</div></div>
+<div class="faq-item"><div class="faq-q">How does billing work?</div><div class="faq-a">We bill per worker per hour, with rates set at contract signing. You'll receive a single invoice - no separate bills from individual workers. Timesheets are tracked and verified by our on-site point of contact before invoicing. Net 15 or Net 30 terms are available.</div></div>
+<div class="faq-item"><div class="faq-q">What if a worker doesn't perform?</div><div class="faq-a">We replace them. Our team manages performance on-site, and if a worker isn't meeting expectations, we swap them out - typically within 24 hours. You don't need to fire or manage anyone. That's our job.</div></div>
+</div></div>
+
+<!-- 07 VISUAL + COMPARISON -->
+<div class="s s--tint" id="visual">
+<div class="fi"><div class="tag">07 - Visual Expression</div><div class="title">How Staffing Looks Different</div><p class="lead">Sheepdog Staffing shares the parent brand system but expresses it with more restraint and structure than Events. Cooler, cleaner, data-forward.</p></div>
+<div class="ve fi">
+<div class="ve-card"><h4>Color Emphasis</h4><ul>
+<li>Navy <code>#1B2A4A</code> is the Staffing accent - not amber</li>
+<li>Signal Red <code>#C23B22</code> reserved for error states only</li>
+<li>More gray and steel tones than Events</li>
+<li>White and Bone backgrounds - clean, clinical separation</li>
+<li>No warm tones, no cream, no amber</li>
+</ul></div>
+<div class="ve-card"><h4>Typography Lean</h4><ul>
+<li>H1: Barlow Semi Condensed 800, <strong>sentence case acceptable</strong></li>
+<li>Clean, measured display - less shouty than Events</li>
+<li>Slightly longer sentences OK - professional vocabulary</li>
+<li>Passive voice acceptable when corporate tone fits</li>
+<li>CTA language: "Request Staff," "Get a Proposal," "Schedule a Call"</li>
+</ul></div>
+<div class="ve-card"><h4>Imagery Direction</h4><ul>
+<li>Workers on-site, logistics in action, organized operations</li>
+<li>Avoid anything that looks like nightlife, events, or parties</li>
+<li>Hi-vis vests, clipboards, organized teams, warehouses, corporate</li>
+<li>Daytime photography - well-lit, clean, operational</li>
+<li>People working, not posing - candid but corporate</li>
+</ul></div>
+<div class="ve-card"><h4>Layout &amp; Composition</h4><ul>
+<li>More structured than Events - clean grids, generous whitespace</li>
+<li>Data-forward where appropriate - stats, metrics, timelines</li>
+<li>Fewer full-bleed images, more contained compositions</li>
+<li>Cards, tables, structured layouts over large hero images</li>
+<li>Information density is higher - B2B audiences scan for specifics</li>
+</ul></div>
+</div>
+</div>
+
+<div class="s s--dk">
+<div class="fi"><div class="tag">07b - Events vs. Staffing</div><div class="title">Same System. Different Voice.</div><p class="lead">How the same brand system produces two distinct sub-brand expressions.</p></div>
+<div class="compare fi">
+<div class="compare-side compare-events">
+<div class="compare-label">Sheepdog Events</div>
+<h4>Audience</h4><p>Venue owners, event planners, Greek orgs, individuals</p>
+<h4 style="margin-top:16px;">Tone</h4><p>Dependable, experienced, straightforward, warm</p>
+<h4 style="margin-top:16px;">Headline Style</h4><p style="font-family:var(--fd);font-weight:800;font-size:22px;text-transform:uppercase;color:var(--white);margin-top:8px;">SECURITY &amp; BARTENDING FOR EVERY EVENT</p>
+<h4 style="margin-top:16px;">CTA</h4><p><span style="display:inline-block;font-family:var(--fh);font-weight:700;font-size:12px;letter-spacing:1.5px;text-transform:uppercase;color:var(--black);background:#C9922E;padding:8px 18px;border-radius:4px;margin-top:6px;">Get a Quote</span></p>
+<h4 style="margin-top:16px;">Sample Line</h4><p>"Your guests should feel safe and have a great time. That's the whole point."</p>
+</div>
+<div class="compare-side compare-staffing">
+<div class="compare-label">Sheepdog Staffing</div>
+<h4>Audience</h4><p>Companies, HR, ops managers, project leads</p>
+<h4 style="margin-top:16px;">Tone</h4><p>Professional, reliable, efficient, no-nonsense</p>
+<h4 style="margin-top:16px;">Headline Style</h4><p style="font-family:var(--fd);font-weight:800;font-size:22px;color:var(--white);margin-top:8px;">Contract Workforce Solutions, On Demand</p>
+<h4 style="margin-top:16px;">CTA</h4><p><span style="display:inline-block;font-family:var(--fh);font-weight:700;font-size:12px;letter-spacing:1.5px;text-transform:uppercase;color:var(--white);background:var(--navy);padding:8px 18px;border-radius:4px;margin-top:6px;">Request Staff</span></p>
+<h4 style="margin-top:16px;">Sample Line</h4><p>"Scope received Monday. Proposal delivered Tuesday. Workers on-site Thursday."</p>
+</div>
+</div>
+<div class="note fi"><div class="note-i">i</div><div><p><strong>The litmus test:</strong> Cover the logo. If the content feels like a party you'd want to attend, it's Events. If it feels like a proposal you'd forward to your VP of Operations, it's Staffing. Both should feel like Sheepdog - but for completely different audiences.</p></div></div>
+</div>
+
+<div class="foot"><div class="foot-brand">Sheepdog Staffing</div><p>Sub-Brand Identity · Deliverable #05<br>Part of the Sheepdog brand system. Pair with <strong>#01 Color Palette</strong> · <strong>#02 Typography</strong> · <strong>#03 Visual Standards</strong> · <strong>#04 Events Identity</strong></p></div>
+
+<script>
+const snav=document.getElementById('snav'),nls=snav.querySelectorAll('a');
+window.addEventListener('scroll',()=>{const y=window.scrollY;snav.classList.toggle('show',y>window.innerHeight*.5);document.querySelectorAll('.s[id]').forEach(s=>{const t=s.offsetTop-80,b=t+s.offsetHeight,id=s.id;nls.forEach(a=>{if(a.getAttribute('href')==='#'+id)a.classList.toggle('active',y>=t&&y<b)})})});
+const fis=document.querySelectorAll('.fi'),obs=new IntersectionObserver(es=>{es.forEach(e=>{if(e.isIntersecting){e.target.classList.add('vis');obs.unobserve(e.target)}})},{threshold:.1,rootMargin:'0px 0px -40px 0px'});fis.forEach(el=>obs.observe(el));
+</script>
+</body>
+</html>

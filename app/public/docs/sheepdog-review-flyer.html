@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Sheepdog Review Flyer</title>
+<link href="https://fonts.googleapis.com/css2?family=Barlow:wght@600;700;800&family=Source+Sans+3:wght@400;600&display=swap" rel="stylesheet">
+<style>
+  @page { size: 4in 6in; margin: 0; }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    background: #1a1a1a;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-height: 100vh;
+    padding: 40px;
+    font-family: 'Source Sans 3', sans-serif;
+  }
+  .print-bar {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    margin-bottom: 32px;
+  }
+  .print-btn {
+    font-family: 'Barlow', sans-serif;
+    font-weight: 700;
+    font-size: 13px;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    color: #FFFFFF;
+    background: #C23B22;
+    border: none;
+    padding: 12px 28px;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: background 0.2s;
+  }
+  .print-btn:hover { background: #A83220; }
+  .print-info {
+    font-size: 13px;
+    color: #666;
+  }
+  .card {
+    width: 4in;
+    height: 6in;
+    background: #0C0C0C;
+    border-radius: 12px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: space-between;
+    padding: 40px 32px 36px;
+    position: relative;
+    overflow: hidden;
+    box-shadow: 0 20px 60px rgba(0,0,0,0.5);
+  }
+  .card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 4px;
+    background: #C23B22;
+  }
+  .top {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+  }
+  .logo {
+    width: 100px;
+    height: auto;
+    margin-bottom: 24px;
+    opacity: 0.9;
+  }
+  .headline {
+    font-family: 'Barlow', sans-serif;
+    font-weight: 800;
+    font-size: 22px;
+    line-height: 1.15;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    color: #FFFFFF;
+    margin-bottom: 6px;
+  }
+  .sub {
+    font-size: 13px;
+    color: #7A8490;
+    line-height: 1.5;
+    max-width: 240px;
+  }
+  .qr-area {
+    width: 160px;
+    height: 160px;
+    background: #FFFFFF;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .qr-placeholder {
+    font-family: 'Barlow', sans-serif;
+    font-size: 9px;
+    font-weight: 600;
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+    color: #999;
+    text-align: center;
+    line-height: 1.3;
+  }
+  .qr-placeholder span {
+    display: block;
+    font-size: 28px;
+    margin-bottom: 4px;
+    color: #ccc;
+  }
+  .bottom {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+  }
+  .stars {
+    font-size: 24px;
+    letter-spacing: 4px;
+    color: #C9922E;
+    margin-bottom: 10px;
+  }
+  .cta {
+    font-family: 'Barlow', sans-serif;
+    font-weight: 700;
+    font-size: 11px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: #C23B22;
+  }
+  .footer-line {
+    font-size: 11px;
+    color: #444;
+    margin-top: 8px;
+  }
+  @media print {
+    body { background: none; padding: 0; }
+    .card { box-shadow: none; border-radius: 0; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+    .print-bar { display: none; }
+  }
+</style>
+</head>
+<body>
+
+<div class="print-bar">
+  <button class="print-btn" onclick="window.print()">Download Printable</button>
+  <span class="print-info">4 x 6 in &middot; Print on heavy cardstock</span>
+</div>
+
+<div class="card">
+  <div class="top">
+    <img src="/sheepdog-stacked-white.svg" alt="Sheepdog" class="logo">
+    <div class="headline">How'd We Do?</div>
+    <p class="sub">Scan the code below to leave us a quick Google review. It takes 30 seconds and means a lot.</p>
+  </div>
+
+  <div class="qr-area">
+    <div class="qr-placeholder">
+      <span>&#9633;</span>
+      QR code<br>pending verification
+    </div>
+  </div>
+
+  <div class="bottom">
+    <div class="stars">&#9733;&#9733;&#9733;&#9733;&#9733;</div>
+    <div class="cta">Leave a Review</div>
+    <div class="footer-line">sheepdogtexas.com</div>
+  </div>
+</div>
+
+</body>
+</html>

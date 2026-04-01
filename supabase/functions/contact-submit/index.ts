@@ -4,25 +4,67 @@ const RESEND_API_KEY = Deno.env.get("RESEND_API_KEY")!;
 const SUPABASE_URL = Deno.env.get("SUPABASE_URL")!;
 const SUPABASE_SERVICE_ROLE_KEY = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
 
-const corsHeaders = {
-  "Access-Control-Allow-Origin": "*",
-  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
-};
+// Allowed origins — lock CORS to only these domains
+const ALLOWED_ORIGINS = [
+  "https://sheepdogtexas.com",
+  "https://www.sheepdogtexas.com",
+];
 
-// Rate limiting: max 3 submissions per IP per 10 minutes
-const rateMap = new Map<string, number[]>();
-function isRateLimited(ip: string): boolean {
-  const now = Date.now();
-  const window = 10 * 60 * 1000; // 10 min
-  const maxRequests = 3;
-  const timestamps = (rateMap.get(ip) || []).filter(t => now - t < window);
-  if (timestamps.length >= maxRequests) return true;
-  timestamps.push(now);
-  rateMap.set(ip, timestamps);
+function getCorsHeaders(requestOrigin: string | null): Record<string, string> {
+  const origin =
+    requestOrigin && ALLOWED_ORIGINS.includes(requestOrigin)
+      ? requestOrigin
+      : ALLOWED_ORIGINS[0];
+  return {
+    "Access-Control-Allow-Origin": origin,
+    "Access-Control-Allow-Headers":
+      "authorization, x-client-info, apikey, content-type",
+    "Access-Control-Allow-Methods": "POST, OPTIONS",
+    "Vary": "Origin",
+  };
+}
+
+// Persistent rate limiting via Supabase — survives cold starts
+const RATE_LIMIT_MAX = 3;
+const RATE_LIMIT_WINDOW_MS = 10 * 60 * 1000; // 10 minutes
+
+async function isRateLimited(
+  supabase: ReturnType<typeof createClient>,
+  ip: string
+): Promise<boolean> {
+  const windowStart = new Date(Date.now() - RATE_LIMIT_WINDOW_MS).toISOString();
+
+  // Count recent requests from this IP
+  const { count, error } = await supabase
+    .from("rate_limits")
+    .select("*", { count: "exact", head: true })
+    .eq("ip", ip)
+    .eq("endpoint", "contact-submit")
+    .gte("created_at", windowStart);
+
+  if (error) {
+    // If we can't check rate limits, fail open (allow the request) and log
+    console.error("Rate limit check failed:", error.message);
+    return false;
+  }
+
+  if ((count ?? 0) >= RATE_LIMIT_MAX) return true;
+
+  // Record this request
+  await supabase.from("rate_limits").insert({ ip, endpoint: "contact-submit" });
+
+  // Clean up old entries (fire-and-forget, don't await)
+  supabase
+    .from("rate_limits")
+    .delete()
+    .eq("ip", ip)
+    .lt("created_at", windowStart)
+    .then(() => {});
+
   return false;
 }
 
-// Escape HTML to prevent injection
+// Escape HTML to prevent injection in email bodies
 function escapeHtml(str: string): string {
   return str
     .replace(/&/g, "&amp;")
@@ -33,23 +75,42 @@ function escapeHtml(str: string): string {
 }
 
 Deno.serve(async (req) => {
+  const requestOrigin = req.headers.get("origin");
+  const corsHeaders = getCorsHeaders(requestOrigin);
+
   if (req.method === "OPTIONS") {
     return new Response("ok", { headers: corsHeaders });
   }
 
-  // Rate limit check
-  const ip = req.headers.get("x-forwarded-for")?.split(",")[0]?.trim() || "unknown";
-  if (isRateLimited(ip)) {
-    return new Response(JSON.stringify({ error: "Too many requests. Please try again in a few minutes." }), {
-      status: 429,
+  if (req.method !== "POST") {
+    return new Response(JSON.stringify({ error: "Method not allowed" }), {
+      status: 405,
       headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
+  }
+
+  const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY);
+
+  // Persistent rate limit check
+  const ip =
+    req.headers.get("x-forwarded-for")?.split(",")[0]?.trim() || "unknown";
+  const limited = await isRateLimited(supabase, ip);
+  if (limited) {
+    return new Response(
+      JSON.stringify({
+        error: "Too many requests. Please try again in a few minutes.",
+      }),
+      {
+        status: 429,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      }
+    );
   }
 
   try {
     const body = await req.json();
 
-    // Honeypot check — if filled, it's a bot
+    // Honeypot — if filled, it's a bot. Return 200 so bots think they succeeded.
     if (body.website) {
       return new Response(JSON.stringify({ success: true }), {
         headers: { ...corsHeaders, "Content-Type": "application/json" },
@@ -60,19 +121,27 @@ Deno.serve(async (req) => {
 
     // Validate required fields
     if (!name || !email || !service || !message) {
-      return new Response(JSON.stringify({ error: "Name, email, service, and message are required" }), {
-        status: 400,
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
-      });
+      return new Response(
+        JSON.stringify({
+          error: "Name, email, service, and message are required",
+        }),
+        {
+          status: 400,
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+        }
+      );
     }
 
     // Validate email format
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!emailRegex.test(email)) {
-      return new Response(JSON.stringify({ error: "Invalid email format" }), {
-        status: 400,
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
-      });
+      return new Response(
+        JSON.stringify({ error: "Invalid email format" }),
+        {
+          status: 400,
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+        }
+      );
     }
 
     // Verify email domain has MX records
@@ -80,28 +149,33 @@ Deno.serve(async (req) => {
     try {
       const dns = await Deno.resolveDns(domain, "MX");
       if (!dns || dns.length === 0) {
-        return new Response(JSON.stringify({ error: "Email domain does not accept mail" }), {
-          status: 400,
-          headers: { ...corsHeaders, "Content-Type": "application/json" },
-        });
+        return new Response(
+          JSON.stringify({ error: "Email domain does not accept mail" }),
+          {
+            status: 400,
+            headers: { ...corsHeaders, "Content-Type": "application/json" },
+          }
+        );
       }
     } catch {
-      return new Response(JSON.stringify({ error: "Email domain does not exist" }), {
-        status: 400,
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
-      });
+      return new Response(
+        JSON.stringify({ error: "Email domain does not exist" }),
+        {
+          status: 400,
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+        }
+      );
     }
 
-    // Sanitize all inputs
-    const safeName = escapeHtml(name);
-    const safePhone = escapeHtml(phone || "");
-    const safeEmail = escapeHtml(email);
+    // Sanitize inputs for use in HTML email bodies
+    const safeName    = escapeHtml(name);
+    const safePhone   = escapeHtml(phone || "");
+    const safeEmail   = escapeHtml(email);
     const safeService = escapeHtml(service);
     const safeMessage = escapeHtml(message);
     const safeCompany = escapeHtml(company || "");
 
-    // Insert into Supabase (raw values for DB, sanitized for emails)
-    const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY);
+    // Insert raw values into DB (Supabase parameterizes, no injection risk)
     const { error: dbError } = await supabase
       .from("contact_submissions")
       .insert({ name, phone, email, service, message, company: company || null });
@@ -110,21 +184,21 @@ Deno.serve(async (req) => {
 
     // Service labels for display
     const serviceLabels: Record<string, string> = {
-      "events-security": "Event Security",
+      "events-security":   "Event Security",
       "events-bartending": "Mobile Bartending",
-      "events-both": "Security + Bartending",
-      "staffing": "Contracted Staffing",
-      "field-ops": "Field Operations",
-      "logistics": "Logistics Support",
-      "facility": "Facility Maintenance",
-      "warehouse": "Warehouse Staffing",
-      "project": "Project-Based Labor",
-      "ongoing": "Ongoing Placements",
-      "other": "Not sure yet",
+      "events-both":       "Security + Bartending",
+      "staffing":          "Contracted Staffing",
+      "field-ops":         "Field Operations",
+      "logistics":         "Logistics Support",
+      "facility":          "Facility Maintenance",
+      "warehouse":         "Warehouse Staffing",
+      "project":           "Project-Based Labor",
+      "ongoing":           "Ongoing Placements",
+      "other":             "Not sure yet",
     };
     const serviceDisplay = serviceLabels[service] || safeService;
 
-    // Send internal notification to team
+    // Internal notification email to team
     const internalHtml = `
       <h2>New Quote Request</h2>
       <p><strong>Name:</strong> ${safeName}</p>${safeCompany ? `
@@ -158,10 +232,10 @@ Deno.serve(async (req) => {
     });
 
     if (!resendRes.ok) {
-      console.error("Resend error:", await resendRes.text());
+      console.error("Resend internal email error:", await resendRes.text());
     }
 
-    // Send confirmation email to the client
+    // Confirmation email to the submitter
     const confirmHtml = `
       <div style="font-family:sans-serif;max-width:560px;margin:0 auto;color:#2A2A2A">
         <h2 style="color:#0C0C0C;margin-bottom:4px">Thanks for reaching out, ${safeName}.</h2>
@@ -199,14 +273,15 @@ Deno.serve(async (req) => {
     });
 
     if (!confirmRes.ok) {
-      console.error("Confirmation email error:", await confirmRes.text());
+      console.error("Resend confirmation email error:", await confirmRes.text());
     }
 
     return new Response(JSON.stringify({ success: true }), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
   } catch (err) {
-    return new Response(JSON.stringify({ error: err.message }), {
+    console.error("Contact submit error:", err);
+    return new Response(JSON.stringify({ error: "Internal server error" }), {
       status: 500,
       headers: { ...corsHeaders, "Content-Type": "application/json" },
     });

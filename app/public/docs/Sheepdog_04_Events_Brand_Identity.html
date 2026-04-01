@@ -1,0 +1,375 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Sheepdog Events - #04 Brand Identity</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Barlow:wght@600;700;800;900&family=Barlow+Semi+Condensed:wght@700;800;900&family=Source+Sans+3:ital,wght@0,300;0,400;0,600;0,700;1,400;1,600&display=swap" rel="stylesheet">
+<style>
+:root{--black:#0C0C0C;--char:#161616;--dark:#2A2A2A;--mid:#4A4A4A;--steel:#7A8490;--light:#A0A0A0;--fog:#D0D0D0;--bdr:#D6D6D6;--tint:#F4F3F1;--white:#FFF;--red:#C23B22;--amber:#C9922E;--amber-l:#DFAF42;--amber-d:#8B6212;--copper:#B5634B;--cream:#FAF6EE;--warmgray:#E8E2D8;--grn:#357A38;--fd:'Barlow Semi Condensed','Barlow',sans-serif;--fh:'Barlow',sans-serif;--fb:'Source Sans 3','Source Sans Pro',sans-serif}
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{font-family:var(--fb);font-size:17px;line-height:1.65;color:var(--dark);background:var(--white);-webkit-font-smoothing:antialiased;overflow-x:hidden}
+
+/* NAV */
+.snav{position:fixed;top:0;left:0;right:0;z-index:100;background:rgba(12,12,12,.95);backdrop-filter:blur(12px);padding:0 40px;display:flex;align-items:center;height:56px;transform:translateY(-100%);transition:transform .35s ease}
+.snav.show{transform:translateY(0)}
+.snav-brand{font-family:var(--fd);font-weight:800;font-size:15px;color:var(--white);text-transform:uppercase;letter-spacing:1.5px;margin-right:auto}
+.snav a{font-family:var(--fb);font-size:11px;font-weight:600;letter-spacing:1.5px;text-transform:uppercase;color:var(--steel);text-decoration:none;margin-left:20px;transition:color .2s}
+.snav a:hover,.snav a.active{color:var(--white)}
+
+/* COVER */
+.cover{min-height:100vh;background:var(--black);color:var(--white);display:flex;flex-direction:column;justify-content:flex-end;padding:64px;position:relative;overflow:hidden}
+.cover::before{content:'';position:absolute;inset:0;background:radial-gradient(ellipse at 60% 30%,rgba(201,146,46,.1),transparent 55%),radial-gradient(ellipse at 20% 80%,rgba(201,146,46,.04),transparent 50%);pointer-events:none}
+.cover-grid{position:absolute;inset:0;background:repeating-linear-gradient(90deg,transparent,transparent 79px,rgba(255,255,255,.02) 79px,rgba(255,255,255,.02) 80px),repeating-linear-gradient(0deg,transparent,transparent 79px,rgba(255,255,255,.02) 79px,rgba(255,255,255,.02) 80px);pointer-events:none}
+.cover-tag{font-family:var(--fb);font-size:12px;font-weight:600;letter-spacing:3px;text-transform:uppercase;color:var(--amber);margin-bottom:24px;opacity:0;animation:fu .6s ease forwards .2s}
+.cover h1{font-family:var(--fd);font-weight:800;font-size:clamp(48px,8vw,100px);line-height:.88;letter-spacing:-2px;text-transform:uppercase;margin-bottom:32px}
+.cover h1 .line{display:block;opacity:0;transform:translateY(30px);animation:cr .7s cubic-bezier(.16,1,.3,1) forwards}
+.cover h1 .line:nth-child(1){animation-delay:.4s}
+.cover h1 .line:nth-child(2){animation-delay:.55s;color:var(--amber)}
+.cover-desc{font-size:16px;line-height:1.6;color:var(--light);max-width:520px;border-top:1px solid rgba(255,255,255,.12);padding-top:24px;opacity:0;animation:fu .6s ease forwards .8s}
+.cover-desc strong{color:var(--white);font-weight:600}
+.cover-num{position:absolute;top:50%;right:64px;transform:translateY(-50%);font-family:var(--fd);font-weight:900;font-size:min(30vw,320px);color:rgba(255,255,255,.02);line-height:1;pointer-events:none}
+@keyframes cr{to{opacity:1;transform:translateY(0)}}
+@keyframes fu{to{opacity:1}}
+
+/* SECTIONS */
+.s{padding:96px 64px;border-bottom:1px solid var(--bdr)}
+.s--dk{background:var(--char);color:var(--white);border-bottom-color:rgba(255,255,255,.06)}
+.s--blk{background:var(--black);color:var(--white);border-bottom-color:rgba(255,255,255,.06)}
+.s--tint{background:var(--tint)}
+.s--cream{background:var(--cream);border-bottom-color:var(--warmgray)}
+.tag{font-family:var(--fb);font-size:11px;font-weight:600;letter-spacing:3px;text-transform:uppercase;color:var(--amber-d);margin-bottom:10px}
+.s--dk .tag,.s--blk .tag{color:var(--amber)}
+.title{font-family:var(--fh);font-weight:800;font-size:42px;line-height:1.08;color:var(--black);margin-bottom:16px}
+.s--dk .title,.s--blk .title{color:var(--white)}
+.lead{font-size:18px;line-height:1.6;color:var(--mid);max-width:660px;margin-bottom:56px}
+.s--dk .lead,.s--blk .lead{color:var(--steel)}
+.sub{font-family:var(--fh);font-weight:700;font-size:22px;color:var(--black);margin-bottom:24px}
+.s--dk .sub,.s--blk .sub{color:var(--white)}
+
+/* POSITIONING */
+.pos{background:var(--tint);border-radius:10px;padding:48px;margin-bottom:48px;border-left:4px solid var(--amber)}
+.pos p{font-family:var(--fb);font-size:20px;line-height:1.7;color:var(--dark);max-width:700px}
+.pos strong{color:var(--black);font-weight:600}
+
+/* VOICE CARDS */
+.vg{display:grid;grid-template-columns:1fr 1fr;gap:28px;margin-bottom:48px}
+.vc{border:1px solid var(--bdr);border-radius:10px;overflow:hidden;transition:box-shadow .3s}
+.vc:hover{box-shadow:0 8px 30px rgba(0,0,0,.08)}
+.vc-head{padding:28px;border-bottom:1px solid var(--bdr)}
+.vc-word{font-family:var(--fd);font-weight:800;font-size:36px;text-transform:uppercase;color:var(--black);margin-bottom:6px}
+.vc-def{font-size:15px;color:var(--mid);line-height:1.6}
+.vc-body{padding:28px}
+.vc-ex{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+.vc-do,.vc-dont{padding:16px;border-radius:6px;font-size:14px;line-height:1.6}
+.vc-do{background:rgba(53,122,56,.06);border:1px solid rgba(53,122,56,.15)}
+.vc-dont{background:rgba(194,59,34,.05);border:1px solid rgba(194,59,34,.12)}
+.vc-dl{font-family:var(--fh);font-weight:700;font-size:12px;letter-spacing:1.5px;text-transform:uppercase;margin-bottom:8px;color:var(--grn)}
+.vc-dnl{font-family:var(--fh);font-weight:700;font-size:12px;letter-spacing:1.5px;text-transform:uppercase;margin-bottom:8px;color:var(--red)}
+.vc-do p,.vc-dont p{color:var(--dark)}
+
+/* PILLARS */
+.pg{display:grid;grid-template-columns:1fr 1fr 1fr;gap:24px;margin-bottom:48px}
+.pil{padding:32px;border-radius:10px;border:1px solid rgba(255,255,255,.1);background:rgba(255,255,255,.03);transition:background .3s}
+.pil:hover{background:rgba(255,255,255,.06)}
+.pil-num{font-family:var(--fd);font-weight:800;font-size:48px;color:var(--amber);line-height:1;margin-bottom:12px}
+.pil h4{font-family:var(--fh);font-weight:700;font-size:20px;color:var(--white);margin-bottom:10px}
+.pil p{font-size:15px;line-height:1.6;color:var(--steel)}
+
+/* TAGLINES */
+.tl{margin-bottom:48px}
+.tl-row{padding:28px 0;border-bottom:1px solid var(--bdr);display:flex;align-items:baseline;gap:20px;transition:padding-left .2s}
+.tl-row:hover{padding-left:12px}
+.tl-row:first-child{border-top:1px solid var(--bdr)}
+.tl-num{font-family:var(--fb);font-size:11px;font-weight:600;letter-spacing:2px;text-transform:uppercase;color:var(--amber-d);flex-shrink:0;width:30px}
+.tl-text{font-family:var(--fd);font-weight:800;font-size:clamp(28px,4vw,42px);text-transform:uppercase;color:var(--black);line-height:1.05}
+
+/* COPY BLOCKS */
+.cb{border-radius:10px;overflow:hidden;margin-bottom:32px;border:1px solid var(--bdr)}
+.cb-label{font-family:var(--fb);font-size:11px;font-weight:600;letter-spacing:2px;text-transform:uppercase;color:var(--steel);padding:14px 24px;border-bottom:1px solid var(--bdr);background:var(--tint)}
+.cb-body{padding:40px;max-width:640px}
+.sp-ol{font-family:var(--fb);font-size:12px;font-weight:600;letter-spacing:2.5px;text-transform:uppercase;color:var(--amber-d);margin-bottom:14px}
+.sp-h1{font-family:var(--fd);font-weight:800;font-size:40px;line-height:.96;letter-spacing:-.5px;text-transform:uppercase;color:var(--black);margin-bottom:16px}
+.sp-h2{font-family:var(--fh);font-weight:700;font-size:24px;line-height:1.2;color:var(--dark);margin-bottom:14px}
+.sp-p{font-family:var(--fb);font-size:17px;line-height:1.65;color:var(--mid);margin-bottom:16px}
+.sp-sm{font-family:var(--fb);font-size:13px;color:var(--light);margin-bottom:20px}
+.sp-btn{display:inline-block;font-family:var(--fh);font-weight:700;font-size:15px;letter-spacing:1.5px;text-transform:uppercase;color:var(--black);background:var(--amber);padding:15px 36px;border-radius:4px;text-decoration:none}
+.sp-dm{font-family:var(--fb);font-size:16px;line-height:1.65;color:var(--dark);font-style:italic;margin-bottom:12px}
+
+/* SWATCHES */
+.sw-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(155px,1fr));gap:14px;margin-bottom:48px}
+.sw{border-radius:10px;overflow:hidden;transition:transform .2s}
+.sw:hover{transform:translateY(-3px)}
+.sw-color{height:90px;position:relative}
+.sw-name{position:absolute;bottom:8px;left:12px;font-family:var(--fh);font-weight:700;font-size:12px}
+.sw-info{padding:12px 14px}
+.sw-hex{font-family:'SFMono-Regular','Consolas',monospace;font-size:13px;font-weight:600}
+.sw-use{font-family:var(--fb);font-size:11px;margin-top:4px;line-height:1.4}
+
+/* CONCEPT SPLIT */
+.concept{display:grid;grid-template-columns:1fr 1fr;gap:0;border-radius:12px;overflow:hidden;margin-bottom:48px;border:1px solid rgba(255,255,255,.1)}
+.concept-side{padding:40px}
+.concept-side h3{font-family:var(--fd);font-weight:800;font-size:28px;text-transform:uppercase;margin-bottom:8px}
+.concept-side h4{font-family:var(--fh);font-weight:700;font-size:16px;margin-bottom:12px}
+.concept-side p{font-size:15px;line-height:1.6}
+.concept-side ul{list-style:none;padding:0;margin-top:12px}
+.concept-side li{font-size:14px;line-height:1.7;padding-left:16px;position:relative}
+.concept-side li::before{content:'→';position:absolute;left:0;font-weight:700}
+
+/* MODE TOGGLE */
+.toggle-wrap{text-align:center;margin-bottom:48px}
+.toggle-btn{display:inline-flex;background:var(--dark);border-radius:50px;padding:4px;border:1px solid rgba(255,255,255,.1)}
+.toggle-opt{font-family:var(--fh);font-weight:700;font-size:14px;letter-spacing:1px;text-transform:uppercase;padding:14px 32px;border-radius:46px;cursor:pointer;transition:all .3s;border:none;background:transparent;color:var(--steel)}
+.toggle-opt.active-sec{background:var(--black);color:var(--amber);box-shadow:0 2px 12px rgba(0,0,0,.4)}
+.toggle-opt.active-bar{background:var(--amber);color:var(--black);box-shadow:0 2px 12px rgba(201,146,46,.3)}
+
+/* LIVE PREVIEW */
+.preview{border-radius:12px;overflow:hidden;transition:all .5s ease;margin-bottom:32px;border:2px solid var(--dark)}
+.preview-chrome{padding:10px 16px;display:flex;align-items:center;gap:6px;transition:background .5s}
+.preview-dot{width:8px;height:8px;border-radius:50%;background:rgba(255,255,255,.15)}
+.preview-bar{flex:1;height:20px;border-radius:4px;margin-left:8px;font-family:'SFMono-Regular',monospace;font-size:10px;line-height:20px;padding-left:8px;background:rgba(255,255,255,.08);color:rgba(255,255,255,.3);transition:all .5s}
+.preview-screen{transition:background .5s}
+.pn{padding:16px 28px;display:flex;align-items:center;justify-content:space-between;transition:all .5s}
+.pn-logo{font-family:var(--fd);font-weight:800;font-size:16px;text-transform:uppercase;letter-spacing:1px;transition:color .5s}
+.pn-cta{font-family:var(--fh);font-weight:700;font-size:11px;letter-spacing:1.5px;text-transform:uppercase;padding:8px 18px;border-radius:4px;transition:all .5s}
+.ph{padding:48px 28px;text-align:center;transition:all .5s}
+.ph-ol{font-family:var(--fb);font-size:11px;font-weight:600;letter-spacing:2.5px;text-transform:uppercase;margin-bottom:12px;transition:color .5s}
+.ph-h1{font-family:var(--fd);font-weight:800;font-size:36px;text-transform:uppercase;line-height:.96;margin-bottom:12px;transition:color .5s}
+.ph-sub{font-family:var(--fh);font-weight:700;font-size:18px;margin-bottom:12px;transition:color .5s}
+.ph-body{font-family:var(--fb);font-size:15px;line-height:1.6;max-width:440px;margin:0 auto 20px;transition:color .5s}
+.ph-sm{font-family:var(--fb);font-size:12px;margin-bottom:20px;transition:color .5s}
+.ph-btn{display:inline-block;font-family:var(--fh);font-weight:700;font-size:14px;letter-spacing:1.5px;text-transform:uppercase;padding:14px 32px;border-radius:4px;transition:all .5s}
+.pc{padding:24px 28px 32px;display:grid;grid-template-columns:1fr 1fr;gap:16px}
+.pc-card{padding:24px;border-radius:8px;transition:all .5s}
+.pc-label{font-family:var(--fb);font-size:10px;font-weight:600;letter-spacing:2px;text-transform:uppercase;margin-bottom:6px;transition:color .5s}
+.pc-title{font-family:var(--fh);font-weight:700;font-size:17px;margin-bottom:6px;transition:color .5s}
+.pc-desc{font-family:var(--fb);font-size:13px;line-height:1.5;transition:color .5s}
+/* Security mode */
+.sec .preview-chrome{background:var(--black)}.sec .preview-screen{background:var(--black)}
+.sec .pn{background:var(--black);border-bottom:1px solid rgba(255,255,255,.06)}.sec .pn-logo{color:var(--white)}.sec .pn-cta{background:var(--amber);color:var(--black)}
+.sec .ph{background:var(--char)}.sec .ph-ol{color:var(--amber)}.sec .ph-h1{color:var(--white)}.sec .ph-sub{color:var(--steel)}.sec .ph-body{color:var(--steel)}.sec .ph-sm{color:rgba(255,255,255,.3)}.sec .ph-btn{background:var(--amber);color:var(--black)}
+.sec .pc{background:var(--black)}.sec .pc-card{background:var(--char);border:1px solid rgba(255,255,255,.06)}.sec .pc-label{color:var(--amber)}.sec .pc-title{color:var(--white)}.sec .pc-desc{color:var(--steel)}
+/* Bartending mode */
+.bar .preview-chrome{background:var(--dark)}.bar .preview-screen{background:var(--cream)}
+.bar .pn{background:var(--white);border-bottom:1px solid var(--warmgray)}.bar .pn-logo{color:var(--black)}.bar .pn-cta{background:var(--amber);color:var(--black)}
+.bar .ph{background:var(--cream)}.bar .ph-ol{color:var(--amber-d)}.bar .ph-h1{color:var(--black)}.bar .ph-sub{color:var(--mid)}.bar .ph-body{color:var(--mid)}.bar .ph-sm{color:var(--light)}.bar .ph-btn{background:var(--amber);color:var(--black)}
+.bar .pc{background:var(--white)}.bar .pc-card{background:var(--cream);border:1px solid var(--warmgray)}.bar .pc-label{color:var(--amber-d)}.bar .pc-title{color:var(--black)}.bar .pc-desc{color:var(--mid)}
+
+/* WHEN TO USE */
+.when{display:grid;grid-template-columns:1fr 1fr;gap:0;border-radius:10px;overflow:hidden;margin-bottom:48px}
+.when-side{padding:32px}
+.when-side h4{font-family:var(--fh);font-weight:700;font-size:18px;margin-bottom:14px}
+.when-side ul{list-style:none;padding:0}
+.when-side li{font-size:14px;line-height:1.7;padding-left:18px;position:relative;margin-bottom:4px}
+.when-dk{background:var(--char)}.when-dk h4{color:var(--amber)}.when-dk li{color:var(--steel)}.when-dk li::before{content:'◼';position:absolute;left:0;color:var(--amber);font-size:8px;top:5px}
+.when-lt{background:var(--cream)}.when-lt h4{color:var(--amber-d)}.when-lt li{color:var(--mid)}.when-lt li::before{content:'◼';position:absolute;left:0;color:var(--amber-d);font-size:8px;top:5px}
+
+/* RULE CARDS */
+.rc{display:grid;grid-template-columns:1fr 1fr;gap:28px;margin-bottom:48px}
+.rc-card{padding:28px;border-radius:8px}
+.rc-card h4{font-family:var(--fh);font-weight:700;font-size:18px;margin-bottom:10px}
+.rc-card p,.rc-card li{font-size:15px;line-height:1.6}
+.rc-card ul{list-style:none;padding:0}
+.rc-card li{padding-left:18px;position:relative;margin-bottom:5px}
+.rc-card li::before{content:'\2013';position:absolute;left:0;font-weight:700}
+.rc-card code{background:rgba(255,255,255,.08);padding:2px 6px;border-radius:3px;font-size:12px;font-family:'SFMono-Regular','Consolas',monospace}
+/* Dark context cards */
+.s--dk .rc-card,.s--blk .rc-card{border:1px solid rgba(255,255,255,.08);background:rgba(255,255,255,.02)}
+.s--dk .rc-card h4,.s--blk .rc-card h4{color:var(--white)}
+.s--dk .rc-card p,.s--dk .rc-card li,.s--blk .rc-card p,.s--blk .rc-card li{color:var(--steel)}
+.s--dk .rc-card li::before,.s--blk .rc-card li::before{color:var(--amber)}
+/* Light context cards */
+.s:not(.s--dk):not(.s--blk) .rc-card{border:1px solid var(--bdr)}
+.s:not(.s--dk):not(.s--blk) .rc-card h4{color:var(--black)}
+.s:not(.s--dk):not(.s--blk) .rc-card p,.s:not(.s--dk):not(.s--blk) .rc-card li{color:var(--mid)}
+.s:not(.s--dk):not(.s--blk) .rc-card li::before{color:var(--amber-d)}
+
+/* VISUAL EXPRESSION */
+.ve{display:grid;grid-template-columns:1fr 1fr;gap:28px;margin-bottom:48px}
+.ve-card{padding:28px;border:1px solid var(--bdr);border-radius:8px}
+.ve-card h4{font-family:var(--fh);font-weight:700;font-size:18px;color:var(--black);margin-bottom:10px}
+.ve-card p,.ve-card li{font-size:15px;line-height:1.6;color:var(--mid)}
+.ve-card ul{list-style:none;padding:0}
+.ve-card li{padding-left:18px;position:relative;margin-bottom:5px}
+.ve-card li::before{content:'\2013';position:absolute;left:0;color:var(--amber-d);font-weight:700}
+.ve-card code{background:rgba(0,0,0,.04);padding:2px 6px;border-radius:3px;font-size:12px;font-family:'SFMono-Regular','Consolas',monospace}
+
+/* NOTE */
+.note{display:flex;gap:16px;padding:24px;border-radius:0 8px 8px 0;margin-bottom:40px;background:rgba(201,146,46,.07);border-left:3px solid var(--amber)}
+.note-i{flex-shrink:0;width:22px;height:22px;border-radius:50%;background:var(--amber);color:var(--white);font-size:12px;font-weight:700;display:flex;align-items:center;justify-content:center}
+.note p{font-size:14px;line-height:1.6;color:var(--mid)}
+.note strong{color:var(--dark)}
+.note code{background:rgba(0,0,0,.04);padding:2px 6px;border-radius:3px;font-size:12px;font-family:'SFMono-Regular','Consolas',monospace}
+.s--dk .note p,.s--blk .note p{color:var(--light)}
+.s--dk .note strong,.s--blk .note strong{color:var(--white)}
+.s--dk .note code,.s--blk .note code{background:rgba(255,255,255,.08);color:var(--fog)}
+
+.foot{padding:56px 64px;background:var(--black);text-align:center}
+.foot-brand{font-family:var(--fd);font-weight:800;font-size:18px;text-transform:uppercase;letter-spacing:2px;color:var(--amber);margin-bottom:8px}
+.foot p{font-size:14px;color:var(--steel);line-height:1.6}
+.foot strong{color:var(--white)}
+.fi{opacity:0;transform:translateY(20px);transition:opacity .6s ease,transform .6s ease}
+.fi.vis{opacity:1;transform:translateY(0)}
+@media print{.cover{min-height:auto;page-break-after:always}.s{page-break-inside:avoid;padding:40px}body{font-size:10.5pt}.snav{display:none}}
+@media(max-width:900px){.vg,.ve,.rc{grid-template-columns:1fr}.pg{grid-template-columns:1fr}.concept,.when{grid-template-columns:1fr}}
+@media(max-width:768px){.s{padding:48px 24px}.cover{padding:40px 24px}.cover h1{font-size:48px}.pc{grid-template-columns:1fr}.sw-grid{grid-template-columns:1fr 1fr}}
+@media(max-width:600px){.vc-ex{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+
+<nav class="snav" id="snav"><div class="snav-brand">Sheepdog Events</div><a href="#positioning">Positioning</a><a href="#voice">Voice</a><a href="#pillars">Pillars</a><a href="#copy">Copy</a><a href="#palette">Palette</a><a href="#visual">Visual</a></nav>
+
+<div class="cover"><div class="cover-grid"></div><div class="cover-num">04</div>
+<div class="cover-tag">Deliverable #04 · Foundation › Brand Architecture</div>
+<h1><span class="line">Sheepdog</span><span class="line">Events</span></h1>
+<div class="cover-desc"><strong>Sub-Brand Identity</strong> - Positioning, voice, messaging pillars, sample copy, dual-mode color palette, and visual expression for Sheepdog Events. Event security and mobile bartending for the Bryan–College Station area.<br><br>References <strong>#01 Color Palette</strong>, <strong>#02 Typography System</strong>, <strong>#03 Visual Standards Guide</strong>.</div></div>
+
+<!-- 01 POSITIONING -->
+<div class="s" id="positioning">
+<div class="fi"><div class="tag">01 - Brand Positioning</div><div class="title">What Sheepdog Events Is</div><p class="lead">One paragraph. What it is, who it serves, why it's different. Every piece of Events marketing traces back to this.</p></div>
+<div class="pos fi"><p><strong>Sheepdog Events</strong> is the event security and mobile bartending arm of Sheepdog, providing experienced, vetted personnel for bars, weddings, concerts, festivals, private parties, and Greek life events across the Bryan–College Station area. We serve venue owners, event planners, and individuals who need their event to run smoothly and safely - without the security feeling heavy-handed or the bar service feeling like an afterthought. What makes us different: <strong>we handle both security and bartending under one roof</strong>, so clients deal with one team, one point of contact, and one invoice. Our people show up trained, uniformed, and ready - because the best security is the kind your guests barely notice, and the best bartending is the kind they remember.</p></div>
+<div class="note fi"><div class="note-i">i</div><div><p><strong>Use this positioning statement</strong> as the foundation for all Events marketing copy, website headers, pitch decks, and outreach. Every piece of content should be traceable back to this paragraph. If copy drifts from these themes, it's off-brand.</p></div></div>
+</div>
+
+<!-- 02 VOICE -->
+<div class="s s--tint" id="voice">
+<div class="fi"><div class="tag">02 - Brand Voice</div><div class="title">How Sheepdog Events Sounds</div><p class="lead">Four attributes. Every piece of copy - website, DM, email, social post - should sound like all four of these.</p></div>
+<div class="vg fi">
+<div class="vc"><div class="vc-head"><div class="vc-word">Dependable</div><div class="vc-def">We do what we say. No surprises, no no-shows. The client can stop worrying the moment they book us.</div></div><div class="vc-body"><div class="vc-ex"><div class="vc-do"><div class="vc-dl">✓ Do</div><p>"We'll be there at 8. Uniformed, briefed, and ready before your first guest arrives."</p></div><div class="vc-dont"><div class="vc-dnl">✗ Don't</div><p>"We'll try to get the team there on time depending on availability."</p></div></div></div></div>
+<div class="vc"><div class="vc-head"><div class="vc-word">Experienced</div><div class="vc-def">We've worked the door, managed the crowd, poured the drinks. This isn't our first event - it's our hundredth.</div></div><div class="vc-body"><div class="vc-ex"><div class="vc-do"><div class="vc-dl">✓ Do</div><p>"Our team has worked everything from 50-person weddings to 2,000-capacity festivals."</p></div><div class="vc-dont"><div class="vc-dnl">✗ Don't</div><p>"We are a new and exciting company eager to gain experience in event security."</p></div></div></div></div>
+<div class="vc"><div class="vc-head"><div class="vc-word">Straightforward</div><div class="vc-def">No jargon, no runaround. We say what it costs, what's included, and what to expect.</div></div><div class="vc-body"><div class="vc-ex"><div class="vc-do"><div class="vc-dl">✓ Do</div><p>"3 guards, 5 hours, $30/hr each. That's $450. We'll send a quote in 10 minutes."</p></div><div class="vc-dont"><div class="vc-dnl">✗ Don't</div><p>"Our bespoke security solutions are tailored to your unique event requirements. Contact us for a customized proposal."</p></div></div></div></div>
+<div class="vc"><div class="vc-head"><div class="vc-word">Warm</div><div class="vc-def">We're security, not soldiers. We're bartenders, not robots. Approachable, friendly, human. We protect the vibe, not just the door.</div></div><div class="vc-body"><div class="vc-ex"><div class="vc-do"><div class="vc-dl">✓ Do</div><p>"Your guests should feel safe and have a great time. That's the whole point."</p></div><div class="vc-dont"><div class="vc-dnl">✗ Don't</div><p>"Our trained operatives will secure the perimeter and enforce access control protocols."</p></div></div></div></div>
+</div></div>
+
+<!-- 03 PILLARS -->
+<div class="s s--blk" id="pillars">
+<div class="fi"><div class="tag">03 - Messaging Pillars</div><div class="title">Three Themes We Always Return To</div><p class="lead">Every piece of Sheepdog Events marketing ties back to at least one of these.</p></div>
+<div class="pg fi">
+<div class="pil"><div class="pil-num">01</div><h4>Security Without the Scene</h4><p>The best security is the kind your guests don't think about. We keep things safe without making it feel like a checkpoint. Our team blends in - visible enough to deter, subtle enough to not disrupt. The party keeps going. We handle the rest.</p></div>
+<div class="pil"><div class="pil-num">02</div><h4>One Team, One Call</h4><p>Security and bartending under one roof. No coordinating two vendors, two invoices, two schedules. One point of contact handles everything - from the door to the bar. This is the biggest differentiator and should be in every pitch.</p></div>
+<div class="pil"><div class="pil-num">03</div><h4>We Show Up Ready</h4><p>Trained, uniformed, on time, every time. No scrambling, no last-minute fills, no excuses. When you book Sheepdog Events, the team that shows up has been briefed on your venue, your event, and your expectations. Dependability is the product.</p></div>
+</div></div>
+
+<!-- 04 COPY -->
+<div class="s" id="copy">
+<div class="fi"><div class="tag">04 - Taglines &amp; Sample Copy</div><div class="title">Words That Work</div><p class="lead">Taglines, website copy, and outreach tone - all in the Sheepdog Events voice.</p></div>
+<div class="tl fi">
+<div class="tl-row"><div class="tl-num">01</div><div class="tl-text">A Presence That Protects.</div></div>
+<div class="tl-row"><div class="tl-num">02</div><div class="tl-text">Security &amp; Bartending.<br>One Team. One Call.</div></div>
+<div class="tl-row"><div class="tl-num">03</div><div class="tl-text">We Show Up Ready.</div></div>
+</div>
+<div class="cb fi"><div class="cb-label">Hero Section - sheepdogtexas.com/events</div><div class="cb-body">
+<div class="sp-ol">Sheepdog Events</div><div class="sp-h1">Security &amp; Bartending<br>For Every Event</div><div class="sp-h2">Your event runs smooth. We handle the rest.</div>
+<div class="sp-p">Sheepdog Events provides experienced security personnel and professional mobile bartenders for events across the Bryan–College Station area. Bars, weddings, concerts, Greek life, festivals, private parties - whatever the occasion, our team shows up trained, uniformed, and ready. Need security and bartending? We handle both under one roof - one team, one point of contact, one invoice.</div>
+<div class="sp-sm">Licensed &amp; insured · TABC certified staff available · Serving the Brazos Valley</div><a class="sp-btn" href="#">Get a Quote</a>
+</div></div>
+<div class="cb fi"><div class="cb-label">How It Works Section</div><div class="cb-body">
+<div class="sp-h1" style="font-size:32px;">How It Works</div>
+<div class="sp-p"><strong style="color:var(--black);">1. Tell us about your event.</strong> Date, venue, size, what you need - security, bartending, or both. We'll ask the right questions so nothing gets missed.</div>
+<div class="sp-p"><strong style="color:var(--black);">2. We build your plan.</strong> The right number of staff, the right roles, positioned for your specific venue and crowd. No templates - a plan that fits your event.</div>
+<div class="sp-p"><strong style="color:var(--black);">3. We show up ready.</strong> Our team arrives early, briefed, uniformed, and prepared. You focus on hosting. We handle the rest.</div>
+</div></div>
+<div class="cb fi"><div class="cb-label">Instagram DM - Venue Owner</div><div class="cb-body"><div class="sp-dm">"Hey [Name] - saw you've got a great lineup coming up at [Venue]. We're Sheepdog Events, local security + bartending crew here in BCS. If you ever need reliable door guys or mobile bartenders for a show, we'd love to chat. No pressure - just wanted to introduce ourselves."</div><div class="sp-sm">Short, human, personalized first line. No sales pitch. Just two people talking.</div></div></div>
+<div class="cb fi"><div class="cb-label">Instagram DM - Wedding Planner</div><div class="cb-body"><div class="sp-dm">"Hi [Name] - love the work you do. We're Sheepdog Events, we handle event security and mobile bartending for weddings around College Station. A lot of planners like having one vendor for both so there's less to coordinate on the day. Happy to send over our info if you're ever looking for a reliable crew."</div><div class="sp-sm">Leads with a compliment. Surfaces the one-team differentiator naturally. Soft close.</div></div></div>
+<div class="cb fi"><div class="cb-label">Post-Event Follow-Up Text</div><div class="cb-body"><div class="sp-dm">"Hey [Name], thanks for having us out at [Venue/Event] last night. Hope everything went smooth on your end. If you've got a sec, a quick Google review would mean a lot to us - [link]. Either way, we appreciate the business."</div><div class="sp-sm">Casual, warm, references the specific job. Review ask feels natural.</div></div></div>
+</div>
+
+<!-- 05 PALETTE -->
+<div class="s s--dk" id="palette">
+<div class="fi"><div class="tag">05 - Dual-Mode Color Palette</div><div class="title">One Palette. Two Modes.</div><p class="lead">Same colors flip between fight night at the door and cocktails at a wedding by inverting which color leads. Black dominant = authority. Cream dominant = warmth. Amber bridges both. Full color reference in <strong style="color:var(--white);">#01 Color Palette</strong>.</p></div>
+
+<div class="sw-grid fi">
+<div class="sw" style="border:1px solid rgba(255,255,255,.08)"><div class="sw-color" style="background:#0C0C0C"><div class="sw-name" style="color:#fff">Midnight</div></div><div class="sw-info" style="background:var(--char)"><div class="sw-hex" style="color:#ddd">#0C0C0C</div><div class="sw-use" style="color:var(--steel)">Security hero, nav bars, authority</div></div></div>
+<div class="sw" style="border:1px solid rgba(255,255,255,.08)"><div class="sw-color" style="background:#161616"><div class="sw-name" style="color:#fff">Charcoal</div></div><div class="sw-info" style="background:var(--char)"><div class="sw-hex" style="color:#ddd">#161616</div><div class="sw-use" style="color:var(--steel)">Dark sections, cards in security mode</div></div></div>
+<div class="sw" style="border:1px solid rgba(255,255,255,.08)"><div class="sw-color" style="background:#C9922E"><div class="sw-name" style="color:#fff">Amber</div></div><div class="sw-info" style="background:var(--char)"><div class="sw-hex" style="color:var(--amber)">#C9922E</div><div class="sw-use" style="color:var(--amber)">THE BRIDGE - CTAs (as fill with black text), accents on dark</div></div></div>
+<div class="sw" style="border:1px solid rgba(255,255,255,.08)"><div class="sw-color" style="background:#8B6212"><div class="sw-name" style="color:#fff">Amber Dark</div></div><div class="sw-info" style="background:var(--char)"><div class="sw-hex" style="color:#ddd">#8B6212</div><div class="sw-use" style="color:var(--steel)">Overline text on light backgrounds (5.4:1 AA)</div></div></div>
+<div class="sw" style="border:1px solid rgba(255,255,255,.08)"><div class="sw-color" style="background:#B5634B"><div class="sw-name" style="color:#fff">Copper</div></div><div class="sw-info" style="background:var(--char)"><div class="sw-hex" style="color:#ddd">#B5634B</div><div class="sw-use" style="color:var(--steel)">Secondary accent - warmth, spice</div></div></div>
+<div class="sw" style="border:1px solid rgba(255,255,255,.08)"><div class="sw-color" style="background:#FAF6EE"><div class="sw-name" style="color:#555">Cream</div></div><div class="sw-info" style="background:var(--char)"><div class="sw-hex" style="color:#ddd">#FAF6EE</div><div class="sw-use" style="color:var(--steel)">Bartending mode background</div></div></div>
+<div class="sw" style="border:1px solid rgba(255,255,255,.08)"><div class="sw-color" style="background:#E8E2D8"><div class="sw-name" style="color:#555">Warm Gray</div></div><div class="sw-info" style="background:var(--char)"><div class="sw-hex" style="color:#ddd">#E8E2D8</div><div class="sw-use" style="color:var(--steel)">Borders, dividers in bartending mode</div></div></div>
+</div>
+
+<div class="concept fi">
+<div class="concept-side" style="background:var(--black);"><h3 style="color:var(--amber);">Security Mode</h3><h4 style="color:var(--steel);">Fight night. The door. Authority.</h4><p style="color:var(--steel);">Black dominant. Amber is a sharp highlight. Commanding, serious, nightlife-ready.</p><ul><li style="color:var(--steel);">Background: Midnight / Charcoal</li><li style="color:var(--steel);">Text: White</li><li style="color:var(--steel);">Accent: Amber (on dark only)</li><li style="color:var(--steel);">Mood: "We've got the door."</li></ul></div>
+<div class="concept-side" style="background:var(--cream);"><h3 style="color:var(--amber-d);">Bartending Mode</h3><h4 style="color:var(--mid);">Wedding bar. Cocktail hour.</h4><p style="color:var(--mid);">Cream dominant. Amber becomes the hero. Premium, warm, celebratory.</p><ul><li style="color:var(--mid);">Background: Cream / White</li><li style="color:var(--mid);">Text: Midnight / Graphite</li><li style="color:var(--mid);">Accent: Amber Dark (for text on light)</li><li style="color:var(--mid);">Mood: "Best bar at the party."</li></ul></div>
+</div>
+
+<div class="toggle-wrap fi"><div class="toggle-btn"><button class="toggle-opt active-sec" id="btnSec" onclick="setMode('sec')">Security</button><button class="toggle-opt" id="btnBar" onclick="setMode('bar')">Bartending</button></div></div>
+<div class="preview sec fi" id="preview">
+<div class="preview-chrome"><div class="preview-dot"></div><div class="preview-dot"></div><div class="preview-dot"></div><div class="preview-bar">sheepdogtexas.com/events</div></div>
+<div class="preview-screen">
+<div class="pn"><div class="pn-logo">Sheepdog Events</div><div class="pn-cta">Get a Quote</div></div>
+<div class="ph"><div class="ph-ol">Sheepdog Events</div><div class="ph-h1">Security &amp; Bartending<br>For Every Event</div><div class="ph-sub">Your event runs smooth. We handle the rest.</div><div class="ph-body">Experienced security and professional mobile bartenders across Bryan–College Station.</div><div class="ph-sm">Licensed · Insured · TABC Certified</div><span class="ph-btn">Get a Quote</span></div>
+<div class="pc"><div class="pc-card"><div class="pc-label">Event Security</div><div class="pc-title">Door &amp; Crowd Management</div><div class="pc-desc">Professional security for bars, concerts, festivals, and private events.</div></div><div class="pc-card"><div class="pc-label">Mobile Bartending</div><div class="pc-title">Full-Service Bar, Anywhere</div><div class="pc-desc">Licensed bartenders, equipment, and setup for weddings, parties, and corporate events.</div></div></div>
+</div></div>
+<div style="text-align:center;margin-top:16px"><span style="font-family:var(--fb);font-size:13px;color:var(--steel)" id="modeLabel">Security Mode - black dominant, amber accent</span></div>
+</div>
+
+<!-- 05 continued: when + rules -->
+<div class="s s--blk">
+<div class="fi"><div class="tag">05 - When &amp; Rules</div><div class="title">Applying the Dual-Mode System</div><p class="lead">Context decides which mode. The event type and audience determine which color leads.</p></div>
+
+<div class="when fi">
+<div class="when-side when-dk"><h4>Use Security Mode When</h4><ul><li>Bar / nightclub security materials</li><li>Concert and festival proposals</li><li>Fight night, boxing, high-energy crowds</li><li>Door staff and crowd management promos</li><li>The sheepdogtexas.com/events hero</li><li>Combined security + bartending pitches</li><li>Anything where "authority" leads</li></ul></div>
+<div class="when-side when-lt"><h4>Use Bartending Mode When</h4><ul><li>Wedding bar service proposals</li><li>Cocktail hour and reception marketing</li><li>Private party bartending promos</li><li>Corporate event bar service</li><li>Menu cards, drink lists, bar signage</li><li>Instagram posts about bartending work</li><li>Anything where "warmth" leads</li></ul></div>
+</div>
+
+<div class="note fi"><div class="note-i">i</div><div><p><strong>Combined events:</strong> Default to Security Mode for the pitch - authority sells trust. Once booked, bartending-specific materials (menu cards, bar setup) can flip to Bartending Mode.</p></div></div>
+
+<div class="rc fi">
+<div class="rc-card"><h4>Amber Is the Anchor</h4><p>Amber <code>#C9922E</code> appears in both modes as the primary accent. It's on every CTA button (always with black text - 7.3:1 AAA), every accent. If amber is missing, it doesn't look like Sheepdog Events.</p></div>
+<div class="rc-card"><h4>Never Mix Modes</h4><p>A single page or material is Security Mode or Bartending Mode - never both. Don't put cream sections inside a black page. Each piece commits to one hierarchy.</p></div>
+<div class="rc-card"><h4>Amber Text Rule</h4><ul><li>On dark backgrounds: use Amber <code>#C9922E</code> (7.1:1 AAA)</li><li>On light backgrounds: use Amber Dark <code>#8B6212</code> (5.4:1 AA)</li><li>Never use Amber as text on white or cream (FAILS - 2.8:1)</li></ul></div>
+<div class="rc-card"><h4>CTA Buttons - Both Modes</h4><ul><li>Amber fill, black text - always</li><li>The button doesn't change between modes</li><li>One button style, everywhere - consistent and accessible</li></ul></div>
+</div>
+</div>
+
+<!-- 06 VISUAL EXPRESSION -->
+<div class="s s--tint" id="visual">
+<div class="fi"><div class="tag">06 - Visual Expression</div><div class="title">How Events Looks Different</div><p class="lead">Sheepdog Events shares the parent brand system (logo, Barlow + Source Sans 3, core neutrals) but expresses it with more energy and warmth than Staffing. Amber replaces Signal Red as the primary accent on all Events materials.</p></div>
+<div class="ve fi">
+<div class="ve-card"><h4>Color Emphasis</h4><ul>
+<li>Amber <code>#C9922E</code> is the Events accent - not Signal Red</li>
+<li>Signal Red <code>#C23B22</code> reserved for error states only</li>
+<li>Dual-mode system: Security (dark) ↔ Bartending (cream)</li>
+<li>Warmer overall feel than Staffing or Hub</li>
+<li>Never cold/corporate blues as primary tones</li>
+</ul></div>
+<div class="ve-card"><h4>Typography Lean</h4><ul>
+<li>H1: Barlow Semi Condensed 800, <strong>always uppercase</strong></li>
+<li>Bold, physical, high-energy display text</li>
+<li>Short sentences - punchy, direct copy</li>
+<li>Active voice only - "We show up" not "Security is provided"</li>
+<li>CTA language: "Get a Quote," "Book Security," "Let's Talk"</li>
+</ul></div>
+<div class="ve-card"><h4>Imagery Direction</h4><ul>
+<li>Real on-site photography - candid, never staged</li>
+<li>Nighttime and low-light is authentic and encouraged</li>
+<li>Show the work: door management, crowd scenes, bartending in action</li>
+<li>Energy and atmosphere - the event should feel alive</li>
+<li>Team in branded gear, visible but not dominating</li>
+</ul></div>
+<div class="ve-card"><h4>Layout &amp; Composition</h4><ul>
+<li>More dynamic than Staffing - larger heroes, bolder breaks</li>
+<li>Full-bleed photography OK for hero sections</li>
+<li>Dark overlays (60–80% black) for text over images</li>
+<li>Cards and components follow parent 8px grid</li>
+<li>Imagery-forward, not data-forward</li>
+</ul></div>
+</div>
+<div class="note fi"><div class="note-i">i</div><div><p><strong>The litmus test:</strong> Cover the logo. If the content feels like a party you'd want to attend, it's Events. If it feels like a proposal you'd forward to your VP of Operations, you've drifted into Staffing territory. Events should always feel like someone you'd want at your party - competent, present, approachable.</p></div></div>
+</div>
+
+<div class="foot"><div class="foot-brand">Sheepdog Events</div><p>Sub-Brand Identity · Deliverable #04<br>Part of the Sheepdog brand system. Pair with <strong>#01 Color Palette</strong> · <strong>#02 Typography</strong> · <strong>#03 Visual Standards</strong> · <strong>#05 Staffing Identity</strong></p></div>
+
+<script>
+function setMode(m){const p=document.getElementById('preview'),s=document.getElementById('btnSec'),b=document.getElementById('btnBar'),l=document.getElementById('modeLabel');p.className='preview fi vis '+m;if(m==='sec'){s.className='toggle-opt active-sec';b.className='toggle-opt';l.textContent='Security Mode - black dominant, amber accent'}else{s.className='toggle-opt';b.className='toggle-opt active-bar';l.textContent='Bartending Mode - cream dominant, amber hero'}}
+const snav=document.getElementById('snav'),nls=snav.querySelectorAll('a');
+window.addEventListener('scroll',()=>{const y=window.scrollY;snav.classList.toggle('show',y>window.innerHeight*.5);document.querySelectorAll('.s[id]').forEach(s=>{const t=s.offsetTop-80,b=t+s.offsetHeight,id=s.id;nls.forEach(a=>{if(a.getAttribute('href')==='#'+id)a.classList.toggle('active',y>=t&&y<b)})})});
+const fis=document.querySelectorAll('.fi'),obs=new IntersectionObserver(es=>{es.forEach(e=>{if(e.isIntersecting){e.target.classList.add('vis');obs.unobserve(e.target)}})},{threshold:.1,rootMargin:'0px 0px -40px 0px'});fis.forEach(el=>obs.observe(el));
+</script>
+</body>
+</html>

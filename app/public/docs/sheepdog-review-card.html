@@ -1,0 +1,245 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Sheepdog Business Cards</title>
+<link href="https://fonts.googleapis.com/css2?family=Barlow:wght@600;700;800&family=Source+Sans+3:wght@400;600&display=swap" rel="stylesheet">
+<style>
+  @page { size: 3.5in 2in; margin: 0; }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    background: #1a1a1a;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 40px;
+    font-family: 'Source Sans 3', sans-serif;
+    gap: 40px;
+  }
+  .print-bar {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+  }
+  .print-btn {
+    font-family: 'Barlow', sans-serif;
+    font-weight: 700;
+    font-size: 13px;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    color: #FFFFFF;
+    background: #C23B22;
+    border: none;
+    padding: 12px 28px;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: background 0.2s;
+  }
+  .print-btn:hover { background: #A83220; }
+  .print-info {
+    font-size: 13px;
+    color: #666;
+  }
+  .label {
+    font-family: 'Barlow', sans-serif;
+    font-weight: 700;
+    font-size: 11px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: #555;
+    margin-bottom: -28px;
+  }
+
+  /* SHARED CARD */
+  .card {
+    width: 3.5in;
+    height: 2in;
+    background: #0C0C0C;
+    border-radius: 6px;
+    position: relative;
+    overflow: hidden;
+    box-shadow: 0 20px 60px rgba(0,0,0,0.5);
+  }
+
+  /* FRONT */
+  .front {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+  }
+  .front::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 3px;
+    background: #C23B22;
+  }
+  .front-logo {
+    width: 200px;
+    height: auto;
+    margin-bottom: 12px;
+    opacity: 0.9;
+  }
+  .front-tagline {
+    font-size: 10px;
+    color: #7A8490;
+    letter-spacing: 0.5px;
+    margin-bottom: 14px;
+  }
+  .front-services {
+    font-family: 'Barlow', sans-serif;
+    font-size: 8px;
+    font-weight: 600;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: #C23B22;
+  }
+  .front-bottom {
+    position: absolute;
+    bottom: 20px;
+    left: 0;
+    right: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 3px;
+    font-size: 9px;
+    color: #444;
+  }
+  .front-bottom-row {
+    display: flex;
+    gap: 20px;
+  }
+
+  /* BACK */
+  .back {
+    display: flex;
+    align-items: center;
+    padding: 0 24px;
+    gap: 20px;
+  }
+  .back::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    bottom: 0;
+    width: 3px;
+    background: #C23B22;
+  }
+  .back-left {
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+  }
+  .back-logo {
+    width: 28px;
+    height: auto;
+    margin-bottom: 8px;
+    opacity: 0.8;
+  }
+  .back-headline {
+    font-family: 'Barlow', sans-serif;
+    font-weight: 800;
+    font-size: 15px;
+    line-height: 1.1;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    color: #FFFFFF;
+    margin-bottom: 4px;
+  }
+  .back-sub {
+    font-size: 10px;
+    color: #7A8490;
+    line-height: 1.4;
+    margin-bottom: 8px;
+  }
+  .back-stars {
+    font-size: 14px;
+    letter-spacing: 2px;
+    color: #C9922E;
+  }
+  .back-right {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 6px;
+  }
+  .qr-area {
+    width: 96px;
+    height: 96px;
+    background: #FFFFFF;
+    border-radius: 4px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .qr-placeholder {
+    font-family: 'Barlow', sans-serif;
+    font-size: 8px;
+    font-weight: 600;
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+    color: #999;
+    text-align: center;
+    line-height: 1.3;
+  }
+  .scan-label {
+    font-family: 'Barlow', sans-serif;
+    font-size: 8px;
+    font-weight: 700;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    color: #C23B22;
+  }
+
+  @media print {
+    body { background: none; padding: 0; gap: 0; }
+    .card { box-shadow: none; border-radius: 0; page-break-after: always; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+    .print-bar, .label { display: none; }
+  }
+</style>
+</head>
+<body>
+
+<div class="print-bar">
+  <button class="print-btn" onclick="window.print()">Download Printable</button>
+  <span class="print-info">3.5 x 2 in (standard business card) &middot; Print on heavy cardstock</span>
+</div>
+
+<div class="label">Front</div>
+<div class="card front">
+  <img src="/sheepdog-wordmark-white.svg" alt="Sheepdog" class="front-logo">
+  <div class="front-tagline">Event Security &middot; Mobile Bartending &middot; Staffing</div>
+  <div class="front-bottom">
+    <div class="front-bottom-row">
+      <span>(979) 204-0945</span>
+      <span>sheepdogtexas.com</span>
+    </div>
+    <span>sheepdogsecurityllc@gmail.com</span>
+  </div>
+</div>
+
+<div class="label">Back</div>
+<div class="card back">
+  <div class="back-left">
+    <img src="/sheepdog-mark-white.svg" alt="Sheepdog" class="back-logo">
+    <div class="back-headline">How'd We Do?</div>
+    <p class="back-sub">Scan to leave a quick Google review. Takes 30 seconds.</p>
+    <div class="back-stars">&#9733;&#9733;&#9733;&#9733;&#9733;</div>
+  </div>
+  <div class="back-right">
+    <div class="qr-area">
+      <div class="qr-placeholder">QR code<br>pending<br>verification</div>
+    </div>
+    <div class="scan-label">Scan Me</div>
+  </div>
+</div>
+
+</body>
+</html>

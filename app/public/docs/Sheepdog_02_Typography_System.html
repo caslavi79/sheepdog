@@ -1,0 +1,396 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Sheepdog — #02 Typography System</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Barlow:ital,wght@0,400;0,500;0,600;0,700;0,800;0,900;1,400;1,600&family=Barlow+Semi+Condensed:wght@600;700;800;900&family=Source+Sans+3:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400;1,600&display=swap" rel="stylesheet">
+<style>
+:root{--black:#0C0C0C;--char:#1A1A1A;--dark:#2A2A2A;--mid:#4A4A4A;--steel:#7A8490;--light:#A0A0A0;--bdr:#D6D6D6;--tint:#F4F3F1;--white:#FFF;--red:#C23B22;--red-d:#A83220;--amber:#C9922E;--navy:#1B2A4A;--fd:'Barlow Semi Condensed','Barlow',sans-serif;--fh:'Barlow',sans-serif;--fb:'Source Sans 3','Source Sans Pro',sans-serif}
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{font-family:var(--fb);font-size:17px;line-height:1.65;color:var(--dark);background:var(--white);-webkit-font-smoothing:antialiased;overflow-x:hidden}
+.snav{position:fixed;top:0;left:0;right:0;z-index:100;background:rgba(15,15,15,.95);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);padding:0 40px;display:flex;align-items:center;height:56px;transform:translateY(-100%);transition:transform .35s ease}
+.snav.show{transform:translateY(0)}
+.snav-brand{font-family:var(--fd);font-weight:800;font-size:15px;color:var(--white);text-transform:uppercase;letter-spacing:1.5px;margin-right:auto}
+.snav a{font-family:var(--fb);font-size:12px;font-weight:600;letter-spacing:1.5px;text-transform:uppercase;color:var(--steel);text-decoration:none;margin-left:24px;transition:color .2s}
+.snav a:hover,.snav a.active{color:var(--white)}
+.cover{min-height:100vh;background:var(--black);color:var(--white);display:flex;flex-direction:column;justify-content:flex-end;padding:64px;position:relative;overflow:hidden}
+.cover::before{content:'';position:absolute;inset:0;background:radial-gradient(ellipse at 70% 20%,rgba(194,59,34,.07),transparent 60%),radial-gradient(ellipse at 20% 80%,rgba(122,132,144,.05),transparent 50%);pointer-events:none}
+.cover-grid{position:absolute;inset:0;background:repeating-linear-gradient(90deg,transparent,transparent 79px,rgba(255,255,255,.02) 79px,rgba(255,255,255,.02) 80px),repeating-linear-gradient(0deg,transparent,transparent 79px,rgba(255,255,255,.02) 79px,rgba(255,255,255,.02) 80px);pointer-events:none}
+.cover-tag{font-family:var(--fb);font-size:12px;font-weight:600;letter-spacing:3px;text-transform:uppercase;color:var(--red);margin-bottom:24px;opacity:0;animation:fu .6s ease forwards;animation-delay:.2s}
+.cover h1{font-family:var(--fd);font-weight:800;font-size:clamp(56px,9vw,120px);line-height:.88;letter-spacing:-2px;text-transform:uppercase;margin-bottom:32px}
+.cover h1 .line{display:block;opacity:0;transform:translateY(30px);animation:cr .7s cubic-bezier(.16,1,.3,1) forwards}
+.cover h1 .line:nth-child(1){animation-delay:.4s}
+.cover h1 .line:nth-child(2){animation-delay:.55s;color:var(--steel)}
+.cover-desc{font-size:16px;line-height:1.6;color:var(--light);max-width:520px;border-top:1px solid rgba(255,255,255,.12);padding-top:24px;opacity:0;animation:fu .6s ease forwards;animation-delay:.8s}
+.cover-desc strong{color:var(--white);font-weight:600}
+.cover-num{position:absolute;top:50%;right:64px;transform:translateY(-50%);font-family:var(--fd);font-weight:900;font-size:min(30vw,320px);color:rgba(255,255,255,.02);line-height:1;pointer-events:none}
+@keyframes cr{to{opacity:1;transform:translateY(0)}}
+@keyframes fu{to{opacity:1}}
+.s{padding:96px 64px;border-bottom:1px solid var(--bdr)}
+.s--dk{background:var(--char);color:var(--white);border-bottom-color:rgba(255,255,255,.06)}
+.s--tint{background:var(--tint)}
+.s--blk{background:var(--black);color:var(--white);border-bottom-color:rgba(255,255,255,.06)}
+.tag{font-family:var(--fb);font-size:11px;font-weight:600;letter-spacing:3px;text-transform:uppercase;color:var(--red);margin-bottom:10px}
+.title{font-family:var(--fh);font-weight:800;font-size:42px;line-height:1.08;color:var(--black);margin-bottom:16px}
+.s--dk .title,.s--blk .title{color:var(--white)}
+.lead{font-size:18px;line-height:1.6;color:var(--mid);max-width:660px;margin-bottom:56px}
+.s--dk .lead,.s--blk .lead{color:var(--steel)}
+.sub{font-family:var(--fh);font-weight:700;font-size:20px;color:var(--black);margin-bottom:20px}
+.s--dk .sub,.s--blk .sub{color:var(--white)}
+.fp{display:grid;grid-template-columns:1fr 1fr;gap:32px;margin-bottom:56px}
+@media(max-width:860px){.fp{grid-template-columns:1fr}}
+.fc{border:1px solid var(--bdr);border-radius:8px;overflow:hidden;transition:box-shadow .3s}
+.fc:hover{box-shadow:0 8px 30px rgba(0,0,0,.08)}
+.fc-h{padding:28px;border-bottom:1px solid var(--bdr)}
+.fc-r{font-family:var(--fb);font-size:11px;font-weight:600;letter-spacing:2.5px;text-transform:uppercase;color:var(--red);margin-bottom:6px}
+.fc-n{font-family:var(--fh);font-weight:800;font-size:28px;color:var(--black)}
+.fc-m{font-size:14px;color:var(--steel);margin-top:4px}
+.fc-s{padding:28px;background:var(--tint)}
+.fc-d{font-family:var(--fd);font-weight:800;font-size:46px;line-height:.98;text-transform:uppercase;color:var(--black);margin-bottom:8px}
+.fc-hd{font-family:var(--fh);font-weight:700;font-size:28px;line-height:1.1;color:var(--dark);margin-bottom:14px}
+.fc-a{font-family:var(--fh);font-weight:600;font-size:13px;letter-spacing:2px;color:var(--steel);word-break:break-all;line-height:2}
+.fc-bs{font-family:var(--fb);font-size:17px;line-height:1.7;color:var(--dark);margin-bottom:14px}
+.fc-ab{font-family:var(--fb);font-weight:400;font-size:13px;letter-spacing:1.5px;color:var(--steel);word-break:break-all;line-height:2}
+.rat{display:grid;grid-template-columns:1fr 1fr;gap:32px}
+@media(max-width:860px){.rat{grid-template-columns:1fr}}
+.rat-c{padding:28px;border:1px solid var(--bdr);border-radius:8px}
+.rat-c h4{font-family:var(--fh);font-weight:700;font-size:18px;color:var(--black);margin-bottom:10px}
+.rat-c p{font-size:15px;line-height:1.65;color:var(--mid)}
+.wt{display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:16px;margin-bottom:40px}
+.wt-c{padding:28px 24px;border:1px solid rgba(255,255,255,.08);border-radius:8px;background:rgba(255,255,255,.02);transition:background .25s,border-color .25s}
+.wt-c:hover{background:rgba(255,255,255,.05);border-color:rgba(255,255,255,.15)}
+.wt-p{font-size:32px;line-height:1.15;color:var(--white);margin-bottom:12px;display:block}
+.wt-n{font-family:var(--fb);font-size:11px;font-weight:600;letter-spacing:1.5px;text-transform:uppercase;color:var(--steel)}
+/* TYPE TESTER - ENHANCED */
+.tester{background:var(--tint);border:1px solid var(--bdr);border-radius:10px;overflow:hidden;margin-bottom:56px}
+.tester-bar{display:flex;align-items:center;gap:16px;padding:16px 24px;border-bottom:1px solid var(--bdr);background:var(--white);flex-wrap:wrap}
+.tester-bar label{font-family:var(--fb);font-size:12px;font-weight:600;letter-spacing:1.5px;text-transform:uppercase;color:var(--steel)}
+.tester-bar select,.tester-bar input[type=text]{font-family:var(--fb);font-size:14px;padding:6px 12px;border:1px solid var(--bdr);border-radius:4px;background:var(--white);color:var(--dark);outline:none}
+.tester-bar select:focus,.tester-bar input:focus{border-color:var(--red)}
+.tester-body{display:grid;grid-template-columns:1fr 280px}
+.tester-output{padding:40px 32px;min-height:140px;display:flex;align-items:center}
+#testerPreview{transition:all .2s;word-break:break-word}
+.tester-specs{padding:24px;border-left:1px solid var(--bdr);background:var(--white);font-family:'SFMono-Regular','Consolas',monospace;font-size:12px;line-height:2.2;color:var(--mid)}
+.tester-specs .spec-key{color:var(--steel);display:inline-block;width:110px}
+.tester-specs .spec-val{color:var(--dark);font-weight:600}
+@media(max-width:860px){.tester-body{grid-template-columns:1fr}.tester-specs{border-left:none;border-top:1px solid var(--bdr)}}
+.wf{margin-bottom:48px}
+.wf-r{display:flex;align-items:baseline;gap:24px;padding:20px 0;border-bottom:1px solid var(--bdr);transition:background .2s}
+.wf-r:hover{background:rgba(0,0,0,.015);padding-left:12px;padding-right:12px;margin:0 -12px;border-radius:6px}
+.wf-r:last-child{border-bottom:none}
+.wf-l{flex-shrink:0;width:140px;font-family:var(--fb);font-size:11px;font-weight:600;letter-spacing:2px;text-transform:uppercase;color:var(--red);padding-top:4px}
+.wf-s{flex:1;min-width:0;color:var(--black);overflow:hidden;text-overflow:ellipsis}
+.wf-spec{flex-shrink:0;font-family:'SFMono-Regular','Consolas',monospace;font-size:11px;color:var(--light);text-align:right;width:80px}
+.sw{overflow-x:auto}
+.st{width:100%;border-collapse:collapse;min-width:860px}
+.st th{font-family:var(--fb);font-size:10px;font-weight:600;letter-spacing:2px;text-transform:uppercase;color:var(--steel);text-align:left;padding:14px 12px;border-bottom:2px solid var(--black);white-space:nowrap}
+.st td{padding:14px 12px;border-bottom:1px solid var(--bdr);vertical-align:top;font-size:13px;line-height:1.5;color:var(--mid)}
+.st .lv{font-family:var(--fh);font-weight:700;font-size:13px;color:var(--black);white-space:nowrap}
+.st code{background:var(--tint);padding:2px 7px;border-radius:3px;font-size:11px;font-family:'SFMono-Regular','Consolas',monospace;color:var(--dark)}
+.devices{display:flex;gap:32px;align-items:flex-start;margin-bottom:48px;justify-content:center;flex-wrap:wrap}
+.dev{border-radius:12px;overflow:hidden;box-shadow:0 12px 48px rgba(0,0,0,.12);flex-shrink:0}
+.dev--desktop{width:560px;border:2px solid var(--dark)}
+.dev--mobile{width:220px;border:2px solid var(--dark);border-radius:24px}
+.dev-chrome{background:var(--dark);padding:10px 16px;display:flex;align-items:center;gap:6px}
+.dev-chrome-dot{width:8px;height:8px;border-radius:50%;background:rgba(255,255,255,.15)}
+.dev-chrome-bar{flex:1;height:20px;background:rgba(255,255,255,.08);border-radius:4px;margin-left:8px;font-family:'SFMono-Regular',monospace;font-size:10px;color:rgba(255,255,255,.3);line-height:20px;padding-left:8px}
+.dev-mobile-notch{background:var(--dark);padding:8px 0 4px;text-align:center}
+.dev-mobile-notch span{display:inline-block;width:60px;height:6px;background:rgba(255,255,255,.15);border-radius:3px}
+.dev-screen{background:var(--white);padding:24px 20px}
+.dev--mobile .dev-screen{padding:16px 14px}
+.measure{margin-bottom:48px}
+.m-box{padding:28px;border-radius:8px;margin-bottom:8px;position:relative}
+.m-box p{font-family:var(--fb);font-size:17px;line-height:1.65;color:var(--dark)}
+.m-tag{font-family:var(--fb);font-size:11px;font-weight:600;letter-spacing:1.5px;text-transform:uppercase;margin-bottom:24px}
+.sp{border-radius:10px;padding:52px;margin-bottom:40px}
+.sp--lt{background:var(--tint)}
+.sp--dk{background:var(--char)}
+.sp-ol{font-family:var(--fb);font-size:12px;font-weight:600;letter-spacing:2.5px;text-transform:uppercase;color:var(--red);margin-bottom:14px}
+.sp-h1{font-family:var(--fd);font-weight:800;font-size:52px;line-height:.96;letter-spacing:-.5px;text-transform:uppercase;color:var(--black);margin-bottom:18px}
+.sp--dk .sp-h1{color:var(--white)}
+.sp-h2{font-family:var(--fh);font-weight:700;font-size:32px;line-height:1.15;color:var(--black);margin-bottom:14px}
+.sp--dk .sp-h2{color:var(--white)}
+.sp-h3{font-family:var(--fh);font-weight:600;font-size:22px;line-height:1.25;color:var(--dark);margin-bottom:10px}
+.sp--dk .sp-h3{color:#bbb}
+.sp-p{font-family:var(--fb);font-size:17px;line-height:1.65;color:var(--mid);max-width:580px;margin-bottom:20px}
+.sp--dk .sp-p{color:var(--steel)}
+.sp-sm{font-family:var(--fb);font-size:13px;line-height:1.5;color:var(--light);margin-bottom:24px}
+.sp-btns{display:flex;gap:12px;flex-wrap:wrap}
+.btn-r{display:inline-block;font-family:var(--fh);font-weight:700;font-size:15px;letter-spacing:1.5px;text-transform:uppercase;color:var(--white);background:var(--red);padding:15px 36px;border-radius:4px;text-decoration:none;transition:background .2s}
+.btn-r:hover{background:var(--red-d)}
+.btn-o{display:inline-block;font-family:var(--fh);font-weight:700;font-size:15px;letter-spacing:1.5px;text-transform:uppercase;color:var(--black);background:transparent;border:2px solid var(--black);padding:13px 34px;border-radius:4px;text-decoration:none;transition:all .2s}
+.btn-o:hover{background:var(--black);color:var(--white)}
+.sp--dk .btn-o{color:var(--white);border-color:var(--white)}
+.sp--dk .btn-o:hover{background:var(--white);color:var(--black)}
+.svc{display:grid;grid-template-columns:1fr 1fr;gap:28px;margin-bottom:40px}
+@media(max-width:860px){.svc{grid-template-columns:1fr}}
+.svc-c{padding:32px;border-radius:8px;border:1px solid var(--bdr)}
+.svc-c h4{font-family:var(--fh);font-weight:700;font-size:20px;color:var(--black);margin-bottom:16px;display:flex;align-items:center;gap:10px}
+.svc-c h4 .dot{width:8px;height:8px;border-radius:50%;flex-shrink:0}
+.svc-c p{font-size:15px;line-height:1.6;color:var(--mid);margin-bottom:6px}
+.svc-c strong{color:var(--dark)}
+.dd{display:grid;grid-template-columns:1fr 1fr;gap:28px;margin-bottom:40px}
+@media(max-width:860px){.dd{grid-template-columns:1fr}}
+.dd-c{padding:28px;border-radius:8px}
+.dd-y{border:2px solid #357A38;background:rgba(53,122,56,.04)}
+.dd-n{border:2px solid var(--red);background:rgba(194,59,34,.04)}
+.dd-c h4{font-family:var(--fh);font-weight:700;font-size:14px;letter-spacing:1.5px;text-transform:uppercase;margin-bottom:14px}
+.dd-y h4{color:#357A38}
+.dd-n h4{color:var(--red)}
+.dd-c ul{list-style:none;padding:0}
+.dd-c li{font-size:15px;line-height:1.6;color:var(--dark);padding-left:22px;position:relative;margin-bottom:5px}
+.dd-y li::before{content:'✓';position:absolute;left:0;color:#357A38;font-weight:700}
+.dd-n li::before{content:'✗';position:absolute;left:0;color:var(--red);font-weight:700}
+.code{background:var(--char);border-radius:10px;overflow:hidden;margin-bottom:40px;position:relative}
+.code-bar{display:flex;align-items:center;padding:12px 20px;border-bottom:1px solid rgba(255,255,255,.06);gap:8px}
+.code-dot{width:10px;height:10px;border-radius:50%}
+.code-bar-title{font-family:'SFMono-Regular','Consolas',monospace;font-size:12px;color:var(--steel);margin-left:12px}
+.code-copy{margin-left:auto;font-family:var(--fb);font-size:11px;font-weight:600;letter-spacing:1px;text-transform:uppercase;color:var(--steel);background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);padding:5px 14px;border-radius:4px;cursor:pointer;transition:all .2s}
+.code-copy:hover{background:rgba(255,255,255,.1);color:var(--white)}
+.code pre{padding:24px;color:#D4D4D4;font-family:'SFMono-Regular','Consolas',monospace;font-size:13px;line-height:1.7;overflow-x:auto;white-space:pre}
+.cm{color:#6A9955}.pr{color:#9CDCFE}.vl{color:#CE9178}.fn{color:#DCDCAA}.kw{color:#569CD6}
+.note{display:flex;gap:16px;padding:24px;border-radius:0 8px 8px 0;margin-bottom:40px}
+.note--g{background:rgba(201,146,46,.07);border-left:3px solid var(--amber)}
+.note--r{background:rgba(194,59,34,.05);border-left:3px solid var(--red)}
+.note-i{flex-shrink:0;width:22px;height:22px;border-radius:50%;color:var(--white);font-size:12px;font-weight:700;display:flex;align-items:center;justify-content:center}
+.note--g .note-i{background:var(--amber)}
+.note--r .note-i{background:var(--red)}
+.note p{font-size:14px;line-height:1.6;color:var(--mid)}
+.note strong{color:var(--dark)}
+
+.s--dk .note p,.s--blk .note p{color:var(--silver)}
+.s--dk .note strong,.s--blk .note strong{color:var(--white)}
+.s--dk .note code,.s--blk .note code{background:rgba(255,255,255,.08);color:#D0D0D0}
+.foot{padding:56px 64px;background:var(--black);text-align:center}
+.foot-brand{font-family:var(--fd);font-weight:800;font-size:18px;text-transform:uppercase;letter-spacing:2px;color:var(--white);margin-bottom:8px}
+.foot p{font-size:14px;color:var(--steel);line-height:1.6}
+.foot strong{color:var(--white)}
+.fi{opacity:0;transform:translateY(20px);transition:opacity .6s ease,transform .6s ease}
+.fi.vis{opacity:1;transform:translateY(0)}
+@media print{.cover{min-height:auto;page-break-after:always}.s{page-break-inside:avoid;padding:40px}body{font-size:10.5pt}.snav,.tester,.code-copy{display:none}}
+@media(max-width:768px){.s{padding:48px 24px}.fp{grid-template-columns:1fr}.cover{padding:40px}.cover h1{font-size:48px}.devices{flex-direction:column;align-items:center}.dev--desktop{width:100%;max-width:560px}}
+</style>
+</head>
+<body>
+<nav class="snav" id="snav"><div class="snav-brand">#02 Typography</div><a href="#fonts">Fonts</a><a href="#weights">Weights</a><a href="#tester">Tester</a><a href="#scale">Scale</a><a href="#specimens">Specimens</a><a href="#rules">Rules</a><a href="#dev">Dev</a></nav>
+
+<div class="cover"><div class="cover-grid"></div><div class="cover-num">02</div>
+<div class="cover-tag">Deliverable #02 · Foundation › Brand Architecture</div>
+<h1><span class="line">Typography</span><span class="line">System</span></h1>
+<div class="cover-desc"><strong>Sheepdog</strong> — Fonts, type scale, weight system, and usage rules for every Sheepdog touchpoint. Covers both sub-brands: <strong>Sheepdog Events</strong> (event security &amp; mobile bartending) and <strong>Sheepdog Staffing</strong> (contracted labor &amp; workforce solutions).</div></div>
+
+<!-- 01 FONTS -->
+<div class="s" id="fonts"><div class="fi"><div class="tag">01 — Font Selection</div><div class="title">Two Fonts. One System.</div><p class="lead">Barlow for commanding headings. Source Sans 3 for clean body text. Both free on Google Fonts.</p></div>
+<div class="fp fi">
+<div class="fc"><div class="fc-h"><div class="fc-r">Headings &amp; Display</div><div class="fc-n">Barlow</div><div class="fc-m">Jeremy Tribby · Grotesk sans-serif · Semi Condensed width available</div></div><div class="fc-s"><div class="fc-d">A Presence That Protects</div><div class="fc-hd">Sheepdog</div><div class="fc-a">ABCDEFGHIJKLMNOPQRSTUVWXYZ abcdefghijklmnopqrstuvwxyz 0123456789</div></div></div>
+<div class="fc"><div class="fc-h"><div class="fc-r">Body &amp; UI Text</div><div class="fc-n">Source Sans 3</div><div class="fc-m">Paul D. Hunt (Adobe) · Humanist sans-serif · Italic included</div></div><div class="fc-s"><div class="fc-bs">Sheepdog provides professional event security, mobile bartending, and contracted staffing services across the Bryan–College Station area through two service lines: Sheepdog Events and Sheepdog Staffing.</div><div class="fc-ab">ABCDEFGHIJKLMNOPQRSTUVWXYZ abcdefghijklmnopqrstuvwxyz 0123456789</div></div></div></div>
+<div class="rat fi"><div class="rat-c"><h4>Why Barlow?</h4><p>A slightly rounded grotesk with an industrial backbone. Its Semi Condensed width gives display headers a commanding, physical presence — the kind of font that says "we show up and handle it." Designed for California's public infrastructure — built to be trusted at a glance. The wide weight range (600–900) flexes from clean corporate headers on Staffing to bold, high-energy display on Events.</p></div>
+<div class="rat-c"><h4>Why Source Sans 3?</h4><p>Adobe's flagship open-source typeface, purpose-built for screen readability. Humanist construction adds warmth without undermining professionalism — critical for a brand that needs to feel approachable on Events and buttoned-up on Staffing. Excellent x-height, open apertures, carefully hinted for every screen from desktop to mobile.</p></div></div></div>
+
+<!-- 02 WEIGHTS -->
+<div class="s s--dk" id="weights"><div class="fi"><div class="tag">02 — Approved Weights</div><div class="title">Restricted Weight Palette</div><p class="lead">If it's not listed here, don't use it.</p></div>
+<div class="sub fi">Barlow &amp; Barlow Semi Condensed</div>
+<div class="wt fi">
+<div class="wt-c"><span class="wt-p" style="font-family:var(--fh);font-weight:600;">Event Security</span><div class="wt-n">Semi Bold · 600 — Sub-headers, nav</div></div>
+<div class="wt-c"><span class="wt-p" style="font-family:var(--fh);font-weight:700;">Book Security</span><div class="wt-n">Bold · 700 — H2, H4, buttons</div></div>
+<div class="wt-c"><span class="wt-p" style="font-family:var(--fd);font-weight:800;text-transform:uppercase;font-size:28px;">We Show Up</span><div class="wt-n">Extra Bold · 800 — H1 display only</div></div>
+<div class="wt-c"><span class="wt-p" style="font-family:var(--fd);font-weight:900;text-transform:uppercase;font-size:28px;">Sheepdog</span><div class="wt-n">Black · 900 — Logo lockup only</div></div></div>
+<div class="sub fi">Source Sans 3</div>
+<div class="wt fi">
+<div class="wt-c"><span class="wt-p" style="font-family:var(--fb);font-weight:300;font-size:26px;">Licensed &amp; Insured</span><div class="wt-n">Light · 300 — Large decorative captions</div></div>
+<div class="wt-c"><span class="wt-p" style="font-family:var(--fb);font-weight:400;font-size:26px;">Our team is vetted.</span><div class="wt-n">Regular · 400 — Body text default</div></div>
+<div class="wt-c"><span class="wt-p" style="font-family:var(--fb);font-weight:600;font-size:26px;">One point of contact.</span><div class="wt-n">Semi Bold · 600 — Emphasis, labels</div></div>
+<div class="wt-c"><span class="wt-p" style="font-family:var(--fb);font-weight:700;font-size:26px;">Request a proposal</span><div class="wt-n">Bold · 700 — Strong emphasis only</div></div></div>
+<div class="note note--g fi"><div class="note-i">i</div><div><p><strong>Semi Condensed vs. Standard:</strong> Use <strong>Barlow Semi Condensed</strong> for H1 display headings only. Standard <strong>Barlow</strong> for H2–H4, buttons, nav. Never mix widths within the same heading level.</p></div></div></div>
+
+<!-- 03 TYPE TESTER -->
+<div class="s" id="tester"><div class="fi"><div class="tag">03 — Interactive Type Tester</div><div class="title">Try It Yourself</div><p class="lead">Type anything, pick a level, see it rendered live with the exact specs used.</p></div>
+<div class="tester fi">
+<div class="tester-bar">
+<label>Level:</label>
+<select id="testerLevel" onchange="updateTester()"><option value="h1">H1 — Page Title</option><option value="h2">H2 — Section Header</option><option value="h3">H3 — Sub-header</option><option value="h4">H4 — Card Title</option><option value="body" selected>Body</option><option value="small">Small / Caption</option><option value="overline">Overline</option><option value="btn">Button / CTA</option></select>
+<label>Background:</label>
+<select id="testerBg" onchange="updateTester()"><option value="light">Light</option><option value="dark">Dark</option></select>
+<input type="text" id="testerInput" value="A Presence That Protects" oninput="updateTester()" placeholder="Type anything…" style="width:260px;">
+</div>
+<div class="tester-body">
+<div class="tester-output" id="testerOutput"><div id="testerPreview"></div></div>
+<div class="tester-specs" id="testerSpecs"></div>
+</div>
+</div></div>
+
+<!-- 04 WATERFALL -->
+<div class="s s--tint"><div class="fi"><div class="tag">04 — Type Scale Waterfall</div><div class="title">See the Hierarchy</div><p class="lead">Every level at actual rendered size. Hover any row to highlight.</p></div>
+<div class="wf fi">
+<div class="wf-r"><div class="wf-l">H1 · Display</div><div class="wf-s" style="font-family:var(--fd);font-weight:800;font-size:56px;line-height:1;letter-spacing:-.5px;text-transform:uppercase;">Professional Security</div><div class="wf-spec">56px / 800</div></div>
+<div class="wf-r"><div class="wf-l">H2 · Section</div><div class="wf-s" style="font-family:var(--fh);font-weight:700;font-size:36px;line-height:1.15;letter-spacing:-.25px;">From bar shifts to weddings.</div><div class="wf-spec">36px / 700</div></div>
+<div class="wf-r"><div class="wf-l">H3 · Sub</div><div class="wf-s" style="font-family:var(--fh);font-weight:600;font-size:24px;line-height:1.25;">How It Works</div><div class="wf-spec">24px / 600</div></div>
+<div class="wf-r"><div class="wf-l">H4 · Card</div><div class="wf-s" style="font-family:var(--fh);font-weight:700;font-size:18px;line-height:1.3;">Bar Security &amp; Crowd Management</div><div class="wf-spec">18px / 700</div></div>
+<div class="wf-r"><div class="wf-l">Body</div><div class="wf-s" style="font-family:var(--fb);font-weight:400;font-size:17px;line-height:1.65;">Our team shows up trained, uniformed, and ready to keep things running smoothly.</div><div class="wf-spec">17px / 400</div></div>
+<div class="wf-r"><div class="wf-l">Small</div><div class="wf-s" style="font-family:var(--fb);font-weight:400;font-size:13px;line-height:1.5;color:var(--light);">Licensed &amp; insured · TABC certified staff available · Serving the Brazos Valley</div><div class="wf-spec">13px / 400</div></div>
+<div class="wf-r"><div class="wf-l">Overline</div><div class="wf-s" style="font-family:var(--fb);font-weight:600;font-size:12px;line-height:1.4;letter-spacing:2.5px;text-transform:uppercase;color:var(--red);">Sheepdog Events</div><div class="wf-spec">12px / 600</div></div>
+<div class="wf-r"><div class="wf-l">Button</div><div class="wf-s"><span style="display:inline-block;font-family:var(--fh);font-weight:700;font-size:15px;letter-spacing:1.5px;text-transform:uppercase;color:var(--white);background:var(--red);padding:14px 32px;border-radius:4px;">Get a Quote</span> <span style="display:inline-block;font-family:var(--fh);font-weight:700;font-size:15px;letter-spacing:1.5px;text-transform:uppercase;color:var(--black);border:2px solid var(--black);padding:12px 30px;border-radius:4px;margin-left:8px;">Our Services</span></div><div class="wf-spec">15px / 700</div></div>
+</div></div>
+
+<!-- 05 SPEC TABLE -->
+<div class="s" id="scale"><div class="fi"><div class="tag">05 — Full Specification</div><div class="title">Desktop, Mobile &amp; Print</div><p class="lead">Complete values. Mobile sizes activate at 768px.</p></div>
+<div class="sw fi"><table class="st"><thead><tr><th>Level</th><th>Font / Weight</th><th>Desktop</th><th>Mobile</th><th>Print</th><th>LH</th><th>LS</th><th>Transform</th></tr></thead><tbody>
+<tr><td class="lv">H1</td><td>Barlow Semi Cond · 800</td><td><code>56px</code></td><td><code>36px</code></td><td><code>42pt</code></td><td><code>1.0</code></td><td><code>-0.5px</code></td><td><code>uppercase</code></td></tr>
+<tr><td class="lv">H2</td><td>Barlow · 700</td><td><code>36px</code></td><td><code>28px</code></td><td><code>27pt</code></td><td><code>1.15</code></td><td><code>-0.25px</code></td><td>—</td></tr>
+<tr><td class="lv">H3</td><td>Barlow · 600</td><td><code>24px</code></td><td><code>20px</code></td><td><code>18pt</code></td><td><code>1.25</code></td><td>—</td><td>—</td></tr>
+<tr><td class="lv">H4</td><td>Barlow · 700</td><td><code>18px</code></td><td><code>17px</code></td><td><code>14pt</code></td><td><code>1.3</code></td><td>—</td><td>—</td></tr>
+<tr><td class="lv">Body</td><td>Source Sans 3 · 400</td><td><code>17px</code></td><td><code>16px</code></td><td><code>11pt</code></td><td><code>1.65</code></td><td>—</td><td>—</td></tr>
+<tr><td class="lv">Body Emph.</td><td>Source Sans 3 · 600</td><td><code>17px</code></td><td><code>16px</code></td><td><code>11pt</code></td><td><code>1.65</code></td><td>—</td><td>—</td></tr>
+<tr><td class="lv">Small</td><td>Source Sans 3 · 400</td><td><code>13px</code></td><td><code>12px</code></td><td><code>9pt</code></td><td><code>1.5</code></td><td><code>0.25px</code></td><td>—</td></tr>
+<tr><td class="lv">Overline</td><td>Source Sans 3 · 600</td><td><code>12px</code></td><td><code>11px</code></td><td><code>8pt</code></td><td><code>1.4</code></td><td><code>2.5px</code></td><td><code>uppercase</code></td></tr>
+<tr><td class="lv">Button</td><td>Barlow · 700</td><td><code>15px</code></td><td><code>14px</code></td><td><code>11pt</code></td><td><code>1.0</code></td><td><code>1.5px</code></td><td><code>uppercase</code></td></tr>
+<tr><td class="lv">Nav</td><td>Barlow · 600</td><td><code>15px</code></td><td><code>14px</code></td><td>—</td><td><code>1.0</code></td><td><code>1px</code></td><td><code>uppercase</code></td></tr>
+</tbody></table></div></div>
+
+<!-- 06 DEVICE PREVIEW -->
+<div class="s s--tint"><div class="fi"><div class="tag">06 — Responsive Preview</div><div class="title">Desktop vs. Mobile</div><p class="lead">Same content at both breakpoints showing the type scale adapting.</p></div>
+<div class="devices fi">
+<div class="dev dev--desktop"><div class="dev-chrome"><div class="dev-chrome-dot"></div><div class="dev-chrome-dot"></div><div class="dev-chrome-dot"></div><div class="dev-chrome-bar">sheepdogtexas.com</div></div>
+<div class="dev-screen"><div style="font-family:var(--fb);font-size:11px;font-weight:600;letter-spacing:2.5px;text-transform:uppercase;color:var(--red);margin-bottom:10px;">Sheepdog Events</div><div style="font-family:var(--fd);font-weight:800;font-size:42px;line-height:.96;text-transform:uppercase;color:var(--black);margin-bottom:12px;">Security &amp;<br>Bartending</div><div style="font-family:var(--fh);font-weight:700;font-size:22px;line-height:1.15;color:var(--dark);margin-bottom:10px;">We show up ready.</div><div style="font-family:var(--fb);font-size:15px;line-height:1.6;color:var(--mid);margin-bottom:16px;max-width:380px;">Professional event security and mobile bartending for the Bryan–College Station area.</div><span style="display:inline-block;font-family:var(--fh);font-weight:700;font-size:13px;letter-spacing:1.5px;text-transform:uppercase;color:var(--white);background:var(--red);padding:10px 24px;border-radius:4px;">Get a Quote</span></div></div>
+<div class="dev dev--mobile"><div class="dev-mobile-notch"><span></span></div>
+<div class="dev-screen"><div style="font-family:var(--fb);font-size:10px;font-weight:600;letter-spacing:2px;text-transform:uppercase;color:var(--red);margin-bottom:8px;">Sheepdog Events</div><div style="font-family:var(--fd);font-weight:800;font-size:28px;line-height:.96;text-transform:uppercase;color:var(--black);margin-bottom:10px;">Security &amp;<br>Bartending</div><div style="font-family:var(--fh);font-weight:700;font-size:16px;line-height:1.15;color:var(--dark);margin-bottom:8px;">We show up ready.</div><div style="font-family:var(--fb);font-size:14px;line-height:1.6;color:var(--mid);margin-bottom:14px;">Professional event security and mobile bartending for BCS.</div><span style="display:inline-block;font-family:var(--fh);font-weight:700;font-size:12px;letter-spacing:1.5px;text-transform:uppercase;color:var(--white);background:var(--red);padding:10px 20px;border-radius:4px;width:100%;text-align:center;">Get a Quote</span></div></div></div></div>
+
+<!-- 07 LINE MEASURE -->
+<div class="s"><div class="fi"><div class="tag">07 — Line Measure</div><div class="title">Paragraph Width Rules</div><p class="lead">Line length directly impacts readability.</p></div>
+<div class="measure fi">
+<div class="m-box" style="background:var(--tint);border-left:3px solid var(--red);"><p style="max-width:100%;">This paragraph has no max-width constraint. On a wide monitor it stretches across the entire viewport making it very difficult to track from the end of one line back to the beginning of the next. This is a common mistake — it feels exhausting to read and people will skip it entirely.</p></div><div class="m-tag" style="color:var(--red);">✗ Too wide — no max-width. Hard to track lines.</div>
+<div class="m-box" style="background:var(--tint);border-left:3px solid #357A38;"><p style="max-width:640px;">This paragraph is constrained to 640px — roughly 65–75 characters per line at 17px body size. The eye can comfortably track from line to line, and the paragraph feels balanced. This is the target for all Sheepdog body text.</p></div><div class="m-tag" style="color:#357A38;">✓ Ideal — 640px / ~65–75 characters per line</div>
+<div class="m-box" style="background:var(--tint);border-left:3px solid var(--amber);"><p style="max-width:420px;">This paragraph is at 420px. Works for captions, sidebars, and card descriptions, but fragments the reading flow for body text.</p></div><div class="m-tag" style="color:var(--amber);">◆ Narrow — 420px. Cards and sidebars only.</div>
+</div>
+<div class="note note--g fi"><div class="note-i">i</div><div><p><strong>Rule:</strong> Body text max-width = <strong>600–680px</strong>. Headings can go wider (up to 800px for H1). On mobile, screen width is the constraint — maintain 16px+ side padding.</p></div></div></div>
+
+<!-- 08 SPECIMENS -->
+<div class="s s--tint" id="specimens"><div class="fi"><div class="tag">08 — Live Specimens</div><div class="title">Typography in Context</div><p class="lead">Both service lines using the full type system on realistic page content.</p></div>
+<div class="sp sp--lt fi"><div class="sp-ol">Sheepdog Events</div><div class="sp-h1">Security &amp; Bartending<br>For Every Event</div><div class="sp-h2">From bar shifts to weddings, we show up ready.</div><div class="sp-p">Sheepdog Events provides experienced security personnel and professional mobile bartenders for events across the Bryan–College Station area. Concerts, weddings, private parties, Greek life events, festivals — whatever the occasion, our team shows up trained, uniformed, and ready to keep things running smoothly.</div><div class="sp-h3">How It Works</div><div class="sp-p">Tell us about your event. We'll build a tailored plan — the right number of staff, the right roles, the right positioning for your venue. Need security and bartending? We handle both under one roof.</div><div class="sp-sm">Licensed &amp; insured · TABC certified staff available · Serving the Brazos Valley</div><div class="sp-btns"><a class="btn-r" href="#">Get a Quote</a><a class="btn-o" href="#">Our Services</a></div></div>
+<div class="sp sp--dk fi"><div class="sp-ol">Sheepdog Staffing</div><div class="sp-h1">Contract Workforce<br>Solutions, On Demand</div><div class="sp-h2">The people you need. The reliability you expect.</div><div class="sp-p">Sheepdog Staffing provides vetted, dependable contracted workers for companies that need labor at scale — from GPS tagging deployments and field logistics to facility maintenance and warehouse operations. You define the scope. We deliver the workforce.</div><div class="sp-h3">One Partner. Fully Managed.</div><div class="sp-p">No juggling subcontractors. We handle recruiting, vetting, onboarding paperwork, scheduling, and compliance. You get reliable workers on site, on time, and a single point of contact for the entire engagement.</div><div class="sp-sm">Background-checked · Insured · W-9 &amp; contractor agreements handled</div><div class="sp-btns"><a class="btn-r" href="#">Request Staff</a><a class="btn-o" href="#">Get a Proposal</a></div></div></div>
+
+<!-- 09 SERVICE LINES -->
+<div class="s"><div class="fi"><div class="tag">09 — Service Line Expression</div><div class="title">Same System. Different Voice.</div><p class="lead">Both lines use Barlow + Source Sans 3 but express the brand differently.</p></div>
+<div class="svc fi">
+<div class="svc-c" style="border-left:4px solid var(--red);"><h4><span class="dot" style="background:var(--red);"></span>Sheepdog Events</h4><p><strong>Audience:</strong> Venue owners, event planners, Greek orgs, individuals</p><p><strong>Tone:</strong> Reliable, experienced, dependable, trustworthy</p><p><strong>H1:</strong> Barlow Semi Condensed 800, always uppercase</p><p><strong>Body:</strong> Direct, confident, warm. Short sentences. Active voice.</p><p><strong>CTAs:</strong> "Get a Quote," "Book Security," "Let's Talk"</p></div>
+<div class="svc-c" style="border-left:4px solid var(--navy);"><h4><span class="dot" style="background:var(--navy);"></span>Sheepdog Staffing</h4><p><strong>Audience:</strong> Companies, HR, ops managers, project leads</p><p><strong>Tone:</strong> Corporate, clean, professional, efficient</p><p><strong>H1:</strong> Same Semi Condensed 800, may use sentence case</p><p><strong>Body:</strong> Measured, precise, solutions-oriented. Professional vocabulary.</p><p><strong>CTAs:</strong> "Request Staff," "Get a Proposal," "Schedule a Call"</p></div></div></div>
+
+<!-- 10 DO/DONT -->
+<div class="s s--tint" id="rules"><div class="fi"><div class="tag">10 — Usage Rules</div><div class="title">Do's and Don'ts</div><p class="lead">Hard rules. No exceptions.</p></div>
+<div class="dd fi">
+<div class="dd-c dd-y"><h4>Do</h4><ul><li>Use Barlow Semi Condensed 800 for H1 display only</li><li>Use standard Barlow for H2–H4, buttons, nav</li><li>Use Source Sans 3 for all body, captions, forms, UI</li><li>Maintain minimum line-heights from the scale</li><li>Use uppercase + letter-spacing for overlines, buttons, nav</li><li>Constrain body text to 600–680px max-width</li><li>Use mobile sizes at the 768px breakpoint</li><li>Limit headings to H1–H4</li></ul></div>
+<div class="dd-c dd-n"><h4>Don't</h4><ul><li>Mix Barlow weights within the same heading level</li><li>Use Semi Condensed for body text</li><li>Use Barlow below 600 or Source Sans below 300</li><li>Add italic Barlow to headings</li><li>Center-align body paragraphs</li><li>Substitute with Inter, Roboto, or system fonts</li><li>Use decorative, script, or serif fonts</li><li>Let body text run full-width</li></ul></div></div>
+<div class="note note--r fi"><div class="note-i">!</div><div><p><strong>Print fallback:</strong> <strong>Barlow → Franklin Gothic</strong> for headings, <strong>Source Sans 3 → Helvetica Neue → Arial</strong> for body. Document every substitution.</p></div></div></div>
+
+<!-- 11 DEV -->
+<div class="s" id="dev"><div class="fi"><div class="tag">11 — Developer Reference</div><div class="title">CSS, Tailwind &amp; Responsive</div><p class="lead">Copy-paste implementation. Click copy on any block.</p></div>
+<div class="code fi"><div class="code-bar"><div class="code-dot" style="background:#FF5F57"></div><div class="code-dot" style="background:#FFBD2E"></div><div class="code-dot" style="background:#27C93F"></div><div class="code-bar-title">google-fonts-embed.html</div><button class="code-copy" onclick="copyCode(this)">Copy</button></div>
+<pre>&lt;link rel="preconnect" href="https://fonts.googleapis.com"&gt;
+&lt;link rel="preconnect" href="https://fonts.gstatic.com" crossorigin&gt;
+&lt;link href="https://fonts.googleapis.com/css2?
+  family=Barlow:wght@600;700;800;900
+  &amp;family=Barlow+Semi+Condensed:wght@700;800;900
+  &amp;family=Source+Sans+3:ital,wght@0,300;0,400;0,600;0,700;1,400;1,600
+  &amp;display=swap" rel="stylesheet"&gt;</pre></div>
+<div class="code fi"><div class="code-bar"><div class="code-dot" style="background:#FF5F57"></div><div class="code-dot" style="background:#FFBD2E"></div><div class="code-dot" style="background:#27C93F"></div><div class="code-bar-title">variables.css</div><button class="code-copy" onclick="copyCode(this)">Copy</button></div>
+<pre><span class="cm">/* Typography tokens */</span>
+<span class="pr">:root</span> {
+  <span class="pr">--font-display</span>: <span class="vl">'Barlow Semi Condensed', 'Barlow', sans-serif</span>;
+  <span class="pr">--font-heading</span>: <span class="vl">'Barlow', sans-serif</span>;
+  <span class="pr">--font-body</span>:    <span class="vl">'Source Sans 3', 'Source Sans Pro', sans-serif</span>;
+  <span class="pr">--text-h1</span>: <span class="vl">56px</span>;   <span class="pr">--text-h2</span>: <span class="vl">36px</span>;   <span class="pr">--text-h3</span>: <span class="vl">24px</span>;
+  <span class="pr">--text-h4</span>: <span class="vl">18px</span>;   <span class="pr">--text-body</span>: <span class="vl">17px</span>; <span class="pr">--text-small</span>: <span class="vl">13px</span>;
+  <span class="pr">--text-label</span>: <span class="vl">12px</span>; <span class="pr">--text-btn</span>: <span class="vl">15px</span>;
+}
+
+<span class="kw">@media</span> (max-width: <span class="vl">768px</span>) {
+  <span class="pr">:root</span> {
+    <span class="pr">--text-h1</span>: <span class="vl">36px</span>;  <span class="pr">--text-h2</span>: <span class="vl">28px</span>;  <span class="pr">--text-h3</span>: <span class="vl">20px</span>;
+    <span class="pr">--text-h4</span>: <span class="vl">17px</span>;  <span class="pr">--text-body</span>: <span class="vl">16px</span>; <span class="pr">--text-small</span>: <span class="vl">12px</span>;
+    <span class="pr">--text-label</span>: <span class="vl">11px</span>; <span class="pr">--text-btn</span>: <span class="vl">14px</span>;
+  }
+}
+
+<span class="pr">h1</span> { font-family: <span class="fn">var</span>(<span class="pr">--font-display</span>); font-weight: <span class="vl">800</span>; font-size: <span class="fn">var</span>(<span class="pr">--text-h1</span>); line-height: <span class="vl">1.0</span>; letter-spacing: <span class="vl">-0.5px</span>; text-transform: <span class="vl">uppercase</span>; }
+<span class="pr">h2</span> { font-family: <span class="fn">var</span>(<span class="pr">--font-heading</span>); font-weight: <span class="vl">700</span>; font-size: <span class="fn">var</span>(<span class="pr">--text-h2</span>); line-height: <span class="vl">1.15</span>; letter-spacing: <span class="vl">-0.25px</span>; }
+<span class="pr">h3</span> { font-family: <span class="fn">var</span>(<span class="pr">--font-heading</span>); font-weight: <span class="vl">600</span>; font-size: <span class="fn">var</span>(<span class="pr">--text-h3</span>); line-height: <span class="vl">1.25</span>; }
+<span class="pr">h4</span> { font-family: <span class="fn">var</span>(<span class="pr">--font-heading</span>); font-weight: <span class="vl">700</span>; font-size: <span class="fn">var</span>(<span class="pr">--text-h4</span>); line-height: <span class="vl">1.3</span>; }
+<span class="pr">body</span> { font-family: <span class="fn">var</span>(<span class="pr">--font-body</span>); font-weight: <span class="vl">400</span>; font-size: <span class="fn">var</span>(<span class="pr">--text-body</span>); line-height: <span class="vl">1.65</span>; }
+<span class="pr">.btn</span> { font-family: <span class="fn">var</span>(<span class="pr">--font-heading</span>); font-weight: <span class="vl">700</span>; font-size: <span class="fn">var</span>(<span class="pr">--text-btn</span>); letter-spacing: <span class="vl">1.5px</span>; text-transform: <span class="vl">uppercase</span>; }</pre></div>
+<div class="code fi"><div class="code-bar"><div class="code-dot" style="background:#FF5F57"></div><div class="code-dot" style="background:#FFBD2E"></div><div class="code-dot" style="background:#27C93F"></div><div class="code-bar-title">tailwind.config.js</div><button class="code-copy" onclick="copyCode(this)">Copy</button></div>
+<pre><span class="cm">// theme.extend</span>
+<span class="pr">fontFamily</span>: {
+  <span class="pr">display</span>: [<span class="vl">'Barlow Semi Condensed'</span>, <span class="vl">'Barlow'</span>, <span class="vl">'sans-serif'</span>],
+  <span class="pr">heading</span>: [<span class="vl">'Barlow'</span>, <span class="vl">'sans-serif'</span>],
+  <span class="pr">body</span>:    [<span class="vl">'Source Sans 3'</span>, <span class="vl">'Source Sans Pro'</span>, <span class="vl">'sans-serif'</span>],
+},
+<span class="pr">fontSize</span>: {
+  <span class="pr">'h1'</span>:    [<span class="vl">'56px'</span>, { lineHeight: <span class="vl">'1'</span>,    letterSpacing: <span class="vl">'-0.5px'</span> }],
+  <span class="pr">'h2'</span>:    [<span class="vl">'36px'</span>, { lineHeight: <span class="vl">'1.15'</span>, letterSpacing: <span class="vl">'-0.25px'</span> }],
+  <span class="pr">'h3'</span>:    [<span class="vl">'24px'</span>, { lineHeight: <span class="vl">'1.25'</span> }],
+  <span class="pr">'h4'</span>:    [<span class="vl">'18px'</span>, { lineHeight: <span class="vl">'1.3'</span> }],
+  <span class="pr">'body'</span>:  [<span class="vl">'17px'</span>, { lineHeight: <span class="vl">'1.65'</span> }],
+  <span class="pr">'small'</span>: [<span class="vl">'13px'</span>, { lineHeight: <span class="vl">'1.5'</span>,  letterSpacing: <span class="vl">'0.25px'</span> }],
+  <span class="pr">'label'</span>: [<span class="vl">'12px'</span>, { lineHeight: <span class="vl">'1.4'</span>,  letterSpacing: <span class="vl">'2.5px'</span> }],
+  <span class="pr">'btn'</span>:   [<span class="vl">'15px'</span>, { lineHeight: <span class="vl">'1'</span>,    letterSpacing: <span class="vl">'1.5px'</span> }],
+},</pre></div></div>
+
+<div class="foot"><div class="foot-brand">Sheepdog</div><p>Typography System · Deliverable #02<br>Reference alongside <strong>#01 Color Palette</strong> and <strong>#03 Visual Standards Guide</strong></p></div>
+
+<script>
+const snav=document.getElementById('snav');const navLinks=snav.querySelectorAll('a');
+window.addEventListener('scroll',()=>{const y=window.scrollY;snav.classList.toggle('show',y>window.innerHeight*.5);document.querySelectorAll('.s[id]').forEach(s=>{const t=s.offsetTop-80,b=t+s.offsetHeight,id=s.id;navLinks.forEach(a=>{if(a.getAttribute('href')==='#'+id)a.classList.toggle('active',y>=t&&y<b)})})});
+
+// Enhanced Type Tester with live spec panel
+const levels={
+  h1:{family:"'Barlow Semi Condensed'",familyVar:'var(--fd)',familyLabel:'Barlow Semi Condensed',weight:800,size:'56px',lh:'1.0',ls:'-0.5px',transform:'uppercase'},
+  h2:{family:"'Barlow'",familyVar:'var(--fh)',familyLabel:'Barlow',weight:700,size:'36px',lh:'1.15',ls:'-0.25px',transform:'none'},
+  h3:{family:"'Barlow'",familyVar:'var(--fh)',familyLabel:'Barlow',weight:600,size:'24px',lh:'1.25',ls:'0',transform:'none'},
+  h4:{family:"'Barlow'",familyVar:'var(--fh)',familyLabel:'Barlow',weight:700,size:'18px',lh:'1.3',ls:'0',transform:'none'},
+  body:{family:"'Source Sans 3'",familyVar:'var(--fb)',familyLabel:'Source Sans 3',weight:400,size:'17px',lh:'1.65',ls:'0',transform:'none'},
+  small:{family:"'Source Sans 3'",familyVar:'var(--fb)',familyLabel:'Source Sans 3',weight:400,size:'13px',lh:'1.5',ls:'0.25px',transform:'none'},
+  overline:{family:"'Source Sans 3'",familyVar:'var(--fb)',familyLabel:'Source Sans 3',weight:600,size:'12px',lh:'1.4',ls:'2.5px',transform:'uppercase'},
+  btn:{family:"'Barlow'",familyVar:'var(--fh)',familyLabel:'Barlow',weight:700,size:'15px',lh:'1.0',ls:'1.5px',transform:'uppercase'}
+};
+function updateTester(){
+  const lv=document.getElementById('testerLevel').value;
+  const bg=document.getElementById('testerBg').value;
+  const text=document.getElementById('testerInput').value||'A Presence That Protects';
+  const l=levels[lv];
+  const out=document.getElementById('testerOutput');
+  const prev=document.getElementById('testerPreview');
+  const specs=document.getElementById('testerSpecs');
+  out.style.background=bg==='dark'?'#1A1A1A':'#F4F3F1';
+  prev.style.fontFamily=l.familyVar;
+  prev.style.fontWeight=l.weight;
+  prev.style.fontSize=l.size;
+  prev.style.lineHeight=l.lh;
+  prev.style.letterSpacing=l.ls;
+  prev.style.textTransform=l.transform;
+  prev.style.color=bg==='dark'?'#FFFFFF':'#0C0C0C';
+  if(lv==='overline')prev.style.color='#C23B22';
+  prev.textContent=text;
+  // Live spec panel
+  specs.innerHTML=
+    `<span class="spec-key">font-family</span> <span class="spec-val">${l.familyLabel}</span><br>`+
+    `<span class="spec-key">font-weight</span> <span class="spec-val">${l.weight}</span><br>`+
+    `<span class="spec-key">font-size</span> <span class="spec-val">${l.size}</span><br>`+
+    `<span class="spec-key">line-height</span> <span class="spec-val">${l.lh}</span><br>`+
+    `<span class="spec-key">letter-spacing</span> <span class="spec-val">${l.ls==='0'?'normal':l.ls}</span><br>`+
+    `<span class="spec-key">text-transform</span> <span class="spec-val">${l.transform}</span><br>`+
+    `<br><span class="spec-key" style="color:var(--red);">CSS variable</span><br><span class="spec-val">${l.familyVar}</span>`;
+}
+updateTester();
+
+function copyCode(btn){const pre=btn.closest('.code').querySelector('pre');navigator.clipboard.writeText(pre.textContent).then(()=>{btn.textContent='Copied!';setTimeout(()=>btn.textContent='Copy',2000)})}
+
+const fis=document.querySelectorAll('.fi');
+const obs=new IntersectionObserver(entries=>{entries.forEach(e=>{if(e.isIntersecting){e.target.classList.add('vis');obs.unobserve(e.target)}})},{threshold:.1,rootMargin:'0px 0px -40px 0px'});
+fis.forEach(el=>obs.observe(el));
+</script>
+</body>
+</html>
