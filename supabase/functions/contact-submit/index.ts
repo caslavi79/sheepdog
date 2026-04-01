@@ -90,6 +90,7 @@ Deno.serve(async (req) => {
     });
   }
 
+  try {
   const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY);
 
   // Parse JSON body first — before rate limiting so malformed requests don't consume slots
@@ -175,7 +176,7 @@ Deno.serve(async (req) => {
   }
 
   // Validate email format
-  const emailRegex = /^[a-zA-Z0-9.!#$%&'*+/=?^_\`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)*$/;
+  const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
   if (!emailRegex.test(email)) {
     return new Response(
       JSON.stringify({ error: "Invalid email format" }),
@@ -205,8 +206,6 @@ Deno.serve(async (req) => {
       }
     );
   }
-
-  try {
 
     // Verify email domain has MX records (with 3s timeout to prevent hangs)
     const domain = email.split("@")[1];
