@@ -12,4 +12,5 @@ supabase/.temp/
 Item_2_InfoLetterEntity.pdf
 *.png
 !og-image.png
+!apple-touch-icon.png
 *.pdf
