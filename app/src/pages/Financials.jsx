@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback, useRef } from 'react'
+import { useState, useEffect, useCallback, useMemo } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { supabase } from '../lib/supabase'
 import { useEscapeKey, useBodyLock, useToast } from '../lib/hooks'
@@ -222,8 +222,8 @@ function PayRateDefaultsModal({ onClose, payRateDefaults, onRefresh, showToast }
   }
 
   return (
-    <div className="modal-overlay" onClick={onClose}>
-      <div className="modal-card modal-card--wide" onClick={e => e.stopPropagation()}>
+    <div className="modal-overlay" role="presentation" onClick={onClose}>
+      <div className="modal-card modal-card--wide" role="dialog" aria-modal="true" onClick={e => e.stopPropagation()}>
         <h2 className="modal-title">Default Pay Rates</h2>
         <p style={{ fontSize: 13, color: 'var(--steel)', marginBottom: 16 }}>Set default hourly rates by role and service line. These auto-fill when you assign staff to invoices.</p>
         <div className="clients-table-wrap">
@@ -377,8 +377,8 @@ function AddInvoiceModal({ onClose, onSaved, clients, onGoToClients, staffRoster
   }
 
   return (
-    <div className="modal-overlay" onClick={onClose}>
-      <div className="modal-card modal-card--wide" onClick={e => e.stopPropagation()} style={{ maxHeight: '90vh', overflow: 'auto' }}>
+    <div className="modal-overlay" role="presentation" onClick={onClose}>
+      <div className="modal-card modal-card--wide" role="dialog" aria-modal="true" onClick={e => e.stopPropagation()} style={{ maxHeight: '90vh', overflow: 'auto' }}>
         <h2 className="modal-title">New Invoice</h2>
         <form onSubmit={handleSubmit} className="modal-form">
           {/* CLIENT-FACING SECTION */}
@@ -528,8 +528,8 @@ function InvoiceDetail({ invoice, clients, onClose, onUpdated, onDeleted, showTo
   }
 
   return (
-    <div className="modal-overlay" onClick={onClose}>
-      <div className="detail-panel" onClick={e => e.stopPropagation()} style={{ maxHeight: '90vh', overflow: 'auto' }}>
+    <div className="modal-overlay" role="presentation" onClick={onClose}>
+      <div className="detail-panel" role="dialog" aria-modal="true" onClick={e => e.stopPropagation()} style={{ maxHeight: '90vh', overflow: 'auto' }}>
         <div className="detail-header">
           <div>
             <h2 className="detail-name">{invoice.invoice_number || 'Invoice'}</h2>
@@ -539,9 +539,9 @@ function InvoiceDetail({ invoice, clients, onClose, onUpdated, onDeleted, showTo
         </div>
 
         {/* TABS */}
-        <div className="detail-tabs">
-          <button className={`detail-tab ${tab === 'client' ? 'detail-tab--active' : ''}`} onClick={() => setTab('client')}>Client</button>
-          <button className={`detail-tab ${tab === 'internal' ? 'detail-tab--active' : ''}`} onClick={() => setTab('internal')}>Internal</button>
+        <div className="detail-tabs" role="tablist">
+          <button className={`detail-tab ${tab === 'client' ? 'detail-tab--active' : ''}`} role="tab" aria-selected={tab === 'client'} onClick={() => setTab('client')}>Client</button>
+          <button className={`detail-tab ${tab === 'internal' ? 'detail-tab--active' : ''}`} role="tab" aria-selected={tab === 'internal'} onClick={() => setTab('internal')}>Internal</button>
         </div>
 
         {payModal && (
@@ -745,27 +745,32 @@ export default function Financials() {
   }, [page, filterStatus, filterLine])
 
   const loadClients = useCallback(async () => {
-    const { data } = await supabase.from('clients').select('id, contact_name, business_name').order('business_name')
+    const { data, error } = await supabase.from('clients').select('id, contact_name, business_name').order('business_name')
+    if (error && import.meta.env.DEV) console.error('Load clients:', error.message)
     setClients(data || [])
   }, [])
 
   const loadStaff = useCallback(async () => {
-    const { data } = await supabase.from('staff').select('*').order('name')
+    const { data, error } = await supabase.from('staff').select('*').order('name')
+    if (error && import.meta.env.DEV) console.error('Load staff:', error.message)
     setStaffRoster(data || [])
   }, [])
 
   const loadPayRates = useCallback(async () => {
-    const { data } = await supabase.from('pay_rate_defaults').select('*').order('role')
+    const { data, error } = await supabase.from('pay_rate_defaults').select('*').order('role')
+    if (error && import.meta.env.DEV) console.error('Load pay rates:', error.message)
     setPayRateDefaults(data || [])
   }, [])
 
   const loadLicenses = useCallback(async () => {
-    const { data } = await supabase.from('licenses').select('staff_id, expiration_date')
+    const { data, error } = await supabase.from('licenses').select('staff_id, expiration_date')
+    if (error && import.meta.env.DEV) console.error('Load licenses:', error.message)
     setLicenses(data || [])
   }, [])
 
   const loadAllInvoices = useCallback(async () => {
-    const { data } = await supabase.from('invoices').select('id, invoice_number, client_id, service_line, total, status, payment_date, internal_line_items, created_at, due_date').order('created_at', { ascending: false })
+    const { data, error } = await supabase.from('invoices').select('id, invoice_number, client_id, service_line, total, status, payment_date, internal_line_items, created_at, due_date').order('created_at', { ascending: false })
+    if (error && import.meta.env.DEV) console.error('Load all invoices:', error.message)
     setAllInvoices(data || [])
   }, [])
 
@@ -799,14 +804,17 @@ export default function Financials() {
   const handleDeleted = () => { load(); loadStats(); loadAllInvoices(); showToast('Invoice deleted') }
 
   // ─── Payout data: unpaid staff on paid invoices ───
-  const unpaidStaff = []
-  allInvoices.filter(inv => inv.status === 'paid' && inv.internal_line_items?.length > 0).forEach(inv => {
-    inv.internal_line_items.forEach((li, idx) => {
-      if (!li.paid_out) {
-        unpaidStaff.push({ ...li, _invoiceId: inv.id, _invoiceNumber: inv.invoice_number, _clientId: inv.client_id, _idx: idx, _paymentDate: inv.payment_date })
-      }
+  const unpaidStaff = useMemo(() => {
+    const result = []
+    allInvoices.filter(inv => inv.status === 'paid' && inv.internal_line_items?.length > 0).forEach(inv => {
+      inv.internal_line_items.forEach((li, idx) => {
+        if (!li.paid_out) {
+          result.push({ ...li, _invoiceId: inv.id, _invoiceNumber: inv.invoice_number, _clientId: inv.client_id, _idx: idx, _paymentDate: inv.payment_date })
+        }
+      })
     })
-  })
+    return result
+  }, [allInvoices])
 
   const handleMarkPaidOut = async (invoiceId, itemIdx) => {
     const inv = allInvoices.find(i => i.id === invoiceId)
@@ -827,48 +835,53 @@ export default function Financials() {
       const inv = allInvoices.find(i => i.id === invId)
       if (!inv) continue
       const updated = (inv.internal_line_items || []).map((li, i) => indices.includes(i) ? { ...li, paid_out: true, paid_out_date: new Date().toISOString().split('T')[0] } : li)
-      await supabase.from('invoices').update({ internal_line_items: updated, updated_at: new Date().toISOString() }).eq('id', invId)
+      const { error } = await supabase.from('invoices').update({ internal_line_items: updated, updated_at: new Date().toISOString() }).eq('id', invId)
+      if (error) { if (import.meta.env.DEV) console.error('Bulk payout error:', error.message); showToast('Failed to update some payouts'); return }
     }
     loadAllInvoices(); showToast(`${unpaidStaff.length} staff marked as paid`)
   }
 
   // ─── Staff earnings data ───
-  const now = new Date()
-  const periodStart = (() => {
-    if (earningsPeriod === 'month') return new Date(now.getFullYear(), now.getMonth(), 1).toISOString().split('T')[0]
-    if (earningsPeriod === 'quarter') { const q = Math.floor(now.getMonth() / 3) * 3; return new Date(now.getFullYear(), q, 1).toISOString().split('T')[0] }
-    return new Date(now.getFullYear(), 0, 1).toISOString().split('T')[0]
-  })()
+  const { earningsList, earningsTotal, ytdEarnings, ytdList, needs1099 } = useMemo(() => {
+    const now = new Date()
+    const periodStart = (() => {
+      if (earningsPeriod === 'month') return new Date(now.getFullYear(), now.getMonth(), 1).toISOString().split('T')[0]
+      if (earningsPeriod === 'quarter') { const q = Math.floor(now.getMonth() / 3) * 3; return new Date(now.getFullYear(), q, 1).toISOString().split('T')[0] }
+      return new Date(now.getFullYear(), 0, 1).toISOString().split('T')[0]
+    })()
 
-  const staffEarnings = {}
-  allInvoices.forEach(inv => {
-    if (!inv.internal_line_items?.length) return
-    inv.internal_line_items.forEach(li => {
-      if (!li.paid_out || !li.paid_out_date || li.paid_out_date < periodStart) return
-      const key = li.staff_id || li.name
-      if (!staffEarnings[key]) staffEarnings[key] = { name: li.name, staff_id: li.staff_id, total: 0, hours: 0, jobs: 0 }
-      staffEarnings[key].total += parseFloat(li.pay_total) || 0
-      staffEarnings[key].hours += parseFloat(li.hours) || 0
-      staffEarnings[key].jobs += 1
+    const staffEarnings = {}
+    allInvoices.forEach(inv => {
+      if (!inv.internal_line_items?.length) return
+      inv.internal_line_items.forEach(li => {
+        if (!li.paid_out || !li.paid_out_date || li.paid_out_date < periodStart) return
+        const key = li.staff_id || ('name:' + li.name)
+        if (!staffEarnings[key]) staffEarnings[key] = { name: li.name, staff_id: li.staff_id, total: 0, hours: 0, jobs: 0 }
+        staffEarnings[key].total += parseFloat(li.pay_total) || 0
+        staffEarnings[key].hours += parseFloat(li.hours) || 0
+        staffEarnings[key].jobs += 1
+      })
     })
-  })
-  const earningsList = Object.values(staffEarnings).sort((a, b) => b.total - a.total)
-  const earningsTotal = earningsList.reduce((s, e) => s + e.total, 0)
+    const _earningsList = Object.values(staffEarnings).sort((a, b) => b.total - a.total)
+    const _earningsTotal = _earningsList.reduce((s, e) => s + e.total, 0)
 
-  // ─── YTD totals for 1099 ───
-  const ytdStart = new Date(now.getFullYear(), 0, 1).toISOString().split('T')[0]
-  const ytdEarnings = {}
-  allInvoices.forEach(inv => {
-    if (!inv.internal_line_items?.length) return
-    inv.internal_line_items.forEach(li => {
-      if (!li.paid_out || !li.paid_out_date || li.paid_out_date < ytdStart) return
-      const key = li.staff_id || li.name
-      if (!ytdEarnings[key]) ytdEarnings[key] = { name: li.name, total: 0 }
-      ytdEarnings[key].total += parseFloat(li.pay_total) || 0
+    // ─── YTD totals for 1099 ───
+    const ytdStart = new Date(now.getFullYear(), 0, 1).toISOString().split('T')[0]
+    const _ytdEarnings = {}
+    allInvoices.forEach(inv => {
+      if (!inv.internal_line_items?.length) return
+      inv.internal_line_items.forEach(li => {
+        if (!li.paid_out || !li.paid_out_date || li.paid_out_date < ytdStart) return
+        const key = li.staff_id || ('name:' + li.name)
+        if (!_ytdEarnings[key]) _ytdEarnings[key] = { name: li.name, total: 0 }
+        _ytdEarnings[key].total += parseFloat(li.pay_total) || 0
+      })
     })
-  })
-  const ytdList = Object.values(ytdEarnings).sort((a, b) => b.total - a.total)
-  const needs1099 = ytdList.filter(e => e.total >= 600)
+    const _ytdList = Object.values(_ytdEarnings).sort((a, b) => b.total - a.total)
+    const _needs1099 = _ytdList.filter(e => e.total >= 600)
+
+    return { earningsList: _earningsList, earningsTotal: _earningsTotal, ytdEarnings: _ytdEarnings, ytdList: _ytdList, needs1099: _needs1099 }
+  }, [allInvoices, earningsPeriod])
 
   return (
     <div className="clients">
@@ -885,10 +898,10 @@ export default function Financials() {
       </div>
 
       {/* Main Tabs */}
-      <div className="detail-tabs" style={{ padding: 0, marginBottom: 16 }}>
-        <button className={`detail-tab ${mainTab === 'invoices' ? 'detail-tab--active' : ''}`} onClick={() => setMainTab('invoices')}>Invoices</button>
-        <button className={`detail-tab ${mainTab === 'payouts' ? 'detail-tab--active' : ''}`} onClick={() => setMainTab('payouts')}>Payouts{unpaidStaff.length > 0 ? ` (${unpaidStaff.length})` : ''}</button>
-        <button className={`detail-tab ${mainTab === 'earnings' ? 'detail-tab--active' : ''}`} onClick={() => setMainTab('earnings')}>Staff Earnings</button>
+      <div className="detail-tabs" role="tablist" style={{ padding: 0, marginBottom: 16 }}>
+        <button className={`detail-tab ${mainTab === 'invoices' ? 'detail-tab--active' : ''}`} role="tab" aria-selected={mainTab === 'invoices'} onClick={() => setMainTab('invoices')}>Invoices</button>
+        <button className={`detail-tab ${mainTab === 'payouts' ? 'detail-tab--active' : ''}`} role="tab" aria-selected={mainTab === 'payouts'} onClick={() => setMainTab('payouts')}>Payouts{unpaidStaff.length > 0 ? ` (${unpaidStaff.length})` : ''}</button>
+        <button className={`detail-tab ${mainTab === 'earnings' ? 'detail-tab--active' : ''}`} role="tab" aria-selected={mainTab === 'earnings'} onClick={() => setMainTab('earnings')}>Staff Earnings</button>
       </div>
 
       {/* ─── PAYOUTS TAB ─── */}
@@ -952,10 +965,10 @@ export default function Financials() {
                 <thead><tr><th>Staff</th><th>Jobs</th><th>Hours</th><th>Total Paid</th><th>YTD Total</th><th>1099?</th></tr></thead>
                 <tbody>
                   {earningsList.map((e, i) => {
-                    const ytd = ytdEarnings[e.staff_id || e.name]
+                    const ytd = ytdEarnings[e.staff_id || ('name:' + e.name)]
                     const ytdTotal = ytd ? ytd.total : 0
                     return (
-                      <tr key={e.staff_id || e.name}>
+                      <tr key={e.staff_id || ('name:' + e.name)}>
                         <td className="clients-name">{e.name}</td>
                         <td>{e.jobs}</td>
                         <td>{e.hours}</td>

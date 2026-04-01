@@ -41,7 +41,7 @@ function StaffModal({ staff, onClose, onSaved }) {
   useEscapeKey(onClose)
   useBodyLock()
   const isEdit = !!staff?.id
-  const [form, setForm] = useState(staff || { name: '', phone: '', email: '', role: '', default_pay_rate: '', status: 'active', background_check: 'none' })
+  const [form, setForm] = useState({ name: '', phone: '', email: '', role: '', default_pay_rate: '', status: 'active', background_check: 'none', ...staff })
   const [saving, setSaving] = useState(false)
   const [error, setError] = useState('')
 
@@ -64,8 +64,8 @@ function StaffModal({ staff, onClose, onSaved }) {
   }
 
   return (
-    <div className="modal-overlay" onClick={onClose}>
-      <div className="modal-card" onClick={e => e.stopPropagation()}>
+    <div className="modal-overlay" role="presentation" onClick={onClose}>
+      <div className="modal-card" role="dialog" aria-modal="true" onClick={e => e.stopPropagation()}>
         <h2 className="modal-title">{isEdit ? 'Edit Staff' : 'Add Staff'}</h2>
         <form onSubmit={handleSubmit} className="modal-form">
           <div className="modal-row">
@@ -103,7 +103,7 @@ function LicenseModal({ license, staffList, onClose, onSaved }) {
   useEscapeKey(onClose)
   useBodyLock()
   const isEdit = !!license?.id
-  const [form, setForm] = useState(license || { staff_id: '', license_type: 'general', license_number: '', issuing_authority: '', issue_date: '', expiration_date: '', notes: '' })
+  const [form, setForm] = useState({ staff_id: '', license_type: 'general', license_number: '', issuing_authority: '', issue_date: '', expiration_date: '', notes: '', ...license })
   const [saving, setSaving] = useState(false)
   const [error, setError] = useState('')
 
@@ -124,8 +124,8 @@ function LicenseModal({ license, staffList, onClose, onSaved }) {
   }
 
   return (
-    <div className="modal-overlay" onClick={onClose}>
-      <div className="modal-card" onClick={e => e.stopPropagation()}>
+    <div className="modal-overlay" role="presentation" onClick={onClose}>
+      <div className="modal-card" role="dialog" aria-modal="true" onClick={e => e.stopPropagation()}>
         <h2 className="modal-title">{isEdit ? 'Edit License' : 'Add License'}</h2>
         <form onSubmit={handleSubmit} className="modal-form">
           <div className="modal-row">
@@ -166,7 +166,7 @@ function DocModal({ doc, staffList, onClose, onSaved }) {
   useEscapeKey(onClose)
   useBodyLock()
   const isEdit = !!doc?.id
-  const [form, setForm] = useState(doc || { staff_id: '', doc_type: 'w9', status: 'missing', signature_date: '', notes: '' })
+  const [form, setForm] = useState({ staff_id: '', doc_type: 'w9', status: 'missing', signature_date: '', notes: '', ...doc })
   const [saving, setSaving] = useState(false)
   const [error, setError] = useState('')
 
@@ -187,8 +187,8 @@ function DocModal({ doc, staffList, onClose, onSaved }) {
   }
 
   return (
-    <div className="modal-overlay" onClick={onClose}>
-      <div className="modal-card" onClick={e => e.stopPropagation()}>
+    <div className="modal-overlay" role="presentation" onClick={onClose}>
+      <div className="modal-card" role="dialog" aria-modal="true" onClick={e => e.stopPropagation()}>
         <h2 className="modal-title">{isEdit ? 'Edit Document' : 'Add Document'}</h2>
         <form onSubmit={handleSubmit} className="modal-form">
           <div className="modal-row">
@@ -273,9 +273,9 @@ export default function Compliance() {
   const handleDelete = async (table, id) => {
     if (table === 'staff') {
       const { error: licErr } = await supabase.from('licenses').delete().eq('staff_id', id)
-      if (licErr && import.meta.env.DEV) console.error('Delete staff licenses:', licErr.message)
+      if (licErr) { if (import.meta.env.DEV) console.error('Delete staff licenses:', licErr.message); showToast('Failed to remove staff licenses'); return }
       const { error: docErr } = await supabase.from('contractor_docs').delete().eq('staff_id', id)
-      if (docErr && import.meta.env.DEV) console.error('Delete staff docs:', docErr.message)
+      if (docErr) { if (import.meta.env.DEV) console.error('Delete staff docs:', docErr.message); showToast('Failed to remove staff docs'); return }
     }
     const { error } = await supabase.from(table).delete().eq('id', id)
     if (error) { if (import.meta.env.DEV) console.error(`Delete ${table}:`, error.message); return }
@@ -336,10 +336,10 @@ export default function Compliance() {
       </div>
 
       {/* Tabs */}
-      <div className="detail-tabs" style={{ padding: 0, marginBottom: 16 }}>
-        <button className={`detail-tab ${tab === 'roster' ? 'detail-tab--active' : ''}`} onClick={() => { setTab('roster'); setSearch('') }}>Staff Roster ({staff.length})</button>
-        <button className={`detail-tab ${tab === 'licenses' ? 'detail-tab--active' : ''}`} onClick={() => { setTab('licenses'); setSearch('') }}>Licenses & Certs ({licenses.length})</button>
-        <button className={`detail-tab ${tab === 'docs' ? 'detail-tab--active' : ''}`} onClick={() => { setTab('docs'); setSearch('') }}>Contractor Docs ({docs.length})</button>
+      <div className="detail-tabs" role="tablist" style={{ padding: 0, marginBottom: 16 }}>
+        <button className={`detail-tab ${tab === 'roster' ? 'detail-tab--active' : ''}`} role="tab" aria-selected={tab === 'roster'} onClick={() => { setTab('roster'); setSearch('') }}>Staff Roster ({staff.length})</button>
+        <button className={`detail-tab ${tab === 'licenses' ? 'detail-tab--active' : ''}`} role="tab" aria-selected={tab === 'licenses'} onClick={() => { setTab('licenses'); setSearch('') }}>Licenses & Certs ({licenses.length})</button>
+        <button className={`detail-tab ${tab === 'docs' ? 'detail-tab--active' : ''}`} role="tab" aria-selected={tab === 'docs'} onClick={() => { setTab('docs'); setSearch('') }}>Contractor Docs ({docs.length})</button>
       </div>
 
       {/* ─── STAFF ROSTER TAB ─── */}

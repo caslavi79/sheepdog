@@ -104,6 +104,8 @@ export default function Hub() {
       if (missingDocs > 0) a.push({ color: '#D4483A', text: `${missingDocs} missing contractor doc${missingDocs !== 1 ? 's' : ''}`, link: '/compliance' })
 
       setAlerts(a)
+    }).catch(err => {
+      if (import.meta.env.DEV) console.error('Hub stats error:', err)
     })
   }, [])
 

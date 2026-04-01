@@ -569,6 +569,10 @@ a { color: inherit; text-decoration: none; }
   margin-bottom: 4px;
 }
 .clients-header p { color: var(--steel); font-size: 14px; }
+.clients-subtitle { font-size: 14px; color: var(--steel); margin-top: 2px; }
+.clients-error { background: rgba(212,72,58,0.08); border: 1px solid rgba(212,72,58,0.2); border-radius: 8px; padding: 16px 20px; margin-bottom: 16px; display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+.clients-error p { color: var(--red); font-size: 14px; }
+.clients-error button { background: var(--red); color: var(--white); border: none; padding: 6px 14px; border-radius: 5px; font-family: var(--fh); font-size: 12px; font-weight: 700; cursor: pointer; }
 .clients-add-btn {
   font-family: var(--fh);
   font-weight: 700;
@@ -1380,6 +1384,26 @@ body.modal-open { overflow: hidden; }
   .login-toggle-pw { padding: 12px 8px; }
   .login-forgot { padding: 12px 4px; }
   .clients-add-btn { padding: 14px 20px; min-height: 48px; }
+
+  /* -- LINE ITEMS / STAFF ASSIGNMENTS (mobile) -- */
+  .line-items-header { display: none; }
+  .line-items-row, .staff-assign-row { flex-wrap: wrap; }
+  .line-items-row input, .staff-assign-row input { min-width: 120px; flex: 1 1 45%; }
+  .staff-autocomplete { width: 100%; }
+
+  /* -- DETAIL TABS (mobile) -- */
+  .detail-tabs { flex-wrap: wrap; gap: 4px; }
+  .detail-tab { padding: 8px 10px; font-size: 11px; }
+
+  /* -- COST SUMMARY (mobile) -- */
+  .cost-summary { font-size: 13px; padding: 10px 12px; }
+  .cost-summary-row { font-size: 13px; }
+
+  /* -- COLLAPSIBLE SECTIONS (mobile) -- */
+  .collapsible-section { padding: 12px; }
+
+  /* -- HUB ALERTS (mobile) -- */
+  .hub-alerts { font-size: 13px; padding: 0; gap: 6px; }
 
   /* -- FONT SIZE FLOOR -- */
   .hub-card-badge, .resource-card-badge { font-size: 10px; }

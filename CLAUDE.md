@@ -49,7 +49,7 @@ npx supabase functions deploy contact-submit --project-ref sezzqhmsfulclcqmfwja 
 
 1. Validates + sanitizes input (name, phone, email, service, message)
 2. Checks honeypot (`website` field — if filled, silently returns 200)
-3. Rate limits: 3 requests per IP per 10 minutes (stored in `rate_limits` table)
+3. Rate limits: 5 requests per IP per 10 minutes (stored in `rate_limits` table)
 4. Validates email format + DNS MX record check
 5. Inserts into `contact_submissions` table
 6. Auto-creates a deal in `pipeline` table with proper columns
@@ -72,6 +72,30 @@ npx supabase functions deploy contact-submit --project-ref sezzqhmsfulclcqmfwja 
 |---|---|
 | events-security, events-bartending, events-both, other | events |
 | staffing, field-ops, logistics, facility, warehouse, project, ongoing | staffing |
+
+## Edge Function: license-reminders
+
+- **Endpoint:** `https://sezzqhmsfulclcqmfwja.supabase.co/functions/v1/license-reminders`
+- **Source:** `supabase/functions/license-reminders/index.ts`
+- **Method:** GET or POST (no auth — invoked by cron or manual trigger)
+- **Deploy:** `npx supabase functions deploy license-reminders --project-ref sezzqhmsfulclcqmfwja --no-verify-jwt`
+
+### What it does
+
+1. Queries all licenses with expiration dates, joins staff names
+2. Checks for licenses expiring in 30, 14, or 7 days, plus already expired
+3. Builds color-coded HTML email (red for expired, amber for expiring)
+4. Sends to all 3 owners via Resend
+5. Returns JSON with reminder count and email result
+
+### Email recipients (same as contact-submit)
+
+- benschultz519@gmail.com, Joshk1288@gmail.com, sheepdogsecurityllc@gmail.com
+- **From:** `Sheepdog Compliance <noreply@sheepdogtexas.com>`
+
+### Cron setup
+
+Enable `pg_cron` in Supabase Dashboard → Database → Extensions, then schedule a daily invocation.
 
 ## Database Tables
 
@@ -127,12 +151,93 @@ npx supabase functions deploy contact-submit --project-ref sezzqhmsfulclcqmfwja 
 | created_at | timestamptz |
 | updated_at | timestamptz |
 
+### invoices
+
+| Column | Type | Notes |
+|--------|------|-------|
+| id | uuid | PK, auto |
+| client_id | uuid | FK to clients |
+| service_line | text | 'events', 'staffing', 'both' |
+| invoice_number | text | Auto-generated SHD-XXXX |
+| line_items | jsonb | Client-facing: [{description, hours, rate, total}] |
+| subtotal | numeric | Sum of line items |
+| tax | numeric | Tax amount |
+| total | numeric | subtotal + tax |
+| status | text | draft, sent, paid, overdue |
+| due_date | date | |
+| payment_date | date | When marked paid |
+| payment_method | text | cash, check, zelle, venmo, card, ach, other |
+| notes | text | Client-facing notes |
+| internal_line_items | jsonb | Staff assignments: [{name, staff_id, role, hours, pay_rate, pay_total, paid_out, paid_out_date}] |
+| internal_notes | text | Internal-only notes |
+| event_date | date | Event/job date |
+| event_start_time | time | |
+| event_end_time | time | |
+| venue_name | text | Event location |
+| created_at | timestamptz | DEFAULT now() |
+| updated_at | timestamptz | DEFAULT now() |
+
+### staff
+
+| Column | Type | Notes |
+|--------|------|-------|
+| id | uuid | PK, auto |
+| name | text | NOT NULL |
+| phone | text | |
+| email | text | |
+| role | text | e.g. Security Guard, Bartender |
+| default_pay_rate | numeric | $/hr default |
+| status | text | 'active' or 'inactive' |
+| background_check | text | 'none', 'pending', 'cleared' |
+| created_at | timestamptz | DEFAULT now() |
+| updated_at | timestamptz | DEFAULT now() |
+
+### licenses
+
+| Column | Type | Notes |
+|--------|------|-------|
+| id | uuid | PK, auto |
+| staff_id | uuid | FK to staff |
+| license_type | text | 'general' or 'tabc' |
+| license_number | text | |
+| issuing_authority | text | TDPS, TABC, etc. |
+| issue_date | date | |
+| expiration_date | date | Used for reminder emails |
+| status | text | 'active' |
+| notes | text | |
+| created_at | timestamptz | DEFAULT now() |
+| updated_at | timestamptz | DEFAULT now() |
+
+### contractor_docs
+
+| Column | Type | Notes |
+|--------|------|-------|
+| id | uuid | PK, auto |
+| staff_id | uuid | FK to staff |
+| doc_type | text | 'w9', 'agreement', 'other' |
+| status | text | 'received', 'missing', 'expired' |
+| signature_date | date | |
+| notes | text | |
+| created_at | timestamptz | DEFAULT now() |
+| updated_at | timestamptz | DEFAULT now() |
+
+### pay_rate_defaults
+
+| Column | Type | Notes |
+|--------|------|-------|
+| id | uuid | PK, auto |
+| role | text | NOT NULL, e.g. Security Guard |
+| service_line | text | NOT NULL, events/staffing/both |
+| rate | numeric | NOT NULL, $/hr |
+| created_at | timestamptz | DEFAULT now() |
+
+Unique index on (role, service_line) for upsert support.
+
 ### Other tables
 
 - **events** — client events (client_id FK, venue_name, event_type, date)
-- **invoices** — client invoices (client_id FK, total, status)
 - **rate_limits** — rate limit tracking (ip, endpoint, created_at)
-- **contractor_docs, contracts, licenses, placements, shifts, staff** — exist but most are stubs
+- **contracts, placements, shifts** — exist but are stubs
 
 ### RLS
 
@@ -168,8 +273,8 @@ Vite + React 19 + React Router v7 + Supabase JS client.
 | /clients | Client management (CRUD) | Ready |
 | /resources | Docs, guides, templates | Ready |
 | /scheduling | Events/staffing calendars | Coming soon |
-| /financials | Revenue, invoicing | Coming soon |
-| /compliance | Licensing, TABC, contractor docs | Coming soon |
+| /financials | Invoices, payouts, staff earnings/1099 | Ready |
+| /compliance | Staff roster, licenses, TABC, contractor docs | Ready |
 
 All routes except /login and /reset-password are protected (require Supabase auth session).
 
