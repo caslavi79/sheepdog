@@ -16,15 +16,27 @@ echo "════════════════════════�
 
 # Deploy contact-submit
 echo ""
-echo "1/2 Deploying contact-submit..."
+echo "1/4 Deploying contact-submit..."
 npx supabase functions deploy contact-submit \
   --project-ref "$PROJECT_REF" \
   --no-verify-jwt
 
 # Deploy license-reminders
 echo ""
-echo "2/2 Deploying license-reminders..."
+echo "2/4 Deploying license-reminders..."
 npx supabase functions deploy license-reminders \
+  --project-ref "$PROJECT_REF" \
+  --no-verify-jwt
+
+echo ""
+echo "3/4 Deploying contract-sign..."
+npx supabase functions deploy contract-sign \
+  --project-ref "$PROJECT_REF" \
+  --no-verify-jwt
+
+echo ""
+echo "4/4 Deploying contract-send..."
+npx supabase functions deploy contract-send \
   --project-ref "$PROJECT_REF" \
   --no-verify-jwt
 

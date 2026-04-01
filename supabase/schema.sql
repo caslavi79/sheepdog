@@ -113,7 +113,29 @@ CREATE TABLE IF NOT EXISTS public.rate_limits (
 );
 
 -- Stub tables (exist but not yet populated)
-CREATE TABLE IF NOT EXISTS public.contracts (id uuid PRIMARY KEY DEFAULT gen_random_uuid(), created_at timestamptz DEFAULT now());
+CREATE TABLE IF NOT EXISTS public.contracts (
+  id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+  client_id uuid REFERENCES public.clients(id),
+  template_name text NOT NULL DEFAULT '',
+  title text,
+  status text DEFAULT 'draft',
+  field_values jsonb DEFAULT '{}',
+  filled_html text,
+  signer_name text,
+  signer_email text,
+  signature_data text,
+  signed_at timestamptz,
+  signer_ip text,
+  sign_token uuid DEFAULT gen_random_uuid(),
+  sent_at timestamptz,
+  notes text,
+  created_at timestamptz DEFAULT now(),
+  updated_at timestamptz DEFAULT now()
+);
+
+CREATE INDEX IF NOT EXISTS idx_contracts_client ON public.contracts (client_id);
+CREATE INDEX IF NOT EXISTS idx_contracts_status ON public.contracts (status);
+CREATE INDEX IF NOT EXISTS idx_contracts_token ON public.contracts (sign_token);
 CREATE TABLE IF NOT EXISTS public.placements (
   id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
   client_id uuid REFERENCES public.clients(id),

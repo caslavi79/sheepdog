@@ -141,12 +141,15 @@ function ClientDetail({ client, onClose, onUpdated, onDeleted }) {
   const [confirmDelete, setConfirmDelete] = useState(false)
   const [events, setEvents] = useState([])
   const [invoices, setInvoices] = useState([])
+  const [contracts, setContracts] = useState([])
 
   useEffect(() => {
     supabase.from('events').select('*').eq('client_id', client.id).order('date', { ascending: false }).limit(5)
       .then(({ data, error }) => { if (error) { if (import.meta.env.DEV) console.error('Events fetch error:', error.message) } else setEvents(data || []) })
     supabase.from('invoices').select('*').eq('client_id', client.id).order('created_at', { ascending: false }).limit(5)
       .then(({ data, error }) => { if (error) { if (import.meta.env.DEV) console.error('Invoices fetch error:', error.message) } else setInvoices(data || []) })
+    supabase.from('contracts').select('*').eq('client_id', client.id).order('created_at', { ascending: false }).limit(5)
+      .then(({ data, error }) => { if (error) { if (import.meta.env.DEV) console.error('Contracts fetch error:', error.message) } else setContracts(data || []) })
   }, [client.id])
 
   const handleSave = async () => {
@@ -215,6 +218,22 @@ function ClientDetail({ client, onClose, onUpdated, onDeleted }) {
                     <div key={inv.id} className="detail-list-item">
                       <span>${inv.total}</span>
                       <span className="detail-list-meta">{inv.status}</span>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+
+            <div className="detail-section">
+              <h3 className="detail-section-title">Contracts</h3>
+              {contracts.length === 0 ? <p className="detail-empty">No contracts yet</p> : (
+                <div className="detail-list">
+                  {contracts.map(c => (
+                    <div key={c.id} className="detail-list-item">
+                      <span>{c.title || c.template_name}</span>
+                      <span className="detail-list-meta" style={{
+                        color: c.status === 'signed' ? '#357A38' : c.status === 'sent' || c.status === 'viewed' ? '#C9922E' : '#929BAA'
+                      }}>{c.status}</span>
                     </div>
                   ))}
                 </div>
