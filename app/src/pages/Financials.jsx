@@ -2,6 +2,7 @@ import { useState, useEffect, useCallback, useRef } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { supabase } from '../lib/supabase'
 import { useEscapeKey, useBodyLock, useToast } from '../lib/hooks'
+import { fmtMoney, fmtDate, daysUntil, badgeStyle, COLORS } from '../lib/format'
 
 const PAGE_SIZE = 25
 const STATUSES = ['draft', 'sent', 'paid', 'overdue']
@@ -9,19 +10,26 @@ const SERVICE_LINES = ['events', 'staffing', 'both']
 const PAYMENT_METHODS = ['cash', 'check', 'zelle', 'venmo', 'card', 'ach', 'other']
 const STATUS_COLORS = { draft: '#929BAA', sent: '#3D5A80', paid: '#357A38', overdue: '#D4483A' }
 
+/* Auto-detect overdue: if status is 'sent' and due_date is past, treat as overdue */
+function effectiveStatus(inv) {
+  if (inv.status === 'sent' && inv.due_date) {
+    const now = new Date(); now.setHours(0, 0, 0, 0)
+    const due = new Date(inv.due_date + 'T00:00:00')
+    if (due < now) return 'overdue'
+  }
+  return inv.status
+}
+
 function StatusBadge({ status }) {
   const c = STATUS_COLORS[status] || '#929BAA'
-  return <span style={{ display: 'inline-block', fontFamily: 'var(--fh)', fontSize: 10, fontWeight: 700, letterSpacing: '1.5px', textTransform: 'uppercase', color: c, background: `${c}22`, padding: '3px 10px', borderRadius: 3 }}>{status}</span>
+  return <span style={badgeStyle(c)}>{status}</span>
 }
 
 function ServiceBadge({ line }) {
   const colors = { events: '#C9922E', staffing: '#3D5A80', both: '#7A8490' }
   const c = colors[line] || '#7A8490'
-  return <span style={{ display: 'inline-block', fontFamily: 'var(--fh)', fontSize: 10, fontWeight: 700, letterSpacing: '1.5px', textTransform: 'uppercase', color: c, background: `${c}22`, padding: '3px 10px', borderRadius: 3 }}>{line || '—'}</span>
+  return <span style={badgeStyle(c)}>{line || '—'}</span>
 }
-
-function fmtMoney(n) { return n != null ? `$${parseFloat(n).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}` : '—' }
-function fmtDate(d) { if (!d) return '—'; const dt = new Date(d + 'T00:00:00'); return dt.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) }
 
 /* ═══════════════════════════════════════════════════════════
    LINE ITEMS EDITOR (Client-Facing)
@@ -66,7 +74,7 @@ function LineItemsEditor({ items, onChange }) {
 /* ═══════════════════════════════════════════════════════════
    STAFF ASSIGNMENTS EDITOR (Internal)
    ═══════════════════════════════════════════════════════════ */
-function StaffAssignmentsEditor({ items, onChange, staffRoster, payRateDefaults, serviceLine, revenue, onAddToRoster }) {
+function StaffAssignmentsEditor({ items, onChange, staffRoster, payRateDefaults, serviceLine, revenue, onAddToRoster, licenses }) {
   const add = () => onChange([...items, { name: '', staff_id: null, role: '', hours: '', pay_rate: '', pay_total: 0 }])
   const remove = (i) => onChange(items.filter((_, idx) => idx !== i))
   const [focusIdx, setFocusIdx] = useState(null)
@@ -129,11 +137,15 @@ function StaffAssignmentsEditor({ items, onChange, staffRoster, payRateDefaults,
           ? staffRoster.filter(s => s.name.toLowerCase().includes(nameVal.toLowerCase()))
           : []
         const noMatch = nameVal.length >= 2 && !staffRoster.some(s => s.name.toLowerCase() === nameVal.toLowerCase())
+        // License warning
+        const staffLics = item.staff_id && licenses ? licenses.filter(l => l.staff_id === item.staff_id) : []
+        const hasExpired = staffLics.some(l => { const d = daysUntil(l.expiration_date); return d !== null && d < 0 })
+        const hasExpiring = staffLics.some(l => { const d = daysUntil(l.expiration_date); return d !== null && d >= 0 && d <= 14 })
 
         return (
           <div key={i} className="staff-assign-row">
             <div style={{ flex: 2, position: 'relative' }}>
-              <input placeholder="Staff name" value={nameVal} onChange={e => update(i, 'name', e.target.value)} onFocus={() => setFocusIdx(i)} onBlur={() => setTimeout(() => setFocusIdx(null), 200)} />
+              <input placeholder="Staff name" value={nameVal} onChange={e => update(i, 'name', e.target.value)} onFocus={() => setFocusIdx(i)} onBlur={() => setTimeout(() => setFocusIdx(null), 200)} style={hasExpired ? { borderColor: COLORS.red } : hasExpiring ? { borderColor: COLORS.amber } : undefined} />
               {suggestions.length > 0 && (
                 <div className="staff-autocomplete">
                   {suggestions.map(s => (
@@ -147,6 +159,8 @@ function StaffAssignmentsEditor({ items, onChange, staffRoster, payRateDefaults,
               {noMatch && focusIdx === i && (
                 <button type="button" className="add-to-roster-btn" onMouseDown={() => onAddToRoster(nameVal)}>+ Add "{nameVal}" to roster</button>
               )}
+              {hasExpired && <span style={{ fontSize: 11, color: COLORS.red, fontWeight: 600, marginTop: 2, display: 'block' }}>Expired license</span>}
+              {!hasExpired && hasExpiring && <span style={{ fontSize: 11, color: COLORS.amber, fontWeight: 600, marginTop: 2, display: 'block' }}>License expiring soon</span>}
             </div>
             <input style={{ flex: 1.5 }} placeholder="Security Guard" value={item.role} onChange={e => update(i, 'role', e.target.value)} />
             <input style={{ flex: 1 }} type="number" step="0.5" min="0" placeholder="0" value={item.hours} onChange={e => update(i, 'hours', e.target.value)} />
@@ -180,15 +194,25 @@ function PayRateDefaultsModal({ onClose, payRateDefaults, onRefresh, showToast }
   const [rates, setRates] = useState(payRateDefaults)
   const [adding, setAdding] = useState(false)
   const [newRow, setNewRow] = useState({ role: '', service_line: 'events', rate: '' })
+  const [editId, setEditId] = useState(null)
+  const [editRow, setEditRow] = useState({})
   const [confirmDeleteId, setConfirmDeleteId] = useState(null)
 
   useEffect(() => { setRates(payRateDefaults) }, [payRateDefaults])
+
+  const inputStyle = { background: 'var(--char)', border: '1px solid #333', borderRadius: 4, padding: '4px 8px', color: 'var(--white)', width: '100%' }
 
   const handleAdd = async () => {
     if (!newRow.role.trim() || !newRow.rate) return
     const { error } = await supabase.from('pay_rate_defaults').upsert([{ role: newRow.role.trim(), service_line: newRow.service_line, rate: parseFloat(newRow.rate) }], { onConflict: 'role,service_line' })
     if (error) { if (import.meta.env.DEV) console.error('Add rate:', error.message); return }
     setNewRow({ role: '', service_line: 'events', rate: '' }); setAdding(false); onRefresh(); showToast('Pay rate saved')
+  }
+
+  const handleSaveEdit = async () => {
+    const { error } = await supabase.from('pay_rate_defaults').update({ role: editRow.role, service_line: editRow.service_line, rate: parseFloat(editRow.rate) }).eq('id', editId)
+    if (error) { if (import.meta.env.DEV) console.error('Edit rate:', error.message); return }
+    setEditId(null); onRefresh(); showToast('Pay rate updated')
   }
 
   const handleDelete = async (id) => {
@@ -204,34 +228,46 @@ function PayRateDefaultsModal({ onClose, payRateDefaults, onRefresh, showToast }
         <p style={{ fontSize: 13, color: 'var(--steel)', marginBottom: 16 }}>Set default hourly rates by role and service line. These auto-fill when you assign staff to invoices.</p>
         <div className="clients-table-wrap">
           <table className="clients-table">
-            <thead><tr><th>Role</th><th>Service Line</th><th>Rate</th><th style={{ width: 80 }}></th></tr></thead>
+            <thead><tr><th>Role</th><th>Service Line</th><th>Rate</th><th style={{ width: 120 }}></th></tr></thead>
             <tbody>
               {rates.map(r => (
-                <tr key={r.id}>
-                  <td className="clients-name">{r.role}</td>
-                  <td><ServiceBadge line={r.service_line} /></td>
-                  <td style={{ fontWeight: 600 }}>${r.rate}/hr</td>
-                  <td>
-                    {confirmDeleteId === r.id ? (
-                      <span style={{ display: 'flex', gap: 4 }}>
-                        <button className="modal-btn-save" style={{ fontSize: 11, padding: '2px 8px', background: 'var(--red)' }} onClick={() => handleDelete(r.id)}>Yes</button>
-                        <button className="modal-btn-cancel" style={{ fontSize: 11, padding: '2px 8px' }} onClick={() => setConfirmDeleteId(null)}>No</button>
-                      </span>
-                    ) : (
-                      <button style={{ background: 'none', border: 'none', color: 'var(--red)', cursor: 'pointer', fontSize: 12, fontFamily: 'var(--fh)', fontWeight: 600 }} onClick={() => setConfirmDeleteId(r.id)}>Del</button>
-                    )}
-                  </td>
-                </tr>
+                editId === r.id ? (
+                  <tr key={r.id}>
+                    <td><input value={editRow.role} onChange={e => setEditRow({ ...editRow, role: e.target.value })} style={inputStyle} /></td>
+                    <td><select value={editRow.service_line} onChange={e => setEditRow({ ...editRow, service_line: e.target.value })} style={inputStyle}>{SERVICE_LINES.map(s => <option key={s} value={s}>{s}</option>)}</select></td>
+                    <td><input type="number" step="0.01" value={editRow.rate} onChange={e => setEditRow({ ...editRow, rate: e.target.value })} style={inputStyle} /></td>
+                    <td><button className="modal-btn-save" style={{ fontSize: 12, padding: '4px 10px' }} onClick={handleSaveEdit}>Save</button> <button className="modal-btn-cancel" style={{ fontSize: 12, padding: '4px 10px' }} onClick={() => setEditId(null)}>×</button></td>
+                  </tr>
+                ) : (
+                  <tr key={r.id}>
+                    <td className="clients-name">{r.role}</td>
+                    <td><ServiceBadge line={r.service_line} /></td>
+                    <td style={{ fontWeight: 600 }}>${r.rate}/hr</td>
+                    <td>
+                      {confirmDeleteId === r.id ? (
+                        <span style={{ display: 'flex', gap: 4 }}>
+                          <button className="modal-btn-save" style={{ fontSize: 11, padding: '2px 8px', background: 'var(--red)' }} onClick={() => handleDelete(r.id)}>Yes</button>
+                          <button className="modal-btn-cancel" style={{ fontSize: 11, padding: '2px 8px' }} onClick={() => setConfirmDeleteId(null)}>No</button>
+                        </span>
+                      ) : (
+                        <span style={{ display: 'flex', gap: 4 }}>
+                          <button style={{ background: 'none', border: 'none', color: 'var(--steel)', cursor: 'pointer', fontSize: 12, fontFamily: 'var(--fh)', fontWeight: 600 }} onClick={() => { setEditId(r.id); setEditRow(r) }}>Edit</button>
+                          <button style={{ background: 'none', border: 'none', color: 'var(--red)', cursor: 'pointer', fontSize: 12, fontFamily: 'var(--fh)', fontWeight: 600 }} onClick={() => setConfirmDeleteId(r.id)}>Del</button>
+                        </span>
+                      )}
+                    </td>
+                  </tr>
+                )
               ))}
               {adding && (
                 <tr>
-                  <td><input placeholder="Security Guard" value={newRow.role} onChange={e => setNewRow({ ...newRow, role: e.target.value })} style={{ background: 'var(--char)', border: '1px solid #333', borderRadius: 4, padding: '4px 8px', color: 'var(--white)', width: '100%' }} /></td>
+                  <td><input placeholder="Security Guard" value={newRow.role} onChange={e => setNewRow({ ...newRow, role: e.target.value })} style={inputStyle} /></td>
                   <td>
-                    <select value={newRow.service_line} onChange={e => setNewRow({ ...newRow, service_line: e.target.value })} style={{ background: 'var(--char)', border: '1px solid #333', borderRadius: 4, padding: '4px 8px', color: 'var(--white)', width: '100%' }}>
+                    <select value={newRow.service_line} onChange={e => setNewRow({ ...newRow, service_line: e.target.value })} style={inputStyle}>
                       {SERVICE_LINES.map(s => <option key={s} value={s}>{s}</option>)}
                     </select>
                   </td>
-                  <td><input type="number" step="0.01" placeholder="$/hr" value={newRow.rate} onChange={e => setNewRow({ ...newRow, rate: e.target.value })} style={{ background: 'var(--char)', border: '1px solid #333', borderRadius: 4, padding: '4px 8px', color: 'var(--white)', width: '100%' }} /></td>
+                  <td><input type="number" step="0.01" placeholder="$/hr" value={newRow.rate} onChange={e => setNewRow({ ...newRow, rate: e.target.value })} style={inputStyle} /></td>
                   <td><button className="modal-btn-save" style={{ fontSize: 12, padding: '4px 10px' }} onClick={handleAdd}>Add</button> <button className="modal-btn-cancel" style={{ fontSize: 12, padding: '4px 10px' }} onClick={() => setAdding(false)}>×</button></td>
                 </tr>
               )}
@@ -285,7 +321,7 @@ function QuickAddStaffModal({ name, onClose, onAdded }) {
 /* ═══════════════════════════════════════════════════════════
    ADD INVOICE MODAL
    ═══════════════════════════════════════════════════════════ */
-function AddInvoiceModal({ onClose, onSaved, clients, onGoToClients, staffRoster, payRateDefaults, onStaffRefresh }) {
+function AddInvoiceModal({ onClose, onSaved, clients, onGoToClients, staffRoster, payRateDefaults, licenses, onStaffRefresh }) {
   useEscapeKey(onClose)
   useBodyLock()
   const [form, setForm] = useState({
@@ -402,6 +438,7 @@ function AddInvoiceModal({ onClose, onSaved, clients, onGoToClients, staffRoster
                   staffRoster={staffRoster} payRateDefaults={payRateDefaults}
                   serviceLine={form.service_line} revenue={total}
                   onAddToRoster={(name) => setQuickAddName(name)}
+                  licenses={licenses}
                 />
               )}
               <label className="modal-field" style={{ marginTop: 12 }}><span>Internal Notes</span><textarea rows={2} value={form.internal_notes} onChange={e => setForm({ ...form, internal_notes: e.target.value })} placeholder="Internal reference only..." /></label>
@@ -422,7 +459,7 @@ function AddInvoiceModal({ onClose, onSaved, clients, onGoToClients, staffRoster
 /* ═══════════════════════════════════════════════════════════
    INVOICE DETAIL MODAL (Tabbed: Client | Internal)
    ═══════════════════════════════════════════════════════════ */
-function InvoiceDetail({ invoice, clients, onClose, onUpdated, onDeleted, showToast, staffRoster, payRateDefaults, onStaffRefresh }) {
+function InvoiceDetail({ invoice, clients, onClose, onUpdated, onDeleted, showToast, staffRoster, payRateDefaults, licenses, onStaffRefresh }) {
   useEscapeKey(onClose)
   useBodyLock()
   const [tab, setTab] = useState('client')
@@ -498,7 +535,7 @@ function InvoiceDetail({ invoice, clients, onClose, onUpdated, onDeleted, showTo
             <h2 className="detail-name">{invoice.invoice_number || 'Invoice'}</h2>
             <p className="detail-business">{clientName}</p>
           </div>
-          <StatusBadge status={invoice.status} />
+          <StatusBadge status={effectiveStatus(invoice)} />
         </div>
 
         {/* TABS */}
@@ -648,6 +685,7 @@ function InvoiceDetail({ invoice, clients, onClose, onUpdated, onDeleted, showTo
                     staffRoster={staffRoster} payRateDefaults={payRateDefaults}
                     serviceLine={form.service_line} revenue={total}
                     onAddToRoster={(name) => setQuickAddName(name)}
+                    licenses={licenses}
                   />
                 )}
                 <label className="modal-field" style={{ marginTop: 12 }}><span>Internal Notes</span><textarea rows={2} value={form.internal_notes || ''} onChange={e => setForm({ ...form, internal_notes: e.target.value })} /></label>
@@ -674,6 +712,7 @@ export default function Financials() {
   const [clients, setClients] = useState([])
   const [staffRoster, setStaffRoster] = useState([])
   const [payRateDefaults, setPayRateDefaults] = useState([])
+  const [licenses, setLicenses] = useState([])
   const [loading, setLoading] = useState(true)
   const [loadError, setLoadError] = useState('')
   const [page, setPage] = useState(0)
@@ -717,19 +756,25 @@ export default function Financials() {
     setPayRateDefaults(data || [])
   }, [])
 
+  const loadLicenses = useCallback(async () => {
+    const { data } = await supabase.from('licenses').select('staff_id, expiration_date')
+    setLicenses(data || [])
+  }, [])
+
   const loadStats = useCallback(async () => {
     const monthStart = new Date(new Date().getFullYear(), new Date().getMonth(), 1).toISOString()
     const { data } = await supabase.from('invoices').select('status, total, created_at, payment_date')
     if (!data) return
-    const outstanding = data.filter(i => i.status === 'sent' || i.status === 'overdue').reduce((s, i) => s + (parseFloat(i.total) || 0), 0)
+    const withEffective = data.map(i => ({ ...i, _status: effectiveStatus(i) }))
+    const outstanding = withEffective.filter(i => i._status === 'sent' || i._status === 'overdue').reduce((s, i) => s + (parseFloat(i.total) || 0), 0)
     const paidMonth = data.filter(i => i.status === 'paid' && i.payment_date && i.payment_date >= monthStart.split('T')[0]).reduce((s, i) => s + (parseFloat(i.total) || 0), 0)
-    const overdue = data.filter(i => i.status === 'overdue').length
+    const overdue = withEffective.filter(i => i._status === 'overdue').length
     const thisMonth = data.filter(i => i.created_at >= monthStart).length
     setStats({ outstanding: fmtMoney(outstanding), paidMonth: fmtMoney(paidMonth), overdue, thisMonth })
   }, [])
 
   useEffect(() => { load() }, [load])
-  useEffect(() => { loadClients(); loadStaff(); loadPayRates() }, [loadClients, loadStaff, loadPayRates])
+  useEffect(() => { loadClients(); loadStaff(); loadPayRates(); loadLicenses() }, [loadClients, loadStaff, loadPayRates, loadLicenses])
   useEffect(() => { loadStats() }, [loadStats])
   useEffect(() => { setPage(0) }, [filterStatus, filterLine])
 
@@ -790,17 +835,20 @@ export default function Financials() {
             <table className="clients-table">
               <thead><tr><th>Invoice #</th><th>Client</th><th>Service</th><th>Total</th><th>Status</th><th>Due Date</th><th>Created</th></tr></thead>
               <tbody>
-                {filtered.map(inv => (
-                  <tr key={inv.id} onClick={() => setSelected(inv)}>
-                    <td className="clients-name">{inv.invoice_number || '—'}</td>
-                    <td>{clientMap[inv.client_id] || '—'}</td>
-                    <td><ServiceBadge line={inv.service_line} /></td>
-                    <td style={{ fontWeight: 600 }}>{fmtMoney(inv.total)}</td>
-                    <td><StatusBadge status={inv.status} /></td>
-                    <td>{fmtDate(inv.due_date)}</td>
-                    <td>{new Date(inv.created_at).toLocaleDateString()}</td>
-                  </tr>
-                ))}
+                {filtered.map(inv => {
+                  const hasInternal = inv.internal_line_items && inv.internal_line_items.length > 0
+                  return (
+                    <tr key={inv.id} onClick={() => setSelected(inv)}>
+                      <td className="clients-name">{inv.invoice_number || '—'}{hasInternal && <span title="Has staff assignments" style={{ color: COLORS.blue, marginLeft: 6, fontSize: 11 }}>●</span>}</td>
+                      <td>{clientMap[inv.client_id] || '—'}</td>
+                      <td><ServiceBadge line={inv.service_line} /></td>
+                      <td style={{ fontWeight: 600 }}>{fmtMoney(inv.total)}</td>
+                      <td><StatusBadge status={effectiveStatus(inv)} /></td>
+                      <td>{fmtDate(inv.due_date)}</td>
+                      <td>{new Date(inv.created_at).toLocaleDateString()}</td>
+                    </tr>
+                  )
+                })}
               </tbody>
             </table>
           </div>
@@ -814,8 +862,8 @@ export default function Financials() {
         </>
       )}
 
-      {showAdd && <AddInvoiceModal onClose={() => setShowAdd(false)} onSaved={handleSaved} clients={clients} onGoToClients={() => { setShowAdd(false); navigate('/clients') }} staffRoster={staffRoster} payRateDefaults={payRateDefaults} onStaffRefresh={loadStaff} />}
-      {selected && <InvoiceDetail invoice={selected} clients={clients} onClose={() => setSelected(null)} onUpdated={handleUpdated} onDeleted={handleDeleted} showToast={showToast} staffRoster={staffRoster} payRateDefaults={payRateDefaults} onStaffRefresh={loadStaff} />}
+      {showAdd && <AddInvoiceModal onClose={() => setShowAdd(false)} onSaved={handleSaved} clients={clients} onGoToClients={() => { setShowAdd(false); navigate('/clients') }} staffRoster={staffRoster} payRateDefaults={payRateDefaults} licenses={licenses} onStaffRefresh={loadStaff} />}
+      {selected && <InvoiceDetail invoice={selected} clients={clients} onClose={() => setSelected(null)} onUpdated={handleUpdated} onDeleted={handleDeleted} showToast={showToast} staffRoster={staffRoster} payRateDefaults={payRateDefaults} licenses={licenses} onStaffRefresh={loadStaff} />}
       {showPayRates && <PayRateDefaultsModal onClose={() => setShowPayRates(false)} payRateDefaults={payRateDefaults} onRefresh={loadPayRates} showToast={showToast} />}
       {toast && <div className="toast">{toast}</div>}
     </div>

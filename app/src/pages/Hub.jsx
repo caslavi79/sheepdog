@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react'
 import { Link } from 'react-router-dom'
 import { supabase } from '../lib/supabase'
+import { daysUntil } from '../lib/format'
 
 const icons = {
   resources: <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><path d="M4 19.5v-15A2.5 2.5 0 0 1 6.5 2H20v20H6.5a2.5 2.5 0 0 1 0-5H20"/><path d="M8 7h6"/><path d="M8 11h4"/></svg>,
@@ -59,6 +60,7 @@ const modules = [
 
 export default function Hub() {
   const [stats, setStats] = useState({ leads: '—', pipelineValue: '—', submissions7d: '—', activeClients: '—' })
+  const [alerts, setAlerts] = useState([])
 
   useEffect(() => {
     const sevenDaysAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString()
@@ -66,7 +68,10 @@ export default function Hub() {
       supabase.from('pipeline').select('stage, value'),
       supabase.from('contact_submissions').select('id', { count: 'exact', head: true }).gte('created_at', sevenDaysAgo),
       supabase.from('clients').select('id', { count: 'exact', head: true }).eq('status', 'active'),
-    ]).then(([pipelineRes, subsRes, clientsRes]) => {
+      supabase.from('invoices').select('status, total, due_date'),
+      supabase.from('licenses').select('expiration_date, staff_id'),
+      supabase.from('contractor_docs').select('status'),
+    ]).then(([pipelineRes, subsRes, clientsRes, invoicesRes, licensesRes, docsRes]) => {
       const deals = pipelineRes.data || []
       const leads = deals.filter(d => d.stage === 'lead').length
       const pipelineValue = deals.filter(d => d.stage !== 'lost').reduce((sum, d) => sum + (parseFloat(d.value) || 0), 0)
@@ -76,6 +81,29 @@ export default function Hub() {
         submissions7d: subsRes.count ?? 0,
         activeClients: clientsRes.count ?? 0,
       })
+
+      // Build alerts
+      const a = []
+      const invoices = invoicesRes.data || []
+      const overdueInvoices = invoices.filter(i => {
+        if (i.status === 'overdue') return true
+        if (i.status === 'sent' && i.due_date) { const d = daysUntil(i.due_date); return d !== null && d < 0 }
+        return false
+      })
+      const outstandingTotal = invoices.filter(i => i.status === 'sent' || i.status === 'overdue').reduce((s, i) => s + (parseFloat(i.total) || 0), 0)
+      if (overdueInvoices.length > 0) a.push({ color: '#D4483A', text: `${overdueInvoices.length} overdue invoice${overdueInvoices.length !== 1 ? 's' : ''}`, link: '/financials' })
+      if (outstandingTotal > 0) a.push({ color: '#C9922E', text: `$${outstandingTotal.toLocaleString()} outstanding`, link: '/financials' })
+
+      const lics = licensesRes.data || []
+      const expiredLics = lics.filter(l => { const d = daysUntil(l.expiration_date); return d !== null && d < 0 })
+      const expiringLics = lics.filter(l => { const d = daysUntil(l.expiration_date); return d !== null && d >= 0 && d <= 30 })
+      if (expiredLics.length > 0) a.push({ color: '#D4483A', text: `${expiredLics.length} expired license${expiredLics.length !== 1 ? 's' : ''}`, link: '/compliance' })
+      if (expiringLics.length > 0) a.push({ color: '#C9922E', text: `${expiringLics.length} license${expiringLics.length !== 1 ? 's' : ''} expiring soon`, link: '/compliance' })
+
+      const missingDocs = (docsRes.data || []).filter(d => d.status === 'missing').length
+      if (missingDocs > 0) a.push({ color: '#D4483A', text: `${missingDocs} missing contractor doc${missingDocs !== 1 ? 's' : ''}`, link: '/compliance' })
+
+      setAlerts(a)
     })
   }, [])
 
@@ -103,6 +131,15 @@ export default function Hub() {
           <div className="hub-stat-label">Active Clients</div>
         </div>
       </div>
+      {alerts.length > 0 && (
+        <div className="hub-alerts">
+          {alerts.map((a, i) => (
+            <Link key={i} to={a.link} className="hub-alert" style={{ borderLeftColor: a.color }}>
+              <span style={{ color: a.color, fontWeight: 700 }}>●</span> {a.text}
+            </Link>
+          ))}
+        </div>
+      )}
       <div className="hub-grid">
         {modules.map((mod) => (
           <Link

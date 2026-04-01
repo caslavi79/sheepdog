@@ -1,21 +1,13 @@
 import { useState, useEffect, useCallback } from 'react'
 import { supabase } from '../lib/supabase'
 import { useEscapeKey, useBodyLock, useToast } from '../lib/hooks'
+import { fmtDate, daysUntil, badgeStyle, COLORS } from '../lib/format'
 
 const STAFF_STATUSES = ['active', 'inactive']
 const BG_CHECKS = ['none', 'pending', 'cleared']
 const LICENSE_TYPES = ['general', 'tabc']
 const DOC_TYPES = ['w9', 'agreement', 'other']
 const DOC_STATUSES = ['received', 'missing', 'expired']
-
-function fmtDate(d) { if (!d) return '—'; return new Date(d + 'T00:00:00').toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) }
-
-function daysUntil(d) {
-  if (!d) return null
-  const now = new Date(); now.setHours(0, 0, 0, 0)
-  const exp = new Date(d + 'T00:00:00')
-  return Math.ceil((exp - now) / (1000 * 60 * 60 * 24))
-}
 
 function LicenseStatusBadge({ expirationDate }) {
   const days = daysUntil(expirationDate)
@@ -41,9 +33,6 @@ function DocStatusBadge({ status }) {
   return <span style={badgeStyle(colors[status] || '#929BAA')}>{status}</span>
 }
 
-function badgeStyle(c) {
-  return { display: 'inline-block', fontFamily: 'var(--fh)', fontSize: 10, fontWeight: 700, letterSpacing: '1.5px', textTransform: 'uppercase', color: c, background: `${c}22`, padding: '3px 10px', borderRadius: 3 }
-}
 
 /* ═══════════════════════════════════════════════════════════
    ADD/EDIT STAFF MODAL
