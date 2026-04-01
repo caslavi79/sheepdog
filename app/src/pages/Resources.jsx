@@ -1,6 +1,5 @@
 import { useState, useEffect } from 'react'
-import { supabase } from '../lib/supabase'
-import { useEscapeKey, useBodyLock, useToast } from '../lib/hooks'
+import { useNavigate } from 'react-router-dom'
 import { COLORS } from '../lib/format'
 
 const CONTRACT_CATEGORIES = ['Client Contracts — Events', 'Client Contracts — Staffing', 'Staff & Contractor', 'Reporting & Operations']
@@ -51,193 +50,10 @@ const resources = [
 
 const categories = [...new Set(resources.map(r => r.category))]
 
-/* ═══════════════════════════════════════════════════════════
-   FILL & SEND CONTRACT MODAL
-   ═══════════════════════════════════════════════════════════ */
-function FillSendModal({ resource, onClose, showToast }) {
-  useEscapeKey(onClose)
-  useBodyLock()
-  const [step, setStep] = useState('fill') // fill, preview, send
-  const [templateHtml, setTemplateHtml] = useState('')
-  const [fields, setFields] = useState([])
-  const [values, setValues] = useState({})
-  const [clients, setClients] = useState([])
-  const [selectedClient, setSelectedClient] = useState('')
-  const [signerEmail, setSignerEmail] = useState('')
-  const [saving, setSaving] = useState(false)
-  const [error, setError] = useState('')
-
-  // Load template and extract fields
-  useEffect(() => {
-    fetch(resource.file)
-      .then(r => { if (!r.ok) throw new Error(`HTTP ${r.status}`); return r.text() })
-      .then(html => {
-        setTemplateHtml(html)
-        const matches = html.match(/<span class="field">\[([^\]]+)\]/g) || []
-        const fieldNames = [...new Set(matches.map(m => m.replace(/<span class="field">\[/, '').replace(/\].*/, '')))]
-        setFields(fieldNames)
-        const initial = {}
-        fieldNames.forEach(f => { initial[f] = '' })
-        setValues(initial)
-      })
-      .catch(err => { setError(`Failed to load template: ${err.message}`); if (import.meta.env.DEV) console.error('Template fetch:', err) })
-    supabase.from('clients').select('id, contact_name, business_name, email, phone').order('business_name').then(({ data }) => setClients(data || []))
-  }, [resource.file])
-
-  // Auto-fill from selected client
-  useEffect(() => {
-    if (!selectedClient) return
-    const c = clients.find(cl => cl.id === selectedClient)
-    if (!c) return
-    setSignerEmail(c.email || '')
-    setValues(prev => {
-      const next = { ...prev }
-      // Try to match common field names
-      const name = c.contact_name || ''
-      const biz = c.business_name || ''
-      Object.keys(next).forEach(key => {
-        const k = key.toUpperCase()
-        if (k.includes('CLIENT NAME') || k.includes('CUSTOMER NAME') || k.includes('CONTRACTOR NAME') || k.includes('SIGNER')) next[key] = name
-        if (k.includes('COMPANY') || k.includes('BUSINESS NAME') || k.includes('ORGANIZATION')) next[key] = biz
-        if (k.includes('CLIENT EMAIL') || k.includes('EMAIL ADDRESS')) next[key] = c.email || ''
-        if (k.includes('CLIENT PHONE') || k.includes('PHONE')) next[key] = c.phone || ''
-      })
-      return next
-    })
-  }, [selectedClient, clients])
-
-  const filledHtml = (() => {
-    if (!templateHtml) return ''
-    let html = templateHtml
-    Object.entries(values).forEach(([field, val]) => {
-      const escaped = (val || `[${field}]`).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
-      const regex = new RegExp(`<span class="field">\\[${field.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}[^\\]]*\\]</span>`, 'g')
-      html = html.replace(regex, `<span class="field" style="border:none;background:none;color:inherit;padding:0;">${escaped}</span>`)
-    })
-    return html
-  })()
-
-  const handleSend = async () => {
-    if (!signerEmail) { setError('Enter a signer email'); return }
-    setSaving(true); setError('')
-    // Create contract in DB
-    const { data: contract, error: insertErr } = await supabase.from('contracts').insert([{
-      client_id: selectedClient || null,
-      template_name: resource.title,
-      title: resource.title,
-      status: 'draft',
-      field_values: values,
-      filled_html: filledHtml,
-      signer_email: signerEmail,
-    }]).select().single()
-
-    if (insertErr || !contract) { setError(insertErr?.message || 'Failed to create contract'); setSaving(false); return }
-
-    // Send via edge function
-    const { data: { session } } = await supabase.auth.getSession()
-    if (!session?.access_token) { setError('Session expired. Please refresh and try again.'); setSaving(false); return }
-    const res = await fetch(`${import.meta.env.VITE_SUPABASE_URL}/functions/v1/contract-send`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${session.access_token}`,
-      },
-      body: JSON.stringify({ contract_id: contract.id }),
-    })
-    const result = await res.json()
-    setSaving(false)
-    if (!result.success) { setError(result.error || 'Failed to send'); return }
-    showToast('Contract sent for signing')
-    onClose()
-  }
-
-  return (
-    <div className="modal-overlay" role="presentation" onClick={onClose}>
-      <div className="modal-card modal-card--wide" role="dialog" aria-modal="true" onClick={e => e.stopPropagation()} style={{ maxHeight: '90vh', overflow: 'auto' }}>
-        <h2 className="modal-title">{resource.title}</h2>
-
-        {/* Step indicator */}
-        <div style={{ display: 'flex', gap: 8, marginBottom: 20 }}>
-          {['fill', 'preview', 'send'].map(s => (
-            <button key={s} onClick={() => setStep(s)} style={{
-              padding: '4px 14px', borderRadius: 4, border: '1px solid', fontSize: 12, fontFamily: 'var(--fh)', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '1px', cursor: 'pointer',
-              background: step === s ? COLORS.blue : 'transparent', borderColor: step === s ? COLORS.blue : 'rgba(255,255,255,0.15)', color: step === s ? '#fff' : 'var(--steel)'
-            }}>{s === 'fill' ? '1. Fill Fields' : s === 'preview' ? '2. Preview' : '3. Send'}</button>
-          ))}
-        </div>
-
-        {/* STEP 1: Fill Fields */}
-        {step === 'fill' && (
-          <div className="modal-form">
-            <label className="modal-field" style={{ marginBottom: 16 }}>
-              <span>Auto-fill from Client</span>
-              <select value={selectedClient} onChange={e => setSelectedClient(e.target.value)}>
-                <option value="">Select client (optional)...</option>
-                {clients.map(c => <option key={c.id} value={c.id}>{c.business_name || c.contact_name}</option>)}
-              </select>
-            </label>
-            {fields.length === 0 ? (
-              <p style={{ color: 'var(--steel)', fontSize: 14 }}>Loading template fields...</p>
-            ) : (
-              fields.map(f => (
-                <label key={f} className="modal-field" style={{ marginBottom: 10 }}>
-                  <span>{f}</span>
-                  <input value={values[f] || ''} onChange={e => setValues({ ...values, [f]: e.target.value })} placeholder={`Enter ${f.toLowerCase()}`} />
-                </label>
-              ))
-            )}
-            <div className="modal-actions" style={{ marginTop: 16 }}>
-              <button className="modal-btn-cancel" onClick={onClose}>Cancel</button>
-              <button className="modal-btn-save" onClick={() => setStep('preview')} disabled={!Object.values(values).some(v => v.trim())}>Preview Contract</button>
-            </div>
-          </div>
-        )}
-
-        {/* STEP 2: Preview */}
-        {step === 'preview' && (
-          <div>
-            <div style={{ background: '#fff', borderRadius: 8, padding: 24, maxHeight: 500, overflow: 'auto', border: '1px solid rgba(255,255,255,0.1)' }}>
-              <iframe srcDoc={filledHtml} sandbox="allow-same-origin" style={{ width: '100%', height: 500, border: 'none', background: '#fff' }} title="Contract Preview" />
-            </div>
-            <div className="modal-actions" style={{ marginTop: 16 }}>
-              <button className="modal-btn-cancel" onClick={() => setStep('fill')}>Back to Edit</button>
-              <button className="modal-btn-save" onClick={() => setStep('send')} disabled={!signerEmail.trim()}>Continue to Send</button>
-            </div>
-          </div>
-        )}
-
-        {/* STEP 3: Send */}
-        {step === 'send' && (
-          <div className="modal-form">
-            <label className="modal-field">
-              <span>Signer Email *</span>
-              <input type="email" required value={signerEmail} onChange={e => setSignerEmail(e.target.value)} placeholder="client@example.com" />
-            </label>
-            <p style={{ fontSize: 13, color: 'var(--steel)', margin: '8px 0 16px' }}>
-              The signer will receive an email with a link to review and electronically sign this contract. Replies go to sheepdogsecurityllc@gmail.com.
-            </p>
-            {error && <p role="alert" style={{ color: 'var(--red)', fontSize: 13, marginBottom: 8 }}>{error}</p>}
-            <div className="modal-actions">
-              <button className="modal-btn-cancel" onClick={() => setStep('preview')}>Back</button>
-              <button className="modal-btn-save" disabled={saving} onClick={handleSend}>{saving ? 'Sending...' : 'Send for Signing'}</button>
-            </div>
-          </div>
-        )}
-      </div>
-    </div>
-  )
-}
-
-/* ═══════════════════════════════════════════════════════════
-   MAIN RESOURCES PAGE
-   ═══════════════════════════════════════════════════════════ */
 export default function Resources() {
+  const navigate = useNavigate()
   const [open, setOpen] = useState(categories.reduce((acc, cat) => ({ ...acc, [cat]: true }), {}))
   const [deadLinks, setDeadLinks] = useState(new Set())
-  const [fillSend, setFillSend] = useState(null)
-  const [toast, setToast] = useState('')
-  const fireToast = useToast()
-  const showToast = (msg) => fireToast(setToast, msg)
 
   useEffect(() => {
     const controller = new AbortController()
@@ -286,7 +102,7 @@ export default function Resources() {
                         style={{ fontSize: 12, fontFamily: 'var(--fh)', fontWeight: 600, color: COLORS.blue, textDecoration: 'none' }}
                         onClick={e => e.stopPropagation()}>View</a>
                       {isContract(cat) && (
-                        <button onClick={() => setFillSend(res)}
+                        <button onClick={() => navigate(`/contracts?template=${encodeURIComponent(res.file)}`)}
                           style={{ background: 'none', border: 'none', fontSize: 12, fontFamily: 'var(--fh)', fontWeight: 600, color: COLORS.amber, cursor: 'pointer' }}>Fill & Send</button>
                       )}
                     </div>
@@ -297,9 +113,6 @@ export default function Resources() {
           </div>
         </div>
       ))}
-
-      {fillSend && <FillSendModal resource={fillSend} onClose={() => setFillSend(null)} showToast={showToast} />}
-      {toast && <div className="toast">{toast}</div>}
     </div>
   )
 }

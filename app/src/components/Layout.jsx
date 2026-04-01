@@ -27,7 +27,7 @@ export default function Layout() {
           <NavLink to="/financials" className="sidebar-link">Financials</NavLink>
           {/* Secondary tabs — hidden on mobile, shown in More menu */}
           <NavLink to="/resources" className="sidebar-link sidebar-link--secondary">Resources</NavLink>
-          <NavLink to="/submissions" className="sidebar-link sidebar-link--secondary">Submissions</NavLink>
+          <NavLink to="/contracts" className="sidebar-link sidebar-link--secondary">Contracts</NavLink>
           <NavLink to="/scheduling" className="sidebar-link sidebar-link--secondary">Scheduling</NavLink>
           <NavLink to="/compliance" className="sidebar-link sidebar-link--secondary">Compliance</NavLink>
 
@@ -45,7 +45,7 @@ export default function Layout() {
         {/* Mobile overflow menu */}
         {moreOpen && (
           <div className="sidebar-more-menu" onClick={() => setMoreOpen(false)}>
-            <NavLink to="/submissions" className="sidebar-more-link">Submissions</NavLink>
+            <NavLink to="/contracts" className="sidebar-more-link">Contracts</NavLink>
             <NavLink to="/resources" className="sidebar-more-link">Resources</NavLink>
             <NavLink to="/scheduling" className="sidebar-more-link">Scheduling</NavLink>
             <NavLink to="/compliance" className="sidebar-more-link">Compliance</NavLink>

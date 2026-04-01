@@ -1095,6 +1095,16 @@ body.modal-open { overflow: hidden; }
 .cal-event:hover { background: var(--dark); }
 .cal-event-more { font-size: 10px; color: var(--steel); font-family: var(--fh); font-weight: 600; padding: 0 6px; }
 
+/* CONTRACT EDITOR */
+.contract-editor { border: 1px solid rgba(255,255,255,0.08); border-radius: 8px; margin-top: 24px; overflow: hidden; }
+.contract-editor-header { display: flex; justify-content: space-between; align-items: center; padding: 16px 20px; background: var(--char); border-bottom: 1px solid rgba(255,255,255,0.06); }
+.contract-editor-body { display: grid; grid-template-columns: 380px 1fr; min-height: 600px; }
+.contract-editor-form { padding: 20px; overflow-y: auto; max-height: 700px; border-right: 1px solid rgba(255,255,255,0.06); }
+.contract-editor-fields { max-height: 400px; overflow-y: auto; padding-right: 8px; }
+.contract-editor-fields::-webkit-scrollbar { width: 4px; }
+.contract-editor-fields::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 2px; }
+.contract-editor-preview { background: var(--char); padding: 12px; min-height: 600px; }
+
 /* TABLET */
 @media (max-width: 1024px) {
   .app-main { padding: 32px; }
@@ -1422,6 +1432,9 @@ body.modal-open { overflow: hidden; }
 
   /* -- HUB ALERTS (mobile) -- */
   .hub-alerts { font-size: 13px; padding: 0; gap: 6px; }
+  .contract-editor-body { grid-template-columns: 1fr; }
+  .contract-editor-form { max-height: none; border-right: none; border-bottom: 1px solid rgba(255,255,255,0.06); }
+  .contract-editor-preview { min-height: 400px; }
   .cal-cell { min-height: 60px; padding: 4px; }
   .cal-cell-date { font-size: 11px; }
   .cal-event { font-size: 10px; padding: 1px 4px; }
