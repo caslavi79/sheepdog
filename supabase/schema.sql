@@ -65,10 +65,24 @@ CREATE TABLE IF NOT EXISTS public.events (
 CREATE TABLE IF NOT EXISTS public.invoices (
   id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
   client_id uuid REFERENCES public.clients(id),
+  service_line text,
+  invoice_number text,
+  line_items jsonb DEFAULT '[]',
+  subtotal numeric DEFAULT 0,
+  tax numeric DEFAULT 0,
   total numeric,
   status text,
-  created_at timestamptz DEFAULT now()
+  due_date date,
+  payment_date date,
+  payment_method text,
+  notes text,
+  created_at timestamptz DEFAULT now(),
+  updated_at timestamptz DEFAULT now()
 );
+
+CREATE INDEX IF NOT EXISTS idx_invoices_client ON public.invoices (client_id);
+CREATE INDEX IF NOT EXISTS idx_invoices_status ON public.invoices (status);
+CREATE INDEX IF NOT EXISTS idx_invoices_created ON public.invoices (created_at DESC);
 
 CREATE TABLE IF NOT EXISTS public.rate_limits (
   id uuid PRIMARY KEY DEFAULT gen_random_uuid(),

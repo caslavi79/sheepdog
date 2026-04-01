@@ -46,7 +46,7 @@ const modules = [
     desc: 'Revenue tracking, invoicing',
     path: '/financials',
     icon: icons.financials,
-    ready: false,
+    ready: true,
   },
   {
     title: 'Compliance',

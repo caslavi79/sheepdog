@@ -24,7 +24,7 @@ export default function Layout() {
           <NavLink to="/" end className="sidebar-link">Dashboard</NavLink>
           <NavLink to="/clients" className="sidebar-link">Clients</NavLink>
           <NavLink to="/pipeline" className="sidebar-link">Pipeline</NavLink>
-          <span className="sidebar-link sidebar-link--stub" aria-disabled="true">Financials</span>
+          <NavLink to="/financials" className="sidebar-link">Financials</NavLink>
           {/* Secondary tabs — hidden on mobile, shown in More menu */}
           <NavLink to="/resources" className="sidebar-link sidebar-link--secondary">Resources</NavLink>
           <NavLink to="/submissions" className="sidebar-link sidebar-link--secondary">Submissions</NavLink>
