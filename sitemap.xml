@@ -70,7 +70,7 @@
        NOTE: Canonical URL has NO trailing slash — match exactly.
        ============================================================ -->
   <url>
-    <loc>https://sheepdogtexas.com/staffing</loc>
+    <loc>https://sheepdogtexas.com/staffing/</loc>
     <lastmod>2026-03-31</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.9</priority>
