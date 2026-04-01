@@ -423,7 +423,6 @@ export default function Scheduling() {
             <button className="cal-nav-btn" onClick={() => { if (calMonth === 0) { setCalMonth(11); setCalYear(y => y - 1) } else setCalMonth(m => m - 1) }}>←</button>
             <span className="cal-nav-title">{monthLabel}</span>
             <button className="cal-nav-btn" onClick={() => { if (calMonth === 11) { setCalMonth(0); setCalYear(y => y + 1) } else setCalMonth(m => m + 1) }}>→</button>
-            <button className="cal-nav-btn" style={{ marginLeft: 8, fontSize: 12 }} onClick={() => { setCalYear(new Date().getFullYear()); setCalMonth(new Date().getMonth()) }}>Today</button>
           </div>
           <div className="cal-grid">
             {['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'].map(d => <div key={d} className="cal-header">{d}</div>)}
