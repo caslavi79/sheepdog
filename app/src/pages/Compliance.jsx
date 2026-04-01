@@ -62,10 +62,11 @@ function StaffModal({ staff, onClose, onSaved }) {
       if (err) { setError(err.message); return }
       // Auto-create required contractor docs
       if (newStaff?.id) {
-        await supabase.from('contractor_docs').insert([
+        const { error: docErr } = await supabase.from('contractor_docs').insert([
           { staff_id: newStaff.id, doc_type: 'w9', status: 'missing' },
           { staff_id: newStaff.id, doc_type: 'agreement', status: 'missing' },
         ])
+        if (docErr && import.meta.env.DEV) console.error('Auto-create docs:', docErr.message)
       }
     }
     onSaved(); onClose()
@@ -118,6 +119,7 @@ function LicenseModal({ license, staffList, onClose, onSaved }) {
   const handleSubmit = async (e) => {
     e.preventDefault()
     if (!form.staff_id) { setError('Select a staff member'); return }
+    if (form.issue_date && form.expiration_date && form.expiration_date < form.issue_date) { setError('Expiration date must be after issue date'); return }
     setSaving(true); setError('')
     const payload = { ...form, issue_date: form.issue_date || null, expiration_date: form.expiration_date || null, notes: form.notes || null }
     if (isEdit) {
@@ -241,6 +243,8 @@ export default function Compliance() {
   const [search, setSearch] = useState('')
   const [filterLicenseType, setFilterLicenseType] = useState('')
   const [filterLicenseStatus, setFilterLicenseStatus] = useState('')
+  const [filterDocType, setFilterDocType] = useState('')
+  const [filterDocStatus, setFilterDocStatus] = useState('')
   const [showStaffModal, setShowStaffModal] = useState(null) // null=closed, {}=add, {staff}=edit
   const [showLicenseModal, setShowLicenseModal] = useState(null)
   const [showDocModal, setShowDocModal] = useState(null)
@@ -306,7 +310,7 @@ export default function Compliance() {
       const days = daysUntil(l.expiration_date)
       if (filterLicenseStatus === 'expired' && (days === null || days >= 0)) return false
       if (filterLicenseStatus === 'expiring' && (days === null || days < 0 || days > 30)) return false
-      if (filterLicenseStatus === 'active' && (days !== null && days <= 30)) return false
+      if (filterLicenseStatus === 'active' && (days === null || days <= 30)) return false
     }
     if (search) {
       const q = search.toLowerCase()
@@ -317,6 +321,8 @@ export default function Compliance() {
   })
 
   const filteredDocs = docs.filter(d => {
+    if (filterDocType && d.doc_type !== filterDocType) return false
+    if (filterDocStatus && d.status !== filterDocStatus) return false
     if (search) {
       const q = search.toLowerCase()
       const name = (staffMap[d.staff_id] || '').toLowerCase()
@@ -346,9 +352,9 @@ export default function Compliance() {
 
       {/* Tabs */}
       <div className="detail-tabs" role="tablist" style={{ padding: 0, marginBottom: 16 }}>
-        <button className={`detail-tab ${tab === 'roster' ? 'detail-tab--active' : ''}`} role="tab" aria-selected={tab === 'roster'} onClick={() => { setTab('roster'); setSearch('') }}>Staff Roster ({staff.length})</button>
-        <button className={`detail-tab ${tab === 'licenses' ? 'detail-tab--active' : ''}`} role="tab" aria-selected={tab === 'licenses'} onClick={() => { setTab('licenses'); setSearch('') }}>Licenses & Certs ({licenses.length})</button>
-        <button className={`detail-tab ${tab === 'docs' ? 'detail-tab--active' : ''}`} role="tab" aria-selected={tab === 'docs'} onClick={() => { setTab('docs'); setSearch('') }}>Contractor Docs ({docs.length})</button>
+        <button className={`detail-tab ${tab === 'roster' ? 'detail-tab--active' : ''}`} role="tab" aria-selected={tab === 'roster'} onClick={() => { setTab('roster'); setSearch(''); setConfirmDeleteId(null); setConfirmDeleteType(null) }}>Staff Roster ({staff.length})</button>
+        <button className={`detail-tab ${tab === 'licenses' ? 'detail-tab--active' : ''}`} role="tab" aria-selected={tab === 'licenses'} onClick={() => { setTab('licenses'); setSearch(''); setConfirmDeleteId(null); setConfirmDeleteType(null) }}>Licenses & Certs ({licenses.length})</button>
+        <button className={`detail-tab ${tab === 'docs' ? 'detail-tab--active' : ''}`} role="tab" aria-selected={tab === 'docs'} onClick={() => { setTab('docs'); setSearch(''); setConfirmDeleteId(null); setConfirmDeleteType(null) }}>Contractor Docs ({docs.length})</button>
       </div>
 
       {/* ─── STAFF ROSTER TAB ─── */}
@@ -379,7 +385,7 @@ export default function Compliance() {
                       <td><BgCheckBadge status={s.background_check} /></td>
                       <td>{s.default_pay_rate ? `$${s.default_pay_rate}/hr` : '—'}</td>
                       <td style={{ whiteSpace: 'nowrap' }}>
-                        {s.email ? (
+                        {s.email && /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(s.email) ? (
                           <span style={{ display: 'flex', gap: 4 }}>
                             {!hasAgreement && <button style={{ background: 'none', border: 'none', color: COLORS.blue, cursor: 'pointer', fontSize: 11, fontFamily: 'var(--fh)', fontWeight: 600 }} onClick={() => navigate(`/contracts?staff_id=${s.id}&template=${encodeURIComponent('/docs/08-independent-contractor-agreement.html')}`)}>Agreement</button>}
                             {hasAgreement && <span style={badgeStyle(COLORS.green)}>AGR</span>}
@@ -464,6 +470,14 @@ export default function Compliance() {
         <>
           <div className="clients-toolbar">
             <input className="clients-search" placeholder="Search by name..." value={search} onChange={e => setSearch(e.target.value)} />
+            <select className="clients-filter" value={filterDocType} onChange={e => setFilterDocType(e.target.value)}>
+              <option value="">All Types</option>
+              {DOC_TYPES.map(t => <option key={t} value={t}>{t === 'w9' ? 'W-9' : t.charAt(0).toUpperCase() + t.slice(1)}</option>)}
+            </select>
+            <select className="clients-filter" value={filterDocStatus} onChange={e => setFilterDocStatus(e.target.value)}>
+              <option value="">All Statuses</option>
+              {DOC_STATUSES.map(s => <option key={s} value={s}>{s.charAt(0).toUpperCase() + s.slice(1)}</option>)}
+            </select>
             <button className="clients-add-btn" onClick={() => setShowDocModal({})}>+ Add Document</button>
           </div>
           {filteredDocs.length === 0 ? (

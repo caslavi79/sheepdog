@@ -81,7 +81,8 @@ function ContractEditor({ template, contract, clients, onSaved, onClose, presele
   useEffect(() => {
     if (!staffId) return
     supabase.from('staff').select('id, name, email, phone, role').eq('id', staffId).single()
-      .then(({ data }) => {
+      .then(({ data, error }) => {
+        if (error) { if (import.meta.env.DEV) console.error('Staff lookup:', error.message); return }
         if (data) {
           setStaffMember(data)
           setSignerEmail(data.email || '')
@@ -176,6 +177,7 @@ function ContractEditor({ template, contract, clients, onSaved, onClose, presele
 
   const handleSend = async () => {
     if (!signerEmail) { setError('Enter a signer email'); return }
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(signerEmail)) { setError('Enter a valid email address'); return }
     setSaving(true); setError('')
     // Save first
     const title = template?.title || contract?.template_name || 'Contract'
@@ -248,8 +250,8 @@ function ContractEditor({ template, contract, clients, onSaved, onClose, presele
             <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
               <button className="modal-btn-cancel" style={{ fontSize: 13 }} disabled={saving} onClick={handleSaveDraft}>{saving ? '...' : 'Save Draft'}</button>
               <button className="modal-btn-save" style={{ fontSize: 13 }} disabled={saving || !signerEmail} onClick={handleSend}>{saving ? 'Sending...' : 'Send for Signing'}</button>
-              {contractId && contractStatus !== 'draft' && (
-                <a href={`${import.meta.env.VITE_SUPABASE_URL}/functions/v1/contract-sign?token=${contract?.sign_token || ''}`}
+              {contractId && contractStatus !== 'draft' && contract?.sign_token && (
+                <a href={`${import.meta.env.VITE_SUPABASE_URL}/functions/v1/contract-sign?token=${contract.sign_token}`}
                   target="_blank" rel="noopener noreferrer"
                   style={{ fontSize: 12, fontFamily: 'var(--fh)', fontWeight: 600, color: COLORS.blue, padding: '8px 14px', textDecoration: 'none' }}>
                   View Signing Page
@@ -292,9 +294,11 @@ export default function Contracts() {
   const fireToast = useToast()
   const showToast = (msg) => fireToast(setToast, msg)
 
+  const [loadError, setLoadError] = useState('')
   const loadContracts = useCallback(async () => {
+    setLoadError('')
     const { data, error } = await supabase.from('contracts').select('*').order('created_at', { ascending: false })
-    if (error && import.meta.env.DEV) console.error('Load contracts:', error.message)
+    if (error) { setLoadError('Failed to load contracts'); if (import.meta.env.DEV) console.error('Load contracts:', error.message); return }
     setContracts(data || [])
   }, [])
 
@@ -326,6 +330,8 @@ export default function Contracts() {
         setEditorTemplate(t)
         setEditorContract(null)
         setShowEditor(true)
+      } else {
+        setShowPicker(true)
       }
     } else if (clientId && !templateFile) {
       // From Clients "New Contract" — open picker with client pre-selected
@@ -367,6 +373,8 @@ export default function Contracts() {
     setShowEditor(false)
     setEditorTemplate(null)
     setEditorContract(null)
+    setPreselectedClientId(null)
+    setPreselectedStaffId(null)
   }
 
   // Stats
@@ -401,7 +409,13 @@ export default function Contracts() {
         </select>
       </div>
 
-      {filtered.length === 0 && !showEditor ? (
+      {loadError && (
+        <div style={{ background: '#3d2020', border: '1px solid #C23B2244', color: '#C23B22', padding: '10px 16px', borderRadius: 4, fontSize: 13, marginBottom: 12 }}>
+          {loadError} <button onClick={loadContracts} style={{ marginLeft: 8, background: 'none', border: '1px solid #C23B22', color: '#C23B22', padding: '4px 12px', borderRadius: 3, cursor: 'pointer' }}>Retry</button>
+        </div>
+      )}
+
+      {filtered.length === 0 && !showEditor && !loadError ? (
         <div className="clients-empty">{contracts.length === 0 ? 'No contracts yet. Create your first one.' : 'No contracts match your filters.'}</div>
       ) : (
         <div className="clients-table-wrap">
@@ -409,7 +423,7 @@ export default function Contracts() {
             <thead><tr><th>Template</th><th>Client</th><th>Signer</th><th>Status</th><th>Sent</th><th>Signed</th></tr></thead>
             <tbody>
               {filtered.map(c => (
-                <tr key={c.id} onClick={() => handleSelectContract(c)} style={{ cursor: 'pointer' }}>
+                <tr key={c.id} onClick={() => handleSelectContract(c)} onKeyDown={e => e.key === 'Enter' && handleSelectContract(c)} tabIndex={0} style={{ cursor: 'pointer' }}>
                   <td className="clients-name">{c.title || c.template_name || '—'}</td>
                   <td>{clientMap[c.client_id] || '—'}</td>
                   <td>{c.signer_email || '—'}</td>

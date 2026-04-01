@@ -6,15 +6,28 @@ export function fmtMoney(n) {
 
 export function fmtDate(d) {
   if (!d) return '—'
-  const dt = new Date(d + 'T00:00:00')
+  const raw = typeof d === 'string' && d.includes('T') ? d.split('T')[0] : d
+  const [y, m, day] = raw.split('-').map(Number)
+  const dt = new Date(y, m - 1, day)
   return dt.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })
 }
 
 export function daysUntil(d) {
   if (!d) return null
+  const raw = typeof d === 'string' && d.includes('T') ? d.split('T')[0] : d
+  const [y, m, day] = raw.split('-').map(Number)
+  const exp = new Date(y, m - 1, day)
   const now = new Date(); now.setHours(0, 0, 0, 0)
-  const exp = new Date(d + 'T00:00:00')
   return Math.ceil((exp - now) / (1000 * 60 * 60 * 24))
+}
+
+export function daysSince(d) {
+  if (!d) return null
+  const raw = typeof d === 'string' && d.includes('T') ? d.split('T')[0] : d
+  const [y, m, day] = raw.split('-').map(Number)
+  const then = new Date(y, m - 1, day)
+  const now = new Date(); now.setHours(0, 0, 0, 0)
+  return Math.ceil((now - then) / (1000 * 60 * 60 * 24))
 }
 
 export function badgeStyle(c) {

@@ -54,10 +54,16 @@ function AddDealModal({ onClose, onSaved }) {
 
   const handleSubmit = async (e) => {
     e.preventDefault()
+    if (!form.contact_name.trim()) { setError('Contact name is required'); return }
     setSaving(true)
     setError('')
     const payload = {
       ...form,
+      contact_name: form.contact_name.trim(),
+      business_name: form.business_name || null,
+      phone: form.phone || null,
+      email: form.email || null,
+      notes: form.notes || null,
       value: form.value ? parseFloat(form.value) : null,
     }
     const { error: err } = await supabase.from('pipeline').insert([payload])
@@ -140,7 +146,12 @@ function DealDetailModal({ deal, onClose, onUpdated, onDeleted, navigate }) {
     const { id, created_at, ...rest } = form
     const payload = {
       ...rest,
+      business_name: form.business_name || null,
+      phone: form.phone || null,
+      email: form.email || null,
+      notes: form.notes || null,
       value: form.value !== '' && form.value !== null ? parseFloat(form.value) : null,
+      last_activity: new Date().toISOString(),
       updated_at: new Date().toISOString(),
     }
     const { error } = await supabase.from('pipeline').update(payload).eq('id', deal.id)
@@ -379,6 +390,7 @@ export default function Pipeline() {
   const [dragOverStage, setDragOverStage] = useState(null)
   const [dragError, setDragError] = useState('')
   const [loadError, setLoadError] = useState('')
+  const [search, setSearch] = useState('')
   const [toast, setToast] = useState('')
   const dragDeal = useRef(null)
   const fireToast = useToast()
@@ -416,22 +428,27 @@ export default function Pipeline() {
     setDragOverStage(null)
     setDragError('')
 
-    const { error } = await supabase.from('pipeline').update({ stage: newStage, updated_at: new Date().toISOString() }).eq('id', deal.id)
+    const { error } = await supabase.from('pipeline').update({ stage: newStage, last_activity: new Date().toISOString(), updated_at: new Date().toISOString() }).eq('id', deal.id)
     if (error) {
-      // Rollback optimistic update
       setDeals(prev => prev.map(d => d.id === deal.id ? { ...d, stage: previousStage } : d))
       setDragError('Failed to move card — changes reverted.')
       setTimeout(() => setDragError(''), 4000)
     }
   }
 
-  const dealsByStage = (stageId) => deals.filter(d => d.stage === stageId)
+  const filteredDeals = search
+    ? deals.filter(d => {
+        const q = search.toLowerCase()
+        return (d.contact_name || '').toLowerCase().includes(q) || (d.business_name || '').toLowerCase().includes(q) || (d.email || '').toLowerCase().includes(q)
+      })
+    : deals
+  const dealsByStage = (stageId) => filteredDeals.filter(d => d.stage === stageId)
 
-  const totalPipelineValue = deals
+  const totalPipelineValue = filteredDeals
     .filter(d => d.stage !== 'lost')
     .reduce((sum, d) => sum + (d.value || 0), 0)
 
-  const wonValue = deals
+  const wonValue = filteredDeals
     .filter(d => d.stage === 'under_contract')
     .reduce((sum, d) => sum + (d.value || 0), 0)
 
@@ -442,7 +459,8 @@ export default function Pipeline() {
           <h1>Pipeline</h1>
           <button className="clients-add-btn" onClick={() => setShowAdd(true)}>+ Add Deal</button>
         </div>
-        <p>{deals.filter(d => d.stage !== 'lost').length} active deals
+        <input className="clients-search" placeholder="Search deals..." value={search} onChange={e => setSearch(e.target.value)} style={{ maxWidth: 250, marginTop: 8 }} />
+        <p>{filteredDeals.filter(d => d.stage !== 'lost').length} active deals
           {totalPipelineValue > 0 && ` · $${totalPipelineValue.toLocaleString()} in play`}
           {wonValue > 0 && ` · $${wonValue.toLocaleString()} under contract`}
         </p>
@@ -478,7 +496,7 @@ export default function Pipeline() {
                 if (deal.stage === newStage) return
                 const prev = deal.stage
                 setDeals(d => d.map(x => x.id === deal.id ? { ...x, stage: newStage } : x))
-                const { error } = await supabase.from('pipeline').update({ stage: newStage, updated_at: new Date().toISOString() }).eq('id', deal.id)
+                const { error } = await supabase.from('pipeline').update({ stage: newStage, last_activity: new Date().toISOString(), updated_at: new Date().toISOString() }).eq('id', deal.id)
                 if (error) {
                   setDeals(d => d.map(x => x.id === deal.id ? { ...x, stage: prev } : x))
                   setDragError('Failed to move card — changes reverted.')

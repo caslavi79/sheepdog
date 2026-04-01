@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react'
 import { Link } from 'react-router-dom'
 import { supabase } from '../lib/supabase'
-import { daysUntil } from '../lib/format'
+import { daysUntil, daysSince } from '../lib/format'
 
 const icons = {
   resources: <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><path d="M4 19.5v-15A2.5 2.5 0 0 1 6.5 2H20v20H6.5a2.5 2.5 0 0 1 0-5H20"/><path d="M8 7h6"/><path d="M8 11h4"/></svg>,
@@ -109,22 +109,25 @@ export default function Hub() {
       const staleDeals = deals.filter(d => {
         if (d.stage === 'lost' || d.stage === 'under_contract') return false
         if (!d.last_activity) return true
-        const daysSince = Math.ceil((Date.now() - new Date(d.last_activity).getTime()) / (1000 * 60 * 60 * 24))
-        return daysSince > 14
+        const ds = daysSince(d.last_activity)
+        return ds !== null && ds > 14
       })
       if (staleDeals.length > 0) a.push({ color: '#C9922E', text: `${staleDeals.length} stale pipeline deal${staleDeals.length !== 1 ? 's' : ''} (14+ days)`, link: '/pipeline' })
 
       // Unsigned contracts (sent 7+ days ago)
       const unsignedContracts = (contractsRes.data || []).filter(c => {
         if (!c.sent_at) return false
-        const daysSince = Math.ceil((Date.now() - new Date(c.sent_at).getTime()) / (1000 * 60 * 60 * 24))
-        return daysSince > 7
+        const ds = daysSince(c.sent_at)
+        return ds !== null && ds > 7
       })
       if (unsignedContracts.length > 0) a.push({ color: '#C9922E', text: `${unsignedContracts.length} unsigned contract${unsignedContracts.length !== 1 ? 's' : ''} (7+ days)`, link: '/contracts' })
 
       // Past events without invoices
-      const now = new Date()
-      const pastEventsNoInvoice = (eventsRes.data || []).filter(e => e.date && new Date(e.date + 'T00:00:00') < now)
+      const pastEventsNoInvoice = (eventsRes.data || []).filter(e => {
+        if (!e.date) return false
+        const ds = daysSince(e.date)
+        return ds !== null && ds > 0
+      })
       if (pastEventsNoInvoice.length > 0) a.push({ color: '#C9922E', text: `${pastEventsNoInvoice.length} past event${pastEventsNoInvoice.length !== 1 ? 's' : ''} without invoices`, link: '/scheduling' })
 
       setAlerts(a)

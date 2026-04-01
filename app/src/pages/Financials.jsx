@@ -240,7 +240,8 @@ function PayRateDefaultsModal({ onClose, payRateDefaults, onRefresh, showToast }
   }
 
   const handleSaveEdit = async () => {
-    const { error } = await supabase.from('pay_rate_defaults').update({ role: editRow.role, service_line: editRow.service_line, rate: parseFloat(editRow.rate) }).eq('id', editId)
+    if (!editRow.role?.trim() || !editRow.rate) { showToast('Role and rate are required'); return }
+    const { error } = await supabase.from('pay_rate_defaults').update({ role: editRow.role.trim(), service_line: editRow.service_line, rate: parseFloat(editRow.rate) }).eq('id', editId)
     if (error) { if (import.meta.env.DEV) console.error('Edit rate:', error.message); return }
     setEditId(null); onRefresh(); showToast('Pay rate updated')
   }
@@ -395,9 +396,13 @@ function AddInvoiceModal({ onClose, onSaved, clients, onGoToClients, staffRoster
     if (!form.client_id) { setError('Select a client'); return }
     if (!form.line_items.some(li => li.description)) { setError('Add at least one line item'); return }
     setSaving(true); setError('')
-    const { data: lastInv } = await supabase.from('invoices').select('invoice_number').order('created_at', { ascending: false }).limit(1)
-    const lastNum = lastInv?.[0]?.invoice_number ? parseInt(lastInv[0].invoice_number.replace('SHD-', '')) : 0
-    const invoiceNumber = `SHD-${String((lastNum || 0) + 1).padStart(4, '0')}`
+    // Generate next invoice number from highest existing number
+    const { data: allNums } = await supabase.from('invoices').select('invoice_number')
+    const maxNum = (allNums || []).reduce((max, inv) => {
+      const n = parseInt((inv.invoice_number || '').replace('SHD-', ''))
+      return isNaN(n) ? max : Math.max(max, n)
+    }, 0)
+    const invoiceNumber = `SHD-${String(maxNum + 1).padStart(4, '0')}`
     const { data: newInvoice, error: err } = await supabase.from('invoices').insert([{
       client_id: form.client_id, service_line: form.service_line, invoice_number: invoiceNumber,
       line_items: form.line_items.filter(li => li.description), subtotal, tax: parseFloat(form.tax) || 0,
@@ -533,9 +538,9 @@ function InvoiceDetail({ invoice, clients, onClose, onUpdated, onDeleted, showTo
 
   const subtotal = (form.line_items || []).reduce((s, li) => s + (parseFloat(li.total) || 0), 0)
   const total = subtotal + (parseFloat(form.tax) || 0)
-  const totalLabor = (invoice.internal_line_items || []).reduce((s, li) => s + (parseFloat(li.pay_total) || 0), 0)
-  const margin = (parseFloat(invoice.total) || 0) - totalLabor
-  const marginPct = invoice.total > 0 ? Math.round((margin / invoice.total) * 100) : 0
+  const totalLabor = (form.internal_line_items || []).reduce((s, li) => s + (parseFloat(li.pay_total) || 0), 0)
+  const margin = total - totalLabor
+  const marginPct = total > 0 ? Math.round((margin / total) * 100) : 0
 
   const handleSave = async () => {
     setSaving(true); setSaveError('')
@@ -551,6 +556,8 @@ function InvoiceDetail({ invoice, clients, onClose, onUpdated, onDeleted, showTo
   }
 
   const handleDelete = async () => {
+    // Clear invoice_id from any linked events before deleting
+    await supabase.from('events').update({ invoice_id: null, updated_at: new Date().toISOString() }).eq('invoice_id', invoice.id)
     const { error } = await supabase.from('invoices').delete().eq('id', invoice.id)
     if (error) { if (import.meta.env.DEV) console.error('Delete error:', error.message); setConfirmDelete(false); return }
     onDeleted(); onClose()
@@ -889,7 +896,9 @@ export default function Financials() {
     loadAllInvoices(); showToast('Staff member marked as paid')
   }
 
+  const [bulkPaying, setBulkPaying] = useState(false)
   const handleBulkPaidOut = async () => {
+    setBulkPaying(true)
     const byInvoice = {}
     unpaidStaff.forEach(s => {
       if (!byInvoice[s._invoiceId]) byInvoice[s._invoiceId] = []
@@ -902,6 +911,7 @@ export default function Financials() {
       const { error } = await supabase.from('invoices').update({ internal_line_items: updated, updated_at: new Date().toISOString() }).eq('id', invId)
       if (error) { if (import.meta.env.DEV) console.error('Bulk payout error:', error.message); showToast('Failed to update some payouts'); return }
     }
+    setBulkPaying(false)
     loadAllInvoices(); showToast(`${unpaidStaff.length} staff marked as paid`)
   }
 
@@ -980,7 +990,7 @@ export default function Financials() {
           ) : (
             <>
               <div style={{ marginBottom: 12 }}>
-                <button className="modal-btn-save" style={{ fontSize: 13 }} onClick={handleBulkPaidOut}>Mark All as Paid ({unpaidStaff.length})</button>
+                <button className="modal-btn-save" style={{ fontSize: 13 }} onClick={handleBulkPaidOut} disabled={bulkPaying}>{bulkPaying ? 'Processing...' : `Mark All as Paid (${unpaidStaff.length})`}</button>
               </div>
               <div className="clients-table-wrap">
                 <table className="clients-table">

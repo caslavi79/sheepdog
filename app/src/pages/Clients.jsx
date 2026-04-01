@@ -62,9 +62,10 @@ function AddClientModal({ onClose, onSaved, fromDeal }) {
 
   const handleSubmit = async (e) => {
     e.preventDefault()
+    if (!form.contact_name.trim()) { setError('Contact name is required'); return }
     setSaving(true)
     setError('')
-    const { data: newClient, error: err } = await supabase.from('clients').insert([form]).select('id').single()
+    const { data: newClient, error: err } = await supabase.from('clients').insert([{ ...form, contact_name: form.contact_name.trim() }]).select('id').single()
     setSaving(false)
     if (err) { setError(err.message); return }
     // Link pipeline deal to new client and advance stage past 'lead'
@@ -166,16 +167,34 @@ function ClientDetail({ client, onClose, onUpdated, onDeleted, navigate }) {
   }, [client.id])
 
   const handleSave = async () => {
+    if (!form.contact_name?.trim()) { setSaveError('Contact name is required'); return }
     setSaving(true)
     setSaveError('')
     const { id, created_at, ...rest } = form
-    const { error } = await supabase.from('clients').update({ ...rest, updated_at: new Date().toISOString() }).eq('id', client.id)
+    const { error } = await supabase.from('clients').update({ ...rest, contact_name: form.contact_name.trim(), updated_at: new Date().toISOString() }).eq('id', client.id)
     setSaving(false)
     if (error) { setSaveError(error.message); return }
     setEditing(false); onUpdated()
   }
 
   const handleDelete = async () => {
+    // Check for linked records before deleting
+    const [evRes, invRes, conRes, pipRes] = await Promise.all([
+      supabase.from('events').select('id', { count: 'exact', head: true }).eq('client_id', client.id),
+      supabase.from('invoices').select('id', { count: 'exact', head: true }).eq('client_id', client.id),
+      supabase.from('contracts').select('id', { count: 'exact', head: true }).eq('client_id', client.id),
+      supabase.from('pipeline').select('id', { count: 'exact', head: true }).eq('client_id', client.id),
+    ])
+    const linked = []
+    if (evRes.count > 0) linked.push(`${evRes.count} event${evRes.count !== 1 ? 's' : ''}`)
+    if (invRes.count > 0) linked.push(`${invRes.count} invoice${invRes.count !== 1 ? 's' : ''}`)
+    if (conRes.count > 0) linked.push(`${conRes.count} contract${conRes.count !== 1 ? 's' : ''}`)
+    if (pipRes.count > 0) linked.push(`${pipRes.count} pipeline deal${pipRes.count !== 1 ? 's' : ''}`)
+    if (linked.length > 0) {
+      setSaveError(`Cannot delete — client has ${linked.join(', ')}`)
+      setConfirmDelete(false)
+      return
+    }
     const { error } = await supabase.from('clients').delete().eq('id', client.id)
     if (error) { if (import.meta.env.DEV) console.error('Delete error:', error.message); setConfirmDelete(false); return }
     onDeleted()
@@ -229,7 +248,7 @@ function ClientDetail({ client, onClose, onUpdated, onDeleted, navigate }) {
                 <div className="detail-list">
                   {invoices.map(inv => (
                     <div key={inv.id} className="detail-list-item">
-                      <span>${inv.total}</span>
+                      <span>{inv.total != null ? `$${Number(inv.total).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}` : '—'}</span>
                       <span className="detail-list-meta">{inv.status}</span>
                     </div>
                   ))}
@@ -292,8 +311,8 @@ function ClientDetail({ client, onClose, onUpdated, onDeleted, navigate }) {
           <div className="detail-body">
             <div className="modal-form">
               <div className="modal-row">
-                <label className="modal-field"><span>Contact Name</span>
-                  <input value={form.contact_name} onChange={e => setForm({...form, contact_name: e.target.value})} />
+                <label className="modal-field"><span>Contact Name *</span>
+                  <input required value={form.contact_name} onChange={e => setForm({...form, contact_name: e.target.value})} />
                 </label>
                 <label className="modal-field"><span>Business Name</span>
                   <input value={form.business_name || ''} onChange={e => setForm({...form, business_name: e.target.value})} />
@@ -415,7 +434,7 @@ export default function Clients() {
           className="clients-search"
           placeholder="Search by name, business, email, or phone..."
           value={search}
-          onChange={e => setSearch(e.target.value)}
+          onChange={e => { setSearch(e.target.value); setPage(0) }}
         />
         <select className="clients-filter" value={filterLine} onChange={e => setFilterLine(e.target.value)}>
           <option value="">All Services</option>
@@ -454,7 +473,7 @@ export default function Clients() {
             </thead>
             <tbody>
               {filtered.map(c => (
-                <tr key={c.id} onClick={() => setSelected(c)}>
+                <tr key={c.id} onClick={() => setSelected(c)} onKeyDown={e => e.key === 'Enter' && setSelected(c)} tabIndex={0} style={{ cursor: 'pointer' }}>
                   <td className="clients-name">{c.contact_name}</td>
                   <td>{c.business_name || '—'}</td>
                   <td>{c.phone || '—'}</td>

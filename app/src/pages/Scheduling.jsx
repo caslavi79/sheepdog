@@ -276,6 +276,7 @@ export default function Scheduling() {
   const [confirmDeleteType, setConfirmDeleteType] = useState(null)
   const [filterStatus, setFilterStatus] = useState('')
   const [filterLine, setFilterLine] = useState('')
+  const [eventSearch, setEventSearch] = useState('')
   const [toast, setToast] = useState('')
   const fireToast = useToast()
   const showToast = (msg) => fireToast(setToast, msg)
@@ -346,18 +347,19 @@ export default function Scheduling() {
 
   const handleDeleteEvent = async (id) => {
     const { error } = await supabase.from('events').delete().eq('id', id)
-    if (error) { if (import.meta.env.DEV) console.error('Delete event:', error.message); return }
+    if (error) { if (import.meta.env.DEV) console.error('Delete event:', error.message); showToast('Failed to delete event'); return }
     setConfirmDeleteId(null); setConfirmDeleteType(null); loadEvents(); showToast('Event deleted')
   }
 
   const handleDeletePlacement = async (id) => {
     const { error } = await supabase.from('placements').delete().eq('id', id)
-    if (error) { if (import.meta.env.DEV) console.error('Delete placement:', error.message); return }
+    if (error) { if (import.meta.env.DEV) console.error('Delete placement:', error.message); showToast('Failed to delete placement'); return }
     setConfirmDeleteId(null); setConfirmDeleteType(null); loadPlacements(); showToast('Placement deleted')
   }
 
   const handleGenerateEvents = async (placement) => {
     if (!placement.schedule_pattern || !placement.start_date) { showToast('Set schedule pattern and start date first'); return }
+    if (placement.end_date && placement.start_date > placement.end_date) { showToast('End date must be after start date'); return }
     const days = placement.schedule_pattern.split(',').filter(Boolean)
     const dayMap = { sun: 0, mon: 1, tue: 2, wed: 3, thu: 4, fri: 5, sat: 6 }
     const start = new Date(placement.start_date + 'T00:00:00')
@@ -392,6 +394,10 @@ export default function Scheduling() {
   const filteredEvents = events.filter(ev => {
     if (filterStatus && ev.status !== filterStatus) return false
     if (filterLine && ev.service_line !== filterLine) return false
+    if (eventSearch) {
+      const q = eventSearch.toLowerCase()
+      return (ev.title || '').toLowerCase().includes(q) || (ev.venue_name || '').toLowerCase().includes(q) || (clientMap[ev.client_id] || '').toLowerCase().includes(q)
+    }
     return true
   })
 
@@ -462,6 +468,7 @@ export default function Scheduling() {
       {tab === 'events' && (
         <>
           <div className="clients-toolbar">
+            <input className="clients-search" placeholder="Search events..." value={eventSearch} onChange={e => setEventSearch(e.target.value)} style={{ maxWidth: 200 }} />
             <select className="clients-filter" value={filterStatus} onChange={e => setFilterStatus(e.target.value)}>
               <option value="">All Statuses</option>
               {EVENT_STATUSES.map(s => <option key={s} value={s}>{s.replace('_', ' ')}</option>)}
