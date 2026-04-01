@@ -76,6 +76,12 @@ CREATE TABLE IF NOT EXISTS public.invoices (
   payment_date date,
   payment_method text,
   notes text,
+  internal_line_items jsonb DEFAULT '[]',
+  internal_notes text,
+  event_date date,
+  event_start_time time,
+  event_end_time time,
+  venue_name text,
   created_at timestamptz DEFAULT now(),
   updated_at timestamptz DEFAULT now()
 );
@@ -97,7 +103,28 @@ CREATE TABLE IF NOT EXISTS public.contracts (id uuid PRIMARY KEY DEFAULT gen_ran
 CREATE TABLE IF NOT EXISTS public.licenses (id uuid PRIMARY KEY DEFAULT gen_random_uuid(), created_at timestamptz DEFAULT now());
 CREATE TABLE IF NOT EXISTS public.placements (id uuid PRIMARY KEY DEFAULT gen_random_uuid(), created_at timestamptz DEFAULT now());
 CREATE TABLE IF NOT EXISTS public.shifts (id uuid PRIMARY KEY DEFAULT gen_random_uuid(), created_at timestamptz DEFAULT now());
-CREATE TABLE IF NOT EXISTS public.staff (id uuid PRIMARY KEY DEFAULT gen_random_uuid(), created_at timestamptz DEFAULT now());
+CREATE TABLE IF NOT EXISTS public.staff (
+  id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+  name text NOT NULL DEFAULT '',
+  phone text,
+  email text,
+  role text,
+  default_pay_rate numeric,
+  created_at timestamptz DEFAULT now(),
+  updated_at timestamptz DEFAULT now()
+);
+
+CREATE INDEX IF NOT EXISTS idx_staff_name ON public.staff (name);
+
+CREATE TABLE IF NOT EXISTS public.pay_rate_defaults (
+  id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+  role text NOT NULL,
+  service_line text NOT NULL,
+  rate numeric NOT NULL,
+  created_at timestamptz DEFAULT now()
+);
+
+CREATE UNIQUE INDEX IF NOT EXISTS idx_pay_rate_defaults_lookup ON public.pay_rate_defaults (role, service_line);
 
 -- =============================================================================
 -- ROW LEVEL SECURITY
@@ -115,6 +142,7 @@ ALTER TABLE public.licenses ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.placements ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.shifts ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.staff ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.pay_rate_defaults ENABLE ROW LEVEL SECURITY;
 
 -- Authenticated users can read/write all ops tables
 DO $$ BEGIN
@@ -150,6 +178,9 @@ DO $$ BEGIN
   END IF;
   IF NOT EXISTS (SELECT 1 FROM pg_policies WHERE policyname = 'authenticated only' AND tablename = 'staff') THEN
     CREATE POLICY "authenticated only" ON public.staff FOR ALL USING (auth.role() = 'authenticated');
+  END IF;
+  IF NOT EXISTS (SELECT 1 FROM pg_policies WHERE policyname = 'authenticated only' AND tablename = 'pay_rate_defaults') THEN
+    CREATE POLICY "authenticated only" ON public.pay_rate_defaults FOR ALL USING (auth.role() = 'authenticated');
   END IF;
 END $$;
 
