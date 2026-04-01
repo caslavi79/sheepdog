@@ -37,10 +37,10 @@ const modules = [
   },
   {
     title: 'Scheduling',
-    desc: 'Events and staffing calendars',
+    desc: 'Events calendar, staff assignments, placements',
     path: '/scheduling',
     icon: icons.scheduling,
-    ready: false,
+    ready: true,
   },
   {
     title: 'Financials',

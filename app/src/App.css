@@ -1077,6 +1077,24 @@ body.modal-open { overflow: hidden; }
 .collapsible-toggle:hover { border-color: var(--steel); color: var(--white); }
 .collapsible-section { border: 1px solid rgba(255,255,255,0.06); border-top: none; border-radius: 0 0 6px 6px; padding: 16px; margin-bottom: 12px; }
 
+/* CALENDAR */
+.cal-nav { display: flex; align-items: center; gap: 12px; margin-bottom: 16px; }
+.cal-nav-btn { background: var(--char); border: 1px solid rgba(255,255,255,0.1); color: var(--white); font-family: var(--fh); font-size: 14px; font-weight: 700; padding: 6px 14px; border-radius: 5px; cursor: pointer; }
+.cal-nav-btn:hover { border-color: var(--steel); }
+.cal-nav-title { font-family: var(--fh); font-size: 18px; font-weight: 800; color: var(--white); }
+.cal-grid { display: grid; grid-template-columns: repeat(7, 1fr); border: 1px solid rgba(255,255,255,0.06); border-radius: 8px; overflow: hidden; }
+.cal-header { background: var(--char); padding: 8px; text-align: center; font-family: var(--fh); font-size: 11px; font-weight: 700; letter-spacing: 1px; text-transform: uppercase; color: var(--steel); border-bottom: 1px solid rgba(255,255,255,0.06); }
+.cal-cell { min-height: 90px; padding: 6px; border-right: 1px solid rgba(255,255,255,0.04); border-bottom: 1px solid rgba(255,255,255,0.04); cursor: pointer; transition: background 0.1s; }
+.cal-cell:hover { background: rgba(255,255,255,0.02); }
+.cal-cell:nth-child(7n) { border-right: none; }
+.cal-cell--other { opacity: 0.35; }
+.cal-cell--today { background: rgba(61,90,128,0.08); }
+.cal-cell-date { display: block; font-family: var(--fh); font-size: 12px; font-weight: 700; color: var(--steel); margin-bottom: 4px; }
+.cal-cell--today .cal-cell-date { color: var(--white); }
+.cal-event { font-size: 11px; padding: 2px 6px; margin-bottom: 2px; border-radius: 3px; background: var(--char); border-left: 2px solid; color: var(--white); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; cursor: pointer; font-family: var(--fb); }
+.cal-event:hover { background: var(--dark); }
+.cal-event-more { font-size: 10px; color: var(--steel); font-family: var(--fh); font-weight: 600; padding: 0 6px; }
+
 /* TABLET */
 @media (max-width: 1024px) {
   .app-main { padding: 32px; }
@@ -1404,6 +1422,10 @@ body.modal-open { overflow: hidden; }
 
   /* -- HUB ALERTS (mobile) -- */
   .hub-alerts { font-size: 13px; padding: 0; gap: 6px; }
+  .cal-cell { min-height: 60px; padding: 4px; }
+  .cal-cell-date { font-size: 11px; }
+  .cal-event { font-size: 10px; padding: 1px 4px; }
+  .cal-nav-title { font-size: 15px; }
 
   /* -- FONT SIZE FLOOR -- */
   .hub-card-badge, .resource-card-badge { font-size: 10px; }

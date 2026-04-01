@@ -56,11 +56,26 @@ CREATE TABLE IF NOT EXISTS public.pipeline (
 CREATE TABLE IF NOT EXISTS public.events (
   id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
   client_id uuid REFERENCES public.clients(id),
+  title text,
   venue_name text,
   event_type text,
+  service_line text,
   date text,
-  created_at timestamptz DEFAULT now()
+  start_time time,
+  end_time time,
+  staff_needed integer DEFAULT 0,
+  staff_assigned jsonb DEFAULT '[]',
+  status text DEFAULT 'scheduled',
+  invoice_id uuid REFERENCES public.invoices(id),
+  placement_id uuid,
+  notes text,
+  created_at timestamptz DEFAULT now(),
+  updated_at timestamptz DEFAULT now()
 );
+
+CREATE INDEX IF NOT EXISTS idx_events_date ON public.events (date);
+CREATE INDEX IF NOT EXISTS idx_events_client ON public.events (client_id);
+CREATE INDEX IF NOT EXISTS idx_events_status ON public.events (status);
 
 CREATE TABLE IF NOT EXISTS public.invoices (
   id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
@@ -99,7 +114,27 @@ CREATE TABLE IF NOT EXISTS public.rate_limits (
 
 -- Stub tables (exist but not yet populated)
 CREATE TABLE IF NOT EXISTS public.contracts (id uuid PRIMARY KEY DEFAULT gen_random_uuid(), created_at timestamptz DEFAULT now());
-CREATE TABLE IF NOT EXISTS public.placements (id uuid PRIMARY KEY DEFAULT gen_random_uuid(), created_at timestamptz DEFAULT now());
+CREATE TABLE IF NOT EXISTS public.placements (
+  id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+  client_id uuid REFERENCES public.clients(id),
+  title text,
+  service_line text DEFAULT 'staffing',
+  venue_name text,
+  schedule_pattern text,
+  start_date date,
+  end_date date,
+  default_start_time time,
+  default_end_time time,
+  staff_needed integer DEFAULT 0,
+  default_staff jsonb DEFAULT '[]',
+  status text DEFAULT 'active',
+  notes text,
+  created_at timestamptz DEFAULT now(),
+  updated_at timestamptz DEFAULT now()
+);
+
+CREATE INDEX IF NOT EXISTS idx_placements_client ON public.placements (client_id);
+CREATE INDEX IF NOT EXISTS idx_placements_status ON public.placements (status);
 CREATE TABLE IF NOT EXISTS public.shifts (id uuid PRIMARY KEY DEFAULT gen_random_uuid(), created_at timestamptz DEFAULT now());
 
 CREATE TABLE IF NOT EXISTS public.staff (

@@ -10,6 +10,7 @@ import Pipeline from './pages/Pipeline'
 import Submissions from './pages/Submissions'
 import Financials from './pages/Financials'
 import Compliance from './pages/Compliance'
+import Scheduling from './pages/Scheduling'
 import Placeholder from './pages/Placeholder'
 import './App.css'
 
@@ -22,7 +23,7 @@ export default function App() {
         <Route element={<ProtectedRoute><Layout /></ProtectedRoute>}>
           <Route index element={<Hub />} />
           <Route path="resources" element={<Resources />} />
-          <Route path="scheduling" element={<Placeholder />} />
+          <Route path="scheduling" element={<Scheduling />} />
           <Route path="pipeline" element={<Pipeline />} />
           <Route path="submissions" element={<Submissions />} />
           <Route path="clients" element={<Clients />} />
