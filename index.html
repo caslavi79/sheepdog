@@ -515,86 +515,9 @@ body.scroll-locked{overflow:hidden}
 <div class="footer-copy">&copy; 2026 Sheepdog Security LLC &mdash; Licensed Event Security, TABC-Certified Mobile Bartending &amp; Contracted Staffing in Bryan-College Station, Brazos Valley, TX. All rights reserved.</div>
 </footer>
 </main><!-- /page-content -->
+<script>var SUPABASE_URL = 'https://sezzqhmsfulclcqmfwja.supabase.co';</script>
+<script src="/js/form.js"></script>
 <script>
-function toggleMobileNav() {
-  var burger = document.getElementById('burgerBtn');
-  burger.classList.toggle('open');
-  document.getElementById('mobileNav').classList.toggle('open');
-  document.getElementById('mobileOverlay').classList.toggle('open');
-  var isOpen = document.getElementById('mobileNav').classList.contains('open');
-  burger.setAttribute('aria-expanded', isOpen);
-  document.body.style.overflow = isOpen ? 'hidden' : '';
-}
-function toggleFaq(btn) {
-  var item = btn.parentElement;
-  var siblings = item.parentElement.querySelectorAll('.faq-item');
-  siblings.forEach(function(s) { if (s !== item) { s.classList.remove('open'); s.querySelector('.faq-q').setAttribute('aria-expanded', 'false'); } });
-  item.classList.toggle('open');
-  btn.setAttribute('aria-expanded', item.classList.contains('open'));
-}
-// Contact form submit via Supabase Edge Function
-const SUPABASE_URL = 'https://sezzqhmsfulclcqmfwja.supabase.co';
-
-async function submitForm(e) {
-  e.preventDefault();
-  const form = e.target;
-  const btn = form.querySelector('.qf-submit');
-  const origText = btn.textContent;
-  btn.textContent = 'Sending...';
-  btn.disabled = true;
-
-  const data = {
-    name: form.name.value,
-    phone: form.phone.value,
-    email: form.email.value,
-    service: form.service.value,
-    message: form.message.value,
-    website: form.website.value
-  };
-
-  try {
-    const res = await fetch(SUPABASE_URL + '/functions/v1/contact-submit', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(data)
-    });
-    const result = await res.json();
-    if (res.ok && result.success) {
-      btn.textContent = 'Sent! We\'ll be in touch.';
-      btn.style.background = '#357A38';
-      btn.style.cursor = 'default';
-      form.querySelectorAll('input, select, textarea').forEach(el => {
-        el.disabled = true;
-        el.style.opacity = '.5';
-      });
-    } else {
-      throw new Error(result.error || 'Failed');
-    }
-  } catch (err) {
-    btn.textContent = err.message || 'Something went wrong. Try again.';
-    btn.style.background = '#C23B22';
-    btn.disabled = false;
-    setTimeout(() => { btn.textContent = origText; btn.style.background = ''; }, 3000);
-  }
-  return false;
-}
-
-// Quote form toggle
-function toggleForm() {
-  const form = document.getElementById('quoteForm');
-  const btn = document.getElementById('quoteToggle');
-  const actions = btn.parentElement;
-  form.classList.add('open');
-  btn.style.opacity = '0';
-  btn.style.width = '0';
-  btn.style.padding = '0';
-  btn.style.border = '0';
-  btn.style.fontSize = '0';
-  btn.style.letterSpacing = '0';
-  btn.style.pointerEvents = 'none';
-  actions.style.gap = '0';
-}
-
 // Scroll to top on load (prevent browser restoring scroll position)
 if ('scrollRestoration' in history) history.scrollRestoration = 'manual';
 window.scrollTo(0, 0);
@@ -837,25 +760,7 @@ if (!isTouch) {
   magBtns.forEach(b => btnObs.observe(b));
 }
 
-// Phone formatting and validation
-function handlePhone(el) {
-  var error = document.getElementById('phone-error');
-  var digits = el.value.replace(/\D/g, '');
-  el.value = formatPhone(digits);
-  if (digits.length > 0 && digits.length !== 10) {
-    error.textContent = 'Enter a 10-digit phone number';
-    el.classList.add('qf-invalid');
-  } else {
-    error.textContent = '';
-    el.classList.remove('qf-invalid');
-  }
-}
-function formatPhone(d) {
-  if (!d) return '';
-  if (d.length <= 3) return '(' + d;
-  if (d.length <= 6) return '(' + d.substring(0,3) + ') ' + d.substring(3);
-  return '(' + d.substring(0,3) + ') ' + d.substring(3,6) + '-' + d.substring(6,10);
-}
+// Phone formatting, FAQ toggle, mobile nav, and form submit are in /js/form.js
 </script>
 <div id="cookie-banner" style="display:none;position:fixed;bottom:0;left:0;right:0;background:#161616;border-top:1px solid rgba(255,255,255,0.08);padding:14px 24px;z-index:9999;font-family:'Source Sans 3',sans-serif;font-size:14px;color:#A0A0A0;text-align:center;">
 We use cookies for analytics to improve your experience. <button onclick="localStorage.setItem('cookie_consent','true');gtag('consent','update',{analytics_storage:'granted'});document.getElementById('cookie-banner').style.display='none'" style="background:#C23B22;color:#fff;border:none;padding:6px 16px;border-radius:3px;font-family:'Barlow',sans-serif;font-weight:700;font-size:12px;letter-spacing:1px;text-transform:uppercase;cursor:pointer;margin-left:12px">Accept</button><button onclick="localStorage.setItem('cookie_consent','false');document.getElementById('cookie-banner').style.display='none'" style="background:none;color:#7A8490;border:1px solid rgba(255,255,255,0.1);padding:6px 16px;border-radius:3px;font-family:'Barlow',sans-serif;font-weight:700;font-size:12px;letter-spacing:1px;text-transform:uppercase;cursor:pointer;margin-left:8px">Decline</button>

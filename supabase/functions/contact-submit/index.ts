@@ -28,10 +28,7 @@ function getCorsHeaders(requestOrigin: string | null): Record<string, string> {
 const RATE_LIMIT_MAX = 3;
 const RATE_LIMIT_WINDOW_MS = 10 * 60 * 1000; // 10 minutes
 
-async function isRateLimited(
-  supabase: ReturnType<typeof createClient>,
-  ip: string
-): Promise<boolean> {
+async function isRateLimited(supabase: ReturnType<typeof createClient>, ip: string): Promise<boolean> {
   const windowStart = new Date(Date.now() - RATE_LIMIT_WINDOW_MS).toISOString();
 
   // Count recent requests from this IP
@@ -43,23 +40,27 @@ async function isRateLimited(
     .gte("created_at", windowStart);
 
   if (error) {
-    // If we can't check rate limits, fail open (allow the request) and log
+    // If we can't check rate limits, fail closed (block the request) and log
     console.error("Rate limit check failed:", error.message);
-    return false;
+    return true;
   }
 
   if ((count ?? 0) >= RATE_LIMIT_MAX) return true;
 
   // Record this request
-  await supabase.from("rate_limits").insert({ ip, endpoint: "contact-submit" });
+  const { error: insertErr } = await supabase.from("rate_limits").insert({ ip, endpoint: "contact-submit" });
+  if (insertErr) {
+    console.error("Rate limit insert failed:", insertErr.message);
+  }
 
-  // Clean up old entries (fire-and-forget, don't await)
+  // Clean up ALL old entries (not just this IP) to prevent unbounded table growth
   supabase
     .from("rate_limits")
     .delete()
-    .eq("ip", ip)
     .lt("created_at", windowStart)
-    .then(() => {});
+    .then(({ error: cleanupErr }) => {
+      if (cleanupErr) console.error("Rate limit cleanup failed:", cleanupErr.message);
+    });
 
   return false;
 }
@@ -91,9 +92,107 @@ Deno.serve(async (req) => {
 
   const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY);
 
-  // Persistent rate limit check
+  // Parse JSON body first — before rate limiting so malformed requests don't consume slots
+  let body: Record<string, unknown>;
+  try {
+    body = await req.json();
+  } catch {
+    return new Response(
+      JSON.stringify({ error: "Invalid JSON body" }),
+      {
+        status: 400,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      }
+    );
+  }
+
+  // Honeypot — if filled, it's a bot. Return 200 so bots think they succeeded.
+  if (body.website) {
+    return new Response(JSON.stringify({ success: true }), {
+      headers: { ...corsHeaders, "Content-Type": "application/json" },
+    });
+  }
+
+  const { name, phone, email, service, message, company } = body as Record<string, string>;
+
+  // Type check — all fields must be strings
+  for (const [key, val] of Object.entries({ name, email, service, message })) {
+    if (typeof val !== "string") {
+      return new Response(
+        JSON.stringify({ error: `${key} must be a string` }),
+        {
+          status: 400,
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+        }
+      );
+    }
+  }
+
+  // Validate required fields
+  if (!name || !email || !service || !message) {
+    return new Response(
+      JSON.stringify({
+        error: "Name, email, service, and message are required",
+      }),
+      {
+        status: 400,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      }
+    );
+  }
+
+  // Input length limits
+  const MAX_LENGTHS: Record<string, number> = {
+    name: 200, email: 320, phone: 30, service: 50, message: 5000, company: 200,
+  };
+  for (const [key, max] of Object.entries(MAX_LENGTHS)) {
+    const val = (body as Record<string, string>)[key];
+    if (typeof val === "string" && val.length > max) {
+      return new Response(
+        JSON.stringify({ error: `${key} exceeds maximum length of ${max} characters` }),
+        {
+          status: 400,
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+        }
+      );
+    }
+  }
+
+  // Validate service against allowlist
+  const VALID_SERVICES = [
+    "events-security", "events-bartending", "events-both",
+    "staffing", "field-ops", "logistics", "facility", "warehouse", "project", "ongoing",
+    "other",
+  ];
+  if (!VALID_SERVICES.includes(service)) {
+    return new Response(
+      JSON.stringify({ error: "Invalid service type" }),
+      {
+        status: 400,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      }
+    );
+  }
+
+  // Validate email format
+  const emailRegex = /^[a-zA-Z0-9.!#$%&'*+/=?^_\`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)*$/;
+  if (!emailRegex.test(email)) {
+    return new Response(
+      JSON.stringify({ error: "Invalid email format" }),
+      {
+        status: 400,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      }
+    );
+  }
+
+  // Rate limit AFTER validation so bad requests don't consume slots
+  // Use x-real-ip (set by Supabase's proxy, not spoofable) with x-forwarded-for as fallback
   const ip =
-    req.headers.get("x-forwarded-for")?.split(",")[0]?.trim() || "unknown";
+    req.headers.get("x-real-ip") ||
+    req.headers.get("cf-connecting-ip") ||
+    req.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ||
+    "unknown";
   const limited = await isRateLimited(supabase, ip);
   if (limited) {
     return new Response(
@@ -108,46 +207,14 @@ Deno.serve(async (req) => {
   }
 
   try {
-    const body = await req.json();
 
-    // Honeypot — if filled, it's a bot. Return 200 so bots think they succeeded.
-    if (body.website) {
-      return new Response(JSON.stringify({ success: true }), {
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
-      });
-    }
-
-    const { name, phone, email, service, message, company } = body;
-
-    // Validate required fields
-    if (!name || !email || !service || !message) {
-      return new Response(
-        JSON.stringify({
-          error: "Name, email, service, and message are required",
-        }),
-        {
-          status: 400,
-          headers: { ...corsHeaders, "Content-Type": "application/json" },
-        }
-      );
-    }
-
-    // Validate email format
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    if (!emailRegex.test(email)) {
-      return new Response(
-        JSON.stringify({ error: "Invalid email format" }),
-        {
-          status: 400,
-          headers: { ...corsHeaders, "Content-Type": "application/json" },
-        }
-      );
-    }
-
-    // Verify email domain has MX records
+    // Verify email domain has MX records (with 3s timeout to prevent hangs)
     const domain = email.split("@")[1];
     try {
-      const dns = await Deno.resolveDns(domain, "MX");
+      const dns = await Promise.race([
+        Deno.resolveDns(domain, "MX"),
+        new Promise<never>((_, reject) => setTimeout(() => reject(new Error("DNS timeout")), 3000)),
+      ]);
       if (!dns || dns.length === 0) {
         return new Response(
           JSON.stringify({ error: "Email domain does not accept mail" }),
@@ -158,13 +225,8 @@ Deno.serve(async (req) => {
         );
       }
     } catch {
-      return new Response(
-        JSON.stringify({ error: "Email domain does not exist" }),
-        {
-          status: 400,
-          headers: { ...corsHeaders, "Content-Type": "application/json" },
-        }
-      );
+      // On timeout or DNS failure, allow the request through — don't block legit users
+      // The email format regex already validated the basic structure
     }
 
     // Sanitize inputs for use in HTML email bodies
@@ -202,12 +264,12 @@ Deno.serve(async (req) => {
       .insert({
         contact_name: name,
         business_name: company || null,
+        email: email,
         phone: phone || null,
-        email,
         service_line: serviceToPipeline[service] || "events",
         stage: "lead",
-        value: null,
-        notes: "[Contact Form] " + message,
+        source: "contact_form",
+        notes: message,
       });
 
     if (pipelineError) {
@@ -245,30 +307,7 @@ Deno.serve(async (req) => {
       <p style="color:#7A8490;font-size:12px;">Submitted from sheepdogtexas.com</p>
     `;
 
-    const resendRes = await fetch("https://api.resend.com/emails", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${RESEND_API_KEY}`,
-      },
-      body: JSON.stringify({
-        from: "Sheepdog Lead <noreply@sheepdogtexas.com>",
-        to: [
-          "benschultz519@gmail.com",
-          "Joshk1288@gmail.com",
-          "sheepdogsecurityllc@gmail.com",
-        ],
-        subject: `[${serviceDisplay}] New Quote Request from ${safeName}`,
-        html: internalHtml,
-        reply_to: email,
-      }),
-    });
-
-    if (!resendRes.ok) {
-      console.error("Resend internal email error:", await resendRes.text());
-    }
-
-    // Confirmation email to the submitter
+    // Confirmation email HTML
     const confirmHtml = `
       <div style="font-family:sans-serif;max-width:560px;margin:0 auto;color:#2A2A2A">
         <h2 style="color:#0C0C0C;margin-bottom:4px">Thanks for reaching out, ${safeName}.</h2>
@@ -290,23 +329,50 @@ Deno.serve(async (req) => {
       </div>
     `;
 
-    const confirmRes = await fetch("https://api.resend.com/emails", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${RESEND_API_KEY}`,
-      },
-      body: JSON.stringify({
-        from: "Sheepdog <noreply@sheepdogtexas.com>",
-        to: [email],
-        reply_to: "sheepdogsecurityllc@gmail.com",
-        subject: "We got your request — Sheepdog",
-        html: confirmHtml,
-      }),
-    });
+    // Send both emails in parallel — don't let one block the other
+    const resendHeaders = {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${RESEND_API_KEY}`,
+    };
 
-    if (!confirmRes.ok) {
-      console.error("Resend confirmation email error:", await confirmRes.text());
+    const [internalResult, confirmResult] = await Promise.allSettled([
+      fetch("https://api.resend.com/emails", {
+        method: "POST",
+        headers: resendHeaders,
+        body: JSON.stringify({
+          from: "Sheepdog Lead <noreply@sheepdogtexas.com>",
+          to: [
+            "benschultz519@gmail.com",
+            "Joshk1288@gmail.com",
+            "sheepdogsecurityllc@gmail.com",
+          ],
+          subject: `[${serviceDisplay}] New Quote Request from ${safeName}`,
+          html: internalHtml,
+          reply_to: safeEmail,
+        }),
+      }),
+      fetch("https://api.resend.com/emails", {
+        method: "POST",
+        headers: resendHeaders,
+        body: JSON.stringify({
+          from: "Sheepdog <noreply@sheepdogtexas.com>",
+          to: [email],
+          reply_to: "sheepdogsecurityllc@gmail.com",
+          subject: "We got your request — Sheepdog",
+          html: confirmHtml,
+        }),
+      }),
+    ]);
+
+    if (internalResult.status === "rejected") {
+      console.error("Resend internal email failed:", internalResult.reason);
+    } else if (!internalResult.value.ok) {
+      console.error("Resend internal email error:", await internalResult.value.text());
+    }
+    if (confirmResult.status === "rejected") {
+      console.error("Resend confirmation email failed:", confirmResult.reason);
+    } else if (!confirmResult.value.ok) {
+      console.error("Resend confirmation email error:", await confirmResult.value.text());
     }
 
     return new Response(JSON.stringify({ success: true }), {

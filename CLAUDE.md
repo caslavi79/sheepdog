@@ -1,0 +1,231 @@
+# Sheepdog Project — System Overview
+
+Everything a new Claude Code session needs to pick up where we left off.
+
+## Architecture
+
+Two repos, one Supabase project, one Resend account. No new repos needed.
+
+| Layer | URL | Repo | Hosting |
+|-------|-----|------|---------|
+| Client-facing site | sheepdogtexas.com | github.com/caslavi79/sheepdog | GitHub Pages (static HTML) |
+| Backend operations app | app.sheepdogtexas.com | github.com/caslavi79/sheepdog-app | GitHub Pages (Vite/React) |
+| Database + Auth + Edge Functions | sezzqhmsfulclcqmfwja.supabase.co | — | Supabase (cloud) |
+| Transactional email | Resend (noreply@sheepdogtexas.com) | — | Resend (cloud) |
+
+The client-facing site and the app code both live in the `sheepdog` repo. The `sheepdog-app` repo is just the deploy target for the built app.
+
+## Supabase
+
+- **Project ref:** `sezzqhmsfulclcqmfwja`
+- **URL:** `https://sezzqhmsfulclcqmfwja.supabase.co`
+- **Anon key (public):** in `app/.env` as `VITE_SUPABASE_ANON_KEY`
+- **Service role key:** stored as Supabase secret (never in code)
+
+### Secrets (set via `npx supabase secrets set`)
+
+- `RESEND_API_KEY` — Resend API key for sending emails
+- `SUPABASE_URL` — auto-set by Supabase
+- `SUPABASE_SERVICE_ROLE_KEY` — auto-set by Supabase
+
+## Edge Function: contact-submit
+
+**This is the most critical piece. If this breaks, the client's live website cannot intake leads.**
+
+- **Endpoint:** `https://sezzqhmsfulclcqmfwja.supabase.co/functions/v1/contact-submit`
+- **Source:** `supabase/functions/contact-submit/index.ts`
+- **Method:** POST (no auth required — public form)
+- **CORS:** locked to `sheepdogtexas.com` and `www.sheepdogtexas.com`
+
+### Deploy command (CRITICAL)
+
+```bash
+npx supabase functions deploy contact-submit --project-ref sezzqhmsfulclcqmfwja --no-verify-jwt
+```
+
+**ALWAYS use `--no-verify-jwt`.** The contact form is public — no auth token is sent. Without this flag, Supabase re-enables JWT verification on every deploy, which silently returns 401 on all form submissions and breaks lead intake.
+
+### What it does
+
+1. Validates + sanitizes input (name, phone, email, service, message)
+2. Checks honeypot (`website` field — if filled, silently returns 200)
+3. Rate limits: 3 requests per IP per 10 minutes (stored in `rate_limits` table)
+4. Validates email format + DNS MX record check
+5. Inserts into `contact_submissions` table
+6. Auto-creates a deal in `pipeline` table with proper columns
+7. Sends internal notification email to team via Resend
+8. Sends confirmation email to submitter via Resend
+9. Returns `{ success: true }`
+
+### Email recipients (hardcoded in edge function)
+
+- **Internal notification to:** benschultz519@gmail.com, Joshk1288@gmail.com, sheepdogsecurityllc@gmail.com
+- **From:** `Sheepdog Lead <noreply@sheepdogtexas.com>`
+- **Reply-to on internal:** submitter's email (so owners can reply directly to the lead)
+- **Confirmation to:** submitter's email
+- **From:** `Sheepdog <noreply@sheepdogtexas.com>`
+- **Reply-to on confirmation:** sheepdogsecurityllc@gmail.com
+
+### Service mapping (form value -> pipeline service_line)
+
+| Form value | Pipeline service_line |
+|---|---|
+| events-security, events-bartending, events-both, other | events |
+| staffing, field-ops, logistics, facility, warehouse, project, ongoing | staffing |
+
+## Database Tables
+
+### pipeline
+
+| Column | Type | Notes |
+|--------|------|-------|
+| id | uuid | PK, auto |
+| client_id | uuid | FK to clients, nullable |
+| contact_name | text | Person's name |
+| business_name | text | Company/venue |
+| phone | text | |
+| email | text | |
+| service_line | text | 'events', 'staffing', or 'both' |
+| stage | text | See stages below |
+| value | numeric | Estimated deal value |
+| source | text | 'contact_form' or null (manual) |
+| notes | text | Message from form or manual notes |
+| next_action | text | |
+| last_activity | timestamptz | |
+| created_at | timestamptz | DEFAULT now() |
+| updated_at | timestamptz | DEFAULT now() |
+
+**Pipeline stages:** lead -> outreach_sent -> responded -> meeting_scheduled -> proposal_sent -> under_contract -> lost
+
+### contact_submissions
+
+| Column | Type |
+|--------|------|
+| id | uuid |
+| name | text |
+| phone | text |
+| email | text |
+| company | text |
+| service | text |
+| message | text |
+| created_at | timestamptz |
+
+### clients
+
+| Column | Type |
+|--------|------|
+| id | uuid |
+| contact_name | text |
+| business_name | text |
+| phone | text |
+| email | text |
+| address | text |
+| service_line | text ('events', 'staffing', 'both') |
+| client_type | text ('bar', 'venue', 'wedding-planner', 'corporate', 'greek-org', 'promoter', 'private', 'other') |
+| status | text ('active', 'inactive', 'prospect') |
+| notes | text |
+| created_at | timestamptz |
+| updated_at | timestamptz |
+
+### Other tables
+
+- **events** — client events (client_id FK, venue_name, event_type, date)
+- **invoices** — client invoices (client_id FK, total, status)
+- **rate_limits** — rate limit tracking (ip, endpoint, created_at)
+- **contractor_docs, contracts, licenses, placements, shifts, staff** — exist but most are stubs
+
+### RLS
+
+Row Level Security is enabled on ALL tables. Policies require authenticated users for all ops tables. The edge function uses the service role key to bypass RLS.
+
+## Client-Facing Site (sheepdogtexas.com)
+
+Three static HTML pages, each with a contact form:
+
+- `index.html` — homepage, "CONTACT US" button
+- `events/index.html` — events landing page, "GET A QUOTE" button
+- `staffing/index.html` — staffing landing page, "GET A QUOTE" button
+
+All three forms call the same `submitForm()` JS function which POSTs to the edge function. The form fields are: name, phone, email, service (dropdown), message, website (honeypot, hidden).
+
+**Google Analytics:** G-1ZT2F15325
+
+## Operations App (app.sheepdogtexas.com)
+
+Vite + React 19 + React Router v7 + Supabase JS client.
+
+### App routes
+
+| Route | Page | Status |
+|-------|------|--------|
+| /login | Login | Ready |
+| /reset-password | Password reset | Ready |
+| / | Hub (dashboard) | Ready |
+| /pipeline | Sales pipeline (Kanban) | Ready |
+| /submissions | Contact form submissions viewer | Ready |
+| /clients | Client management (CRUD) | Ready |
+| /resources | Docs, guides, templates | Ready |
+| /scheduling | Events/staffing calendars | Coming soon |
+| /financials | Revenue, invoicing | Coming soon |
+| /compliance | Licensing, TABC, contractor docs | Coming soon |
+
+All routes except /login and /reset-password are protected (require Supabase auth session).
+
+### Key files
+
+- `app/src/App.jsx` — router + auth provider
+- `app/src/lib/supabase.js` — Supabase client init
+- `app/src/pages/Pipeline.jsx` — Kanban board with drag-and-drop
+- `app/src/pages/Submissions.jsx` — read-only submissions table
+- `app/src/pages/Clients.jsx` — full CRUD for clients
+- `app/src/components/Layout.jsx` — sidebar nav layout
+- `app/src/components/ProtectedRoute.jsx` — auth guard
+- `app/src/App.css` — all styles
+
+### Deploy the app
+
+```bash
+cd app && npm run deploy
+```
+
+This builds with Vite and pushes to the `sheepdog-app` repo via gh-pages.
+
+## Resend (Email)
+
+- **Domain:** sheepdogtexas.com (verified, GoDaddy DNS)
+- **API key name:** "contact form 1" (stored as Supabase secret `RESEND_API_KEY`)
+- **Region:** us-east-1
+- **Sender:** noreply@sheepdogtexas.com
+
+## Environment Files
+
+### app/.env
+
+```
+VITE_SUPABASE_URL=https://sezzqhmsfulclcqmfwja.supabase.co
+VITE_SUPABASE_ANON_KEY=<public anon key>
+```
+
+## Data Flow: Contact Form -> Pipeline
+
+```
+Website visitor fills form
+  -> submitForm() in HTML
+  -> POST to edge function (no auth)
+  -> Validates, rate limits, honeypot check
+  -> INSERT into contact_submissions
+  -> INSERT into pipeline (contact_name, email, phone, service_line, stage='lead', source='contact_form', notes=message)
+  -> Resend: internal email to team (reply-to = submitter)
+  -> Resend: confirmation email to submitter (reply-to = sheepdog)
+  -> Return { success: true }
+```
+
+Leads appear in the Pipeline page of the app as cards in the "Lead" column.
+
+## Known Issues / Watch Out For
+
+1. **--no-verify-jwt** — Cannot stress this enough. Every edge function deploy without this flag breaks the live contact form.
+2. **Rate limiter** — 3 per IP per 10 min. During testing, you'll get blocked. The rate_limits table can be cleared manually if needed.
+3. **Supabase dashboard is slow** — SQL editor and table editor load slowly. Be patient or use CLI/curl instead.
+4. **Pipeline.jsx uses drag-and-drop** — has optimistic updates with rollback on error.
+5. **Scheduling, Financials, Compliance pages** — routes exist but components are stubs (show "coming soon").
