@@ -67,8 +67,8 @@ function AddClientModal({ onClose, onSaved }) {
   }
 
   return (
-    <div className="modal-overlay" onClick={onClose}>
-      <div className="modal-card" onClick={e => e.stopPropagation()}>
+    <div className="modal-overlay" role="presentation" onClick={onClose}>
+      <div className="modal-card" role="dialog" aria-modal="true" onClick={e => e.stopPropagation()}>
         <h2 className="modal-title">Add Client</h2>
         <form onSubmit={handleSubmit} className="modal-form">
           <div className="modal-row">
@@ -171,7 +171,7 @@ function ClientDetail({ client, onClose, onUpdated, onDeleted }) {
 
   return (
     <div className="modal-overlay" onClick={onClose}>
-      <div className="detail-panel" onClick={e => e.stopPropagation()}>
+      <div className="detail-panel" role="dialog" aria-modal="true" onClick={e => e.stopPropagation()}>
         <div className="detail-header">
           <div>
             <h2 className="detail-name">{client.contact_name}</h2>
