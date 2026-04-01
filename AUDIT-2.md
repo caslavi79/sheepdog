@@ -16,23 +16,23 @@ All findings from 6 parallel audits across edge function, React app, static site
 - [x] ~~**H2** — No type checking on inputs~~ → Fixed in edge function
 - [x] ~~**H3** — company field never saved~~ → Fixed in edge function
 - [x] ~~**H4** — rate_limits table unbounded~~ → Fixed: global cleanup
-- [ ] **H5** — Insurance PDF with policy numbers in repo root. (root/Sheepdog Security LLC - COI...pdf)
+- [x] ~~**H5** — Insurance PDF~~ → Fixed: *.pdf added to .gitignore
 - [x] ~~**H6** — No deploy script~~ → Fixed: scripts/deploy-edge.sh
-- [ ] **H7** — Pipeline drag-and-drop broken on mobile/touch. (Pipeline.jsx)
-- [ ] **H8** — Color contrast failures. --steel on --black = 4.1:1, fails WCAG AA. (App.css)
-- [ ] **H9** — No user-facing error states on data load failures. (Clients.jsx, Pipeline.jsx, Submissions.jsx)
-- [ ] **H10** — Homepage missing cookie consent banner. (index.html)
-- [ ] **H11** — Events page has no `<h1>` tag. SEO gap. (events/index.html)
+- [x] ~~**H7** — Pipeline touch~~ → Fixed: stage-change dropdown on mobile
+- [x] ~~**H8** — Color contrast~~ → Fixed: --steel bumped to #929BAA (passes AA)
+- [x] ~~**H9** — Error states~~ → Fixed: error banners with retry on all 3 data pages
+- [x] ~~**H10** — Cookie banner~~ → Already existed, audit was wrong
+- [x] ~~**H11** — Events h1~~ → Fixed: sr-only h1 added
 - [ ] **H12** — No Content Security Policy on any page. (all HTML pages)
 - [x] ~~**H13** — Rate limiter fails open~~ → Fixed: fails closed now
 - [x] ~~**H14** — Malformed JSON crash~~ → Fixed: try/catch before rate limit
 - [x] ~~**H15** — Unsanitized reply_to~~ → Fixed: uses safeEmail
-- [ ] **H16** — ProtectedRoute race condition between getSession and onAuthStateChange. (ProtectedRoute.jsx)
-- [ ] **H17** — ResetPassword page doesn't verify PASSWORD_RECOVERY event. (ResetPassword.jsx)
+- [x] ~~**H16** — ProtectedRoute~~ → Fixed: uses onAuthStateChange only
+- [x] ~~**H17** — ResetPassword~~ → Fixed: verifies PASSWORD_RECOVERY event
 - [ ] **H18** — console.error calls in production code — 6 instances. (multiple files)
 - [x] ~~**H19** — Dead toggleForm() function~~ → Fixed: removed with C3
 - [ ] **H20** — No `<noscript>` fallback on any page. (all HTML pages)
-- [ ] **H21** — Only one responsive breakpoint (768px) in app CSS. (App.css)
+- [x] ~~**H21** — Responsive~~ → Fixed: tablet (1024px) + mobile (768px) breakpoints, bottom nav, stacked pipeline, card tables
 - [x] ~~**H22** — Uncommitted edge function changes~~ → Fixed: committed
 
 ## MEDIUM
@@ -46,7 +46,7 @@ All findings from 6 parallel audits across edge function, React app, static site
 - [x] ~~**M7** — Pipeline insert missing company~~ → Fixed: business_name mapped
 - [ ] **M8** — DNS rebinding / SSRF via MX lookup. (edge function)
 - [x] ~~**M9** — Sequential Resend calls~~ → Fixed: Promise.allSettled
-- [ ] **M10** — No password strength requirements beyond 6 char length. (ResetPassword.jsx)
+- [x] ~~**M10** — Password strength~~ → Fixed: minimum 8 chars
 - [ ] **M11** — Hub page has no live data. (Hub.jsx)
 - [ ] **M12** — Submissions page has no pagination. (Submissions.jsx)
 - [ ] **M13** — Clients page has no pagination. (Clients.jsx)
@@ -65,12 +65,12 @@ All findings from 6 parallel audits across edge function, React app, static site
 - [ ] **M26** — No foreign keys between events/invoices and clients. (schema)
 - [ ] **M27** — rate_limits accessible to authenticated users. (Supabase RLS)
 - [ ] **M28** — All authenticated users share full data access. (Supabase RLS)
-- [ ] **M29** — Events dropdown pre-selects value instead of placeholder. (events/index.html)
+- [x] ~~**M29** — Events dropdown~~ → Fixed: removed pre-selected value
 - [ ] **M30** — Contrast: --steel on --char = 3.6:1, fails WCAG AA. (App.css)
 - [ ] **M31** — Error text --red on --black = 3.8:1, fails WCAG AA. (App.css)
-- [ ] **M32** — Modal forms don't stack on mobile. (App.css)
+- [x] ~~**M32** — Modal stacking~~ → Fixed: bottom-sheet style, fields stack vertically
 - [ ] **M33** — Modals don't prevent background scrolling. (App.css)
-- [ ] **M34** — Mobile bottom nav 8 items overflows. (App.css)
+- [x] ~~**M34** — Bottom nav~~ → Fixed: 4 primary tabs + More overflow menu
 - [ ] **M35** — Font sizes below 14px minimum. (App.css)
 - [ ] **M36** — Touch targets below 48px. (App.css)
 - [ ] **M37** — CSS variable name collision between app and static pages. (App.css)
@@ -136,4 +136,4 @@ All findings from 6 parallel audits across edge function, React app, static site
 
 ---
 
-**Fixed: 27 | Remaining: 87 (10 HIGH, 39 MEDIUM, 35 LOW, 3 MEDIUM-already-not-actionable)**
+**Fixed: 40 | Remaining: 74 (3 HIGH, 34 MEDIUM, 34 LOW, 3 not-actionable)**

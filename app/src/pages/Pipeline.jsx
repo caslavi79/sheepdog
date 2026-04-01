@@ -311,7 +311,7 @@ function PipelineColumn({ stage, deals, onDragOver, onDrop, onDragStart, onDragE
 
   return (
     <div
-      className={`pipeline-column${isDragOver ? ' pipeline-column--over' : ''}`}
+      className={`pipeline-column${isDragOver ? ' pipeline-column--over' : ''}${deals.length === 0 ? ' pipeline-column--empty' : ''}`}
       onDragOver={e => { e.preventDefault(); onDragOver(stage.id) }}
       onDrop={e => onDrop(e, stage.id)}
       onDragLeave={() => onDragOver(null)}

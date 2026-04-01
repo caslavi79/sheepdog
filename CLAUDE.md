@@ -146,7 +146,9 @@ Three static HTML pages, each with a contact form:
 - `events/index.html` — events landing page, "GET A QUOTE" button
 - `staffing/index.html` — staffing landing page, "GET A QUOTE" button
 
-All three forms call the same `submitForm()` JS function which POSTs to the edge function. The form fields are: name, phone, email, service (dropdown), message, website (honeypot, hidden).
+All three forms share `js/form.js` which contains `submitForm()`, `handlePhone()`, `formatPhone()`, `toggleMobileNav()`, and `toggleFaq()`. Each page defines `SUPABASE_URL` inline before loading the shared script. Page-specific JS (splash animation, hero cards, rail panels) remains inline.
+
+The form fields are: name, phone, email, service (dropdown), message, company (staffing only), website (honeypot, hidden).
 
 **Google Analytics:** G-1ZT2F15325
 
@@ -171,16 +173,32 @@ Vite + React 19 + React Router v7 + Supabase JS client.
 
 All routes except /login and /reset-password are protected (require Supabase auth session).
 
+### Mobile layout
+
+The app has responsive CSS with breakpoints at 1024px (tablet) and 768px (mobile).
+
+On mobile:
+- Sidebar becomes a bottom tab bar with 4 primary tabs + "More" overflow menu
+- **Bottom nav tabs:** Dashboard, Clients, Pipeline, Financials, More
+- **More menu:** Submissions, Resources, Scheduling, Compliance, Log Out
+- Pipeline columns stack vertically, empty columns collapse to headers only
+- Stage-change dropdown appears on pipeline cards (since drag-and-drop doesn't work on touch)
+- Tables convert to stacked card layout
+- Modals slide up as bottom sheets with stacked fields
+
 ### Key files
 
-- `app/src/App.jsx` — router + auth provider
+- `app/src/App.jsx` — router + auth provider + 404 catch-all
 - `app/src/lib/supabase.js` — Supabase client init
-- `app/src/pages/Pipeline.jsx` — Kanban board with drag-and-drop
-- `app/src/pages/Submissions.jsx` — read-only submissions table
-- `app/src/pages/Clients.jsx` — full CRUD for clients
-- `app/src/components/Layout.jsx` — sidebar nav layout
-- `app/src/components/ProtectedRoute.jsx` — auth guard
-- `app/src/App.css` — all styles
+- `app/src/pages/Pipeline.jsx` — Kanban board with drag-and-drop (desktop) / stage dropdown (mobile)
+- `app/src/pages/Submissions.jsx` — read-only submissions table with error state
+- `app/src/pages/Clients.jsx` — full CRUD for clients with error state
+- `app/src/components/Layout.jsx` — sidebar nav + mobile bottom tab bar with More menu
+- `app/src/components/ProtectedRoute.jsx` — auth guard (uses onAuthStateChange only, no race condition)
+- `app/src/App.css` — all styles (responsive at 1024px and 768px)
+- `js/form.js` — shared contact form JS (used by static site, not the app)
+- `scripts/deploy-edge.sh` — edge function deploy script with --no-verify-jwt baked in
+- `supabase/schema.sql` — database schema, RLS policies, and indexes (source of truth)
 
 ### Deploy the app
 
@@ -189,6 +207,14 @@ cd app && npm run deploy
 ```
 
 This builds with Vite and pushes to the `sheepdog-app` repo via gh-pages.
+
+### Deploy the edge function
+
+```bash
+bash scripts/deploy-edge.sh
+```
+
+This deploys with `--no-verify-jwt` and auto-tests the endpoint. **Never deploy the edge function any other way.**
 
 ## Resend (Email)
 
@@ -224,8 +250,10 @@ Leads appear in the Pipeline page of the app as cards in the "Lead" column.
 
 ## Known Issues / Watch Out For
 
-1. **--no-verify-jwt** — Cannot stress this enough. Every edge function deploy without this flag breaks the live contact form.
-2. **Rate limiter** — 3 per IP per 10 min. During testing, you'll get blocked. The rate_limits table can be cleared manually if needed.
+1. **--no-verify-jwt** — Cannot stress this enough. Every edge function deploy without this flag breaks the live contact form. Use `scripts/deploy-edge.sh` which has it baked in.
+2. **Rate limiter** — 5 per IP per 10 min. During testing, you'll get blocked. Clear the `rate_limits` table via Supabase SQL editor: `DELETE FROM rate_limits;`
 3. **Supabase dashboard is slow** — SQL editor and table editor load slowly. Be patient or use CLI/curl instead.
-4. **Pipeline.jsx uses drag-and-drop** — has optimistic updates with rollback on error.
+4. **Pipeline.jsx uses drag-and-drop** — has optimistic updates with rollback on error. On mobile, a stage-change dropdown replaces drag.
 5. **Scheduling, Financials, Compliance pages** — routes exist but components are stubs (show "coming soon").
+6. **Docker not installed** — `supabase db dump` requires Docker. Schema is manually maintained in `supabase/schema.sql` instead.
+7. **Audit tracker** — `AUDIT-2.md` has 87 remaining findings. 27 fixed so far.
