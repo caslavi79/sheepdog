@@ -51,9 +51,8 @@ export default function ProtectedRoute({ children }) {
   const [recovery, setRecovery] = useState(false)
 
   useEffect(() => {
-    // Detect recovery from URL hash (e.g. #access_token=...&type=recovery)
-    const hash = window.location.hash
-    if (hash.includes('type=recovery')) {
+    // Check if recovery flag was set by supabase.js before React mounted
+    if (sessionStorage.getItem('password_recovery') === 'true') {
       setRecovery(true)
     }
 
@@ -72,6 +71,6 @@ export default function ProtectedRoute({ children }) {
 
   if (loading) return <div className="loading">Loading...</div>
   if (!user) return <Navigate to="/login" replace />
-  if (recovery) return <ResetPasswordForm onDone={() => setRecovery(false)} />
+  if (recovery) return <ResetPasswordForm onDone={() => { sessionStorage.removeItem('password_recovery'); setRecovery(false) }} />
   return children
 }
