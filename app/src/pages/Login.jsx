@@ -77,7 +77,9 @@ export default function Login() {
             onClick={async () => {
               if (!email) { setError('Enter your email first.'); return }
               setError('')
-              const { error: err } = await supabase.auth.resetPasswordForEmail(email)
+              const { error: err } = await supabase.auth.resetPasswordForEmail(email, {
+                redirectTo: `${window.location.origin}/reset-password`,
+              })
               if (err) setError(err.message)
               else setResetSent(true)
             }}
