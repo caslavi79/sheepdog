@@ -182,6 +182,39 @@ Deno.serve(async (req) => {
 
     if (dbError) throw dbError;
 
+    // Auto-create pipeline deal so no lead slips through
+    const serviceToPipeline: Record<string, string> = {
+      "events-security": "events",
+      "events-bartending": "events",
+      "events-both": "events",
+      "staffing": "staffing",
+      "field-ops": "staffing",
+      "logistics": "staffing",
+      "facility": "staffing",
+      "warehouse": "staffing",
+      "project": "staffing",
+      "ongoing": "staffing",
+      "other": "events",
+    };
+
+    const { error: pipelineError } = await supabase
+      .from("pipeline")
+      .insert({
+        contact_name: name,
+        business_name: company || null,
+        phone: phone || null,
+        email,
+        service_line: serviceToPipeline[service] || "events",
+        stage: "lead",
+        value: null,
+        notes: "[Contact Form] " + message,
+      });
+
+    if (pipelineError) {
+      console.error("Pipeline auto-create failed:", pipelineError.message);
+      // Don't throw — contact submission is already saved, emails will still send
+    }
+
     // Service labels for display
     const serviceLabels: Record<string, string> = {
       "events-security":   "Event Security",

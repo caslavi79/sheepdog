@@ -22,6 +22,7 @@ export default function Layout() {
           <NavLink to="/scheduling" className="sidebar-link sidebar-link--stub">Scheduling</NavLink>
           <NavLink to="/clients" className="sidebar-link">Clients</NavLink>
           <NavLink to="/pipeline" className="sidebar-link">Pipeline</NavLink>
+          <NavLink to="/submissions" className="sidebar-link">Submissions</NavLink>
           <NavLink to="/financials" className="sidebar-link sidebar-link--stub">Financials</NavLink>
           <NavLink to="/compliance" className="sidebar-link sidebar-link--stub">Compliance</NavLink>
         </nav>
