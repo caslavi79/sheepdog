@@ -67,9 +67,14 @@ function AddClientModal({ onClose, onSaved, fromDeal }) {
     const { data: newClient, error: err } = await supabase.from('clients').insert([form]).select('id').single()
     setSaving(false)
     if (err) { setError(err.message); return }
-    // Link pipeline deal to new client
+    // Link pipeline deal to new client and advance stage past 'lead'
     if (fromDeal?.deal_id && newClient?.id) {
-      await supabase.from('pipeline').update({ client_id: newClient.id, updated_at: new Date().toISOString() }).eq('id', fromDeal.deal_id)
+      await supabase.from('pipeline').update({
+        client_id: newClient.id,
+        stage: 'outreach_sent',
+        last_activity: new Date().toISOString(),
+        updated_at: new Date().toISOString(),
+      }).eq('id', fromDeal.deal_id).eq('stage', 'lead')
     }
     onSaved(); onClose()
   }

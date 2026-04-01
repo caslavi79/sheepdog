@@ -34,6 +34,17 @@ function ServiceBadge({ line }) {
 /* ═══════════════════════════════════════════════════════════
    LINE ITEMS EDITOR (Client-Facing)
    ═══════════════════════════════════════════════════════════ */
+const LINE_ITEM_PRESETS = [
+  // Events
+  'Event Security', 'Bar Security / Bouncer', 'Mobile Bartender', 'Event Coordinator',
+  'Setup', 'Takedown', 'Cleanup', 'Setup & Takedown',
+  'Table Rental', 'Chair Rental', 'Table & Chair Rental', 'Equipment Rental',
+  // Staffing
+  'Field Operations Staff', 'Warehouse Staff', 'Logistics Staff', 'Facility Maintenance', 'Project Labor',
+  // General
+  'Travel Fee', 'Overtime', 'Holiday Rate',
+]
+
 function LineItemsEditor({ items, onChange }) {
   const add = () => onChange([...items, { description: '', hours: '', rate: '', total: 0 }])
   const remove = (i) => onChange(items.filter((_, idx) => idx !== i))
@@ -41,11 +52,19 @@ function LineItemsEditor({ items, onChange }) {
     const next = items.map((item, idx) => {
       if (idx !== i) return item
       const updated = { ...item, [field]: val }
+      if (field === 'description' && val !== 'other') {
+        // If selecting a preset, clear any custom text
+        updated._custom = false
+      }
       if (field === 'hours' || field === 'rate') {
         updated.total = Math.round((parseFloat(updated.hours) || 0) * (parseFloat(updated.rate) || 0) * 100) / 100
       }
       return updated
     })
+    onChange(next)
+  }
+  const setCustom = (i) => {
+    const next = items.map((item, idx) => idx !== i ? item : { ...item, description: '', _custom: true })
     onChange(next)
   }
   return (
@@ -57,15 +76,26 @@ function LineItemsEditor({ items, onChange }) {
         <span style={{ flex: 1 }}>Total</span>
         <span style={{ width: 32 }}></span>
       </div>
-      {items.map((item, i) => (
-        <div key={i} className="line-items-row">
-          <input style={{ flex: 3 }} placeholder="Security staff — 3 guards" value={item.description} onChange={e => update(i, 'description', e.target.value)} />
-          <input style={{ flex: 1 }} type="number" step="0.5" min="0" placeholder="0" value={item.hours} onChange={e => update(i, 'hours', e.target.value)} />
-          <input style={{ flex: 1 }} type="number" step="0.01" min="0" placeholder="0" value={item.rate} onChange={e => update(i, 'rate', e.target.value)} />
-          <span className="line-items-total" style={{ flex: 1 }}>{fmtMoney(item.total)}</span>
-          <button type="button" className="line-items-remove" onClick={() => remove(i)} title="Remove">×</button>
-        </div>
-      ))}
+      {items.map((item, i) => {
+        const isCustom = item._custom || (item.description && !LINE_ITEM_PRESETS.includes(item.description))
+        return (
+          <div key={i} className="line-items-row">
+            {isCustom ? (
+              <input style={{ flex: 3 }} placeholder="Custom description..." value={item.description} onChange={e => update(i, 'description', e.target.value)} />
+            ) : (
+              <select style={{ flex: 3 }} value={item.description} onChange={e => e.target.value === 'other' ? setCustom(i) : update(i, 'description', e.target.value)}>
+                <option value="">Select...</option>
+                {LINE_ITEM_PRESETS.map(p => <option key={p} value={p}>{p}</option>)}
+                <option value="other">Other (custom)</option>
+              </select>
+            )}
+            <input style={{ flex: 1 }} type="number" step="0.5" min="0" placeholder="0" value={item.hours} onChange={e => update(i, 'hours', e.target.value)} />
+            <input style={{ flex: 1 }} type="number" step="0.01" min="0" placeholder="0" value={item.rate} onChange={e => update(i, 'rate', e.target.value)} />
+            <span className="line-items-total" style={{ flex: 1 }}>{fmtMoney(item.total)}</span>
+            <button type="button" className="line-items-remove" onClick={() => remove(i)} title="Remove">×</button>
+          </div>
+        )
+      })}
       <button type="button" className="line-items-add" onClick={add}>+ Add Line Item</button>
     </div>
   )

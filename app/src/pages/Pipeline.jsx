@@ -156,7 +156,16 @@ function DealDetailModal({ deal, onClose, onUpdated, onDeleted, navigate }) {
     onClose()
   }
 
-  const stageColor = STAGE_COLORS[deal.stage] || '#7A8490'
+  const [currentStage, setCurrentStage] = useState(deal.stage)
+  const stageColor = STAGE_COLORS[currentStage] || '#7A8490'
+
+  const handleStageChange = async (newStage) => {
+    const prev = currentStage
+    setCurrentStage(newStage)
+    const { error } = await supabase.from('pipeline').update({ stage: newStage, last_activity: new Date().toISOString(), updated_at: new Date().toISOString() }).eq('id', deal.id)
+    if (error) { setCurrentStage(prev); return }
+    onUpdated()
+  }
 
   return (
     <div className="modal-overlay" role="presentation" onClick={onClose}>
@@ -167,11 +176,17 @@ function DealDetailModal({ deal, onClose, onUpdated, onDeleted, navigate }) {
             {deal.business_name && <p className="detail-business">{deal.business_name}</p>}
           </div>
           <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
-            <span style={{
-              fontFamily: 'var(--fh)', fontSize: 10, fontWeight: 700, letterSpacing: '1.5px',
-              textTransform: 'uppercase', color: stageColor, background: `${stageColor}22`,
-              padding: '3px 10px', borderRadius: 3
-            }}>{STAGES.find(s => s.id === deal.stage)?.label || deal.stage}</span>
+            <select value={currentStage} onChange={e => handleStageChange(e.target.value)}
+              style={{
+                fontFamily: 'var(--fh)', fontSize: 13, fontWeight: 700, letterSpacing: '1px',
+                textTransform: 'uppercase', color: '#fff', background: stageColor,
+                padding: '8px 32px 8px 14px', borderRadius: 6, border: 'none', cursor: 'pointer',
+                appearance: 'none', WebkitAppearance: 'none',
+                backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='7' viewBox='0 0 12 7'%3E%3Cpath d='M1 1l5 5 5-5' stroke='white' stroke-width='2' fill='none' stroke-linecap='round'/%3E%3C/svg%3E")`,
+                backgroundRepeat: 'no-repeat', backgroundPosition: 'right 10px center',
+              }}>
+              {STAGES.map(s => <option key={s.id} value={s.id} style={{ color: '#fff', background: '#1a1a1a' }}>{s.label}</option>)}
+            </select>
           </div>
         </div>
 
