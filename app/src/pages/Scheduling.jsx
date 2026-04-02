@@ -306,7 +306,7 @@ export default function Scheduling() {
       setTab('events')
       navigate(location.pathname, { replace: true, state: {} })
     }
-  }, []) // eslint-disable-line react-hooks/exhaustive-deps
+  }, []) // eslint-disable-line react-hooks/exhaustive-deps — only run once on mount; state cleared by navigate()
 
   const loadEvents = useCallback(async () => {
     const { data, error } = await supabase.from('events').select('*').order('date', { ascending: true })

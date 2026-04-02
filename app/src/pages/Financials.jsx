@@ -930,7 +930,7 @@ export default function Financials() {
       // Clear state so modal doesn't reopen on refresh
       navigate(location.pathname, { replace: true, state: {} })
     }
-  }, []) // eslint-disable-line react-hooks/exhaustive-deps
+  }, []) // eslint-disable-line react-hooks/exhaustive-deps — only run once on mount; state cleared by navigate()
 
   const clientMap = Object.fromEntries(clients.map(c => [c.id, c.business_name || c.contact_name]))
   const filtered = invoices.filter(inv => {

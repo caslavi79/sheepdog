@@ -279,15 +279,15 @@ function ClientDetail({ client, onClose, onUpdated, onDeleted, navigate }) {
             <div className="detail-section">
               <h3 className="detail-section-title">Quick Actions</h3>
               <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
-                <button className="modal-btn-save" style={{ fontSize: 13 }}
+                <button className="modal-btn-save" style={{ fontSize: 13 }} aria-label="Create new event for this client"
                   onClick={() => { onClose(); navigate('/scheduling', { state: { fromClient: { client_id: client.id, business_name: client.business_name || client.contact_name } } }) }}>
                   New Event
                 </button>
-                <button className="modal-btn-save" style={{ fontSize: 13, background: COLORS.blue }}
+                <button className="modal-btn-save" style={{ fontSize: 13, background: COLORS.blue }} aria-label="Create new invoice for this client"
                   onClick={() => { onClose(); navigate('/financials', { state: { fromClient: { client_id: client.id, business_name: client.business_name || client.contact_name } } }) }}>
                   New Invoice
                 </button>
-                <button className="modal-btn-save" style={{ fontSize: 13, background: COLORS.amber }}
+                <button className="modal-btn-save" style={{ fontSize: 13, background: COLORS.amber }} aria-label="Create new contract for this client"
                   onClick={() => { onClose(); navigate(`/contracts?client_id=${client.id}`) }}>
                   New Contract
                 </button>
@@ -389,7 +389,7 @@ export default function Clients() {
       setShowAdd(true)
       navigate(location.pathname, { replace: true, state: {} })
     }
-  }, []) // eslint-disable-line react-hooks/exhaustive-deps
+  }, []) // eslint-disable-line react-hooks/exhaustive-deps — only run once on mount; state cleared by navigate()
 
   const loadClients = async () => {
     setLoading(true)
