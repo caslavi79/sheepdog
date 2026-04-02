@@ -35,6 +35,7 @@ function EventModal({ event, clients, staff, licenses, onClose, onSaved, default
   })
   const [saving, setSaving] = useState(false)
   const [error, setError] = useState('')
+  const [updateSeries, setUpdateSeries] = useState(false)
 
   const handleSubmit = async (e) => {
     e.preventDefault()
@@ -49,6 +50,14 @@ function EventModal({ event, clients, staff, licenses, onClose, onSaved, default
       const { id, created_at, ...rest } = payload
       const { error: err } = await supabase.from('events').update({ ...rest, updated_at: new Date().toISOString() }).eq('id', event.id)
       setSaving(false); if (err) { setError(err.message); return }
+      // Update all future events in the same series
+      if (updateSeries && event.placement_id) {
+        const { start_time, end_time, staff_needed, staff_assigned, venue_name, service_line } = rest
+        await supabase.from('events').update({
+          start_time, end_time, staff_needed, staff_assigned, venue_name, service_line,
+          updated_at: new Date().toISOString(),
+        }).eq('placement_id', event.placement_id).gt('date', event.date).neq('status', 'completed').neq('status', 'cancelled')
+      }
     } else {
       const { error: err } = await supabase.from('events').insert([payload])
       setSaving(false); if (err) { setError(err.message); return }
@@ -124,6 +133,12 @@ function EventModal({ event, clients, staff, licenses, onClose, onSaved, default
           <button type="button" className="line-items-add" onClick={addStaff}>+ Assign Staff</button>
 
           <label className="modal-field" style={{ marginTop: 12 }}><span>Notes</span><textarea rows={2} value={form.notes || ''} onChange={e => setForm({ ...form, notes: e.target.value })} /></label>
+          {isEdit && event?.placement_id && (
+            <label style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: 13, color: 'var(--steel)', margin: '8px 0', cursor: 'pointer' }}>
+              <input type="checkbox" checked={updateSeries} onChange={e => setUpdateSeries(e.target.checked)} />
+              Apply changes to all future events in this series
+            </label>
+          )}
           {error && <p role="alert" style={{ color: 'var(--red)', fontSize: 13 }}>{error}</p>}
           <div className="modal-actions">
             <button type="button" className="modal-btn-cancel" onClick={onClose}>Cancel</button>

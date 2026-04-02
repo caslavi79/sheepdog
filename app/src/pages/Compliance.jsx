@@ -185,15 +185,29 @@ function DocModal({ doc, staffList, onClose, onSaved }) {
   useEscapeKey(onClose)
   useBodyLock()
   const isEdit = !!doc?.id
-  const [form, setForm] = useState({ staff_id: '', doc_type: 'w9', status: 'missing', signature_date: '', notes: '', ...doc })
+  const [form, setForm] = useState({ staff_id: '', doc_type: 'w9', status: 'missing', signature_date: '', notes: '', file_url: '', ...doc })
   const [saving, setSaving] = useState(false)
+  const [uploading, setUploading] = useState(false)
   const [error, setError] = useState('')
+
+  const handleFileUpload = async (e) => {
+    const file = e.target.files?.[0]
+    if (!file) return
+    setUploading(true); setError('')
+    const ext = file.name.split('.').pop()
+    const path = `${form.staff_id || 'unknown'}/${Date.now()}.${ext}`
+    const { error: uploadErr } = await supabase.storage.from('contractor-docs').upload(path, file)
+    setUploading(false)
+    if (uploadErr) { setError(`Upload failed: ${uploadErr.message}`); return }
+    const { data: { publicUrl } } = supabase.storage.from('contractor-docs').getPublicUrl(path)
+    setForm(prev => ({ ...prev, file_url: publicUrl }))
+  }
 
   const handleSubmit = async (e) => {
     e.preventDefault()
     if (!form.staff_id) { setError('Select a staff member'); return }
     setSaving(true); setError('')
-    const payload = { ...form, signature_date: form.signature_date || null, notes: form.notes || null }
+    const payload = { ...form, signature_date: form.signature_date || null, notes: form.notes || null, file_url: form.file_url || null }
     if (isEdit) {
       const { id, created_at, ...rest } = payload
       const { error: err } = await supabase.from('contractor_docs').update({ ...rest, updated_at: new Date().toISOString() }).eq('id', doc.id)
@@ -228,10 +242,22 @@ function DocModal({ doc, staffList, onClose, onSaved }) {
             <label className="modal-field"><span>Signature Date</span><input type="date" value={form.signature_date || ''} onChange={e => setForm({ ...form, signature_date: e.target.value })} /></label>
           </div>
           <label className="modal-field"><span>Notes</span><textarea rows={2} value={form.notes || ''} onChange={e => setForm({ ...form, notes: e.target.value })} /></label>
+          <label className="modal-field">
+            <span>Attachment</span>
+            {form.file_url ? (
+              <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                <a href={form.file_url} target="_blank" rel="noopener noreferrer" style={{ color: COLORS.blue, fontSize: 13, textDecoration: 'none' }}>View File</a>
+                <button type="button" style={{ background: 'none', border: 'none', color: COLORS.red, cursor: 'pointer', fontSize: 12, fontFamily: 'var(--fh)', fontWeight: 600 }} onClick={() => setForm({ ...form, file_url: '' })}>Remove</button>
+              </div>
+            ) : (
+              <input type="file" accept=".pdf,.doc,.docx,.png,.jpg,.jpeg" onChange={handleFileUpload} disabled={uploading} />
+            )}
+            {uploading && <span style={{ fontSize: 12, color: 'var(--steel)' }}>Uploading...</span>}
+          </label>
           {error && <p role="alert" style={{ color: 'var(--red)', fontSize: 13 }}>{error}</p>}
           <div className="modal-actions">
             <button type="button" className="modal-btn-cancel" onClick={onClose}>Cancel</button>
-            <button type="submit" className="modal-btn-save" disabled={saving}>{saving ? 'Saving...' : isEdit ? 'Save' : 'Add Document'}</button>
+            <button type="submit" className="modal-btn-save" disabled={saving || uploading}>{saving ? 'Saving...' : isEdit ? 'Save' : 'Add Document'}</button>
           </div>
         </form>
       </div>
@@ -331,6 +357,37 @@ export default function Compliance() {
     showToast(`${ids.length} records deleted`)
   }
 
+  const handleImportCSV = async (e) => {
+    const file = e.target.files?.[0]
+    if (!file) return
+    const text = await file.text()
+    const lines = text.split('\n').filter(l => l.trim())
+    if (lines.length < 2) { showToast('CSV must have a header row and at least one data row'); return }
+    const headers = lines[0].split(',').map(h => h.trim().replace(/^"|"$/g, '').toLowerCase())
+    const nameIdx = headers.findIndex(h => h === 'name')
+    if (nameIdx === -1) { showToast('CSV must have a "Name" column'); return }
+    const roleIdx = headers.findIndex(h => h === 'role')
+    const phoneIdx = headers.findIndex(h => h === 'phone')
+    const emailIdx = headers.findIndex(h => h === 'email')
+    const rateIdx = headers.findIndex(h => h.includes('rate') || h.includes('pay'))
+    const rows = lines.slice(1).map(line => {
+      const cols = line.split(',').map(c => c.trim().replace(/^"|"$/g, ''))
+      return {
+        name: cols[nameIdx] || '',
+        role: roleIdx >= 0 ? cols[roleIdx] || null : null,
+        phone: phoneIdx >= 0 ? cols[phoneIdx] || null : null,
+        email: emailIdx >= 0 ? cols[emailIdx] || null : null,
+        default_pay_rate: rateIdx >= 0 ? parseFloat(cols[rateIdx]) || null : null,
+        status: 'active', background_check: 'none',
+      }
+    }).filter(r => r.name)
+    if (rows.length === 0) { showToast('No valid rows found'); return }
+    const { error } = await supabase.from('staff').insert(rows)
+    if (error) { showToast(`Import failed: ${error.message}`); return }
+    loadStaff(); loadDocs(); showToast(`${rows.length} staff imported`)
+    e.target.value = '' // Reset file input
+  }
+
   const filteredStaff = useMemo(() => staff.filter(s => {
     if (!search) return true
     const q = search.toLowerCase()
@@ -399,6 +456,10 @@ export default function Compliance() {
               const rows = staff.map(s => [s.name, s.role || '', s.phone || '', s.email || '', s.status, s.background_check, s.default_pay_rate || ''])
               downloadCSV(rows, ['Name', 'Role', 'Phone', 'Email', 'Status', 'BG Check', 'Pay Rate'], `staff-roster-${new Date().toISOString().split('T')[0]}.csv`)
             }}>Export</button>}
+            <label className="modal-btn-cancel" style={{ fontSize: 12, padding: '6px 14px', cursor: 'pointer' }}>
+              Import CSV
+              <input type="file" accept=".csv" onChange={handleImportCSV} style={{ display: 'none' }} />
+            </label>
             <button className="clients-add-btn" onClick={() => setShowStaffModal({})}>+ Add Staff</button>
           </div>
           {bulkSelected.size > 0 && (
@@ -552,7 +613,7 @@ export default function Compliance() {
           ) : (
             <div className="clients-table-wrap">
               <table className="clients-table">
-                <thead><tr><th>Staff</th><th>Document</th><th>Status</th><th>Signed</th><th>Notes</th><th></th></tr></thead>
+                <thead><tr><th>Staff</th><th>Document</th><th>Status</th><th>Signed</th><th>File</th><th>Notes</th><th></th></tr></thead>
                 <tbody>
                   {filteredDocs.slice(docPage * COMP_PAGE_SIZE, (docPage + 1) * COMP_PAGE_SIZE).map(d => (
                     <tr key={d.id}>
@@ -560,6 +621,7 @@ export default function Compliance() {
                       <td>{d.doc_type === 'w9' ? 'W-9' : d.doc_type.charAt(0).toUpperCase() + d.doc_type.slice(1)}</td>
                       <td><DocStatusBadge status={d.status} /></td>
                       <td>{fmtDate(d.signature_date)}</td>
+                      <td>{d.file_url ? <a href={d.file_url} target="_blank" rel="noopener noreferrer" style={{ color: COLORS.blue, fontSize: 12, fontFamily: 'var(--fh)', fontWeight: 600, textDecoration: 'none' }}>View</a> : <span style={{ fontSize: 12, color: 'var(--steel)' }}>—</span>}</td>
                       <td style={{ maxWidth: 200, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{d.notes || '—'}</td>
                       <td>
                         {confirmDeleteId === d.id && confirmDeleteType === 'contractor_docs' ? (

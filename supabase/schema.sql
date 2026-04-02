@@ -199,6 +199,7 @@ CREATE TABLE IF NOT EXISTS public.contractor_docs (
   doc_type text NOT NULL DEFAULT 'other',
   status text DEFAULT 'missing',
   signature_date date,
+  file_url text,
   notes text,
   created_at timestamptz DEFAULT now(),
   updated_at timestamptz DEFAULT now()
