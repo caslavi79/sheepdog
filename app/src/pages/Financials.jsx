@@ -665,6 +665,66 @@ function InvoiceDetail({ invoice, clients, onClose, onUpdated, onDeleted, showTo
               <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
                 {invoice.status === 'draft' && <button className="modal-btn-cancel" onClick={handleMarkSent}>Mark Sent</button>}
                 {(invoice.status === 'sent' || invoice.status === 'overdue') && <button className="modal-btn-save" style={{ background: 'var(--green)' }} onClick={() => setPayModal(true)}>Mark Paid</button>}
+                <button className="modal-btn-cancel" onClick={() => {
+                  const items = (invoice.line_items || []).filter(li => li.description)
+                  const html = `<!DOCTYPE html><html><head><title>${invoice.invoice_number || 'Invoice'}</title>
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Semi+Condensed:wght@700;800&family=Barlow:wght@600;700;800&family=Source+Sans+3:wght@400;600&display=swap" rel="stylesheet">
+<style>
+@page{size:letter;margin:0}
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:'Source Sans 3',sans-serif;color:#4A4A4A;padding:0;background:#fff}
+.download-bar{display:flex;align-items:center;justify-content:center;gap:16px;padding:20px;background:#1a1a1a}
+.download-btn{font-family:'Barlow',sans-serif;font-weight:700;font-size:13px;letter-spacing:1.5px;text-transform:uppercase;color:#fff;background:#C23B22;border:none;padding:12px 28px;border-radius:4px;cursor:pointer}
+.download-btn:hover{background:#A83220}
+.download-info{font-size:13px;color:#666}
+.page{max-width:800px;margin:0 auto;padding:40px}
+.top{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:24px;padding-bottom:16px;border-bottom:2px solid #0C0C0C}
+.top-left{display:flex;align-items:center;gap:10px}
+.top-left img{width:36px;height:36px;border-radius:4px}
+.brand{font-family:'Barlow Semi Condensed',sans-serif;font-weight:800;font-size:14px;text-transform:uppercase;letter-spacing:1px;color:#0C0C0C}
+.inv-label{font-family:'Barlow',sans-serif;font-weight:700;font-size:13px;color:#C23B22;letter-spacing:2px;text-transform:uppercase}
+.meta{font-size:13px;color:#7A8490;line-height:1.8;margin-bottom:20px}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:24px}
+.label{font-family:'Barlow',sans-serif;font-size:10px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:#7A8490;margin-bottom:4px}
+.val{font-size:14px;font-weight:600;color:#0C0C0C}
+table{width:100%;border-collapse:collapse;margin:20px 0}
+th{font-family:'Barlow',sans-serif;text-align:left;font-size:10px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:#7A8490;padding:10px 0;border-bottom:2px solid #D6D6D6}
+td{padding:10px 0;border-bottom:1px solid #f0f0f0;font-size:14px;color:#4A4A4A}
+.totals{text-align:right;margin-top:12px}
+.totals div{font-size:13px;color:#7A8490;margin-bottom:4px}
+.totals .grand{font-family:'Barlow',sans-serif;font-size:22px;font-weight:800;color:#0C0C0C;margin-top:8px;padding-top:8px;border-top:2px solid #0C0C0C}
+.notes{margin-top:24px;padding:16px;background:#F4F3F1;border-radius:6px;font-size:13px;color:#4A4A4A}
+.footer{margin-top:48px;padding-top:16px;border-top:3px solid #C23B22;text-align:center;font-family:'Barlow',sans-serif;font-size:10px;letter-spacing:2px;text-transform:uppercase;color:#A0A0A0}
+@media print{.download-bar{display:none !important}.page{padding:24px}}
+</style></head><body>
+<div class="download-bar"><button class="download-btn" onclick="window.print()">Save as PDF</button><span class="download-info">Use "Save as PDF" in the print dialog</span></div>
+<div class="page">
+<div class="top"><div class="top-left"><img src="https://sheepdogtexas.com/favicon.jpg" alt=""><span class="brand">Sheepdog</span></div><span class="inv-label">INVOICE</span></div>
+<div class="meta">${invoice.invoice_number || ''}<br>Date: ${new Date(invoice.created_at).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })}<br>Due: ${invoice.due_date || '—'}</div>
+<div class="grid"><div><div class="label">Bill To</div><div class="val">${clientName}</div></div><div><div class="label">Service</div><div class="val">${invoice.service_line || '—'}</div></div></div>
+${items.length > 0 ? `<table><thead><tr><th>Description</th><th>Hours</th><th>Rate</th><th style="text-align:right">Total</th></tr></thead><tbody>${items.map(li => `<tr><td>${li.description}</td><td>${li.hours || ''}</td><td>$${Number(li.rate || 0).toFixed(2)}</td><td style="text-align:right">$${Number(li.total || 0).toFixed(2)}</td></tr>`).join('')}</tbody></table>` : ''}
+<div class="totals"><div>Subtotal: $${Number(invoice.subtotal || 0).toFixed(2)}</div><div>Tax: $${Number(invoice.tax || 0).toFixed(2)}</div><div class="grand">Total: $${Number(invoice.total || 0).toFixed(2)}</div></div>
+${invoice.notes ? `<div class="notes"><strong>Notes:</strong> ${invoice.notes}</div>` : ''}
+<div class="footer">Sheepdog Security LLC &middot; sheepdogtexas.com</div>
+</div></body></html>`
+                  const w = window.open('', '_blank')
+                  w.document.write(html)
+                  w.document.close()
+                }}>Download PDF</button>
+                {invoice.client_id && (
+                  <button className="modal-btn-cancel" style={{ color: COLORS.blue, borderColor: `${COLORS.blue}44` }} onClick={async () => {
+                    const { data: { session } } = await supabase.auth.getSession()
+                    if (!session?.access_token) { showToast('Session expired'); return }
+                    const res = await fetch(`${import.meta.env.VITE_SUPABASE_URL}/functions/v1/invoice-send`, {
+                      method: 'POST',
+                      headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${session.access_token}` },
+                      body: JSON.stringify({ invoice_id: invoice.id }),
+                    })
+                    const result = await res.json()
+                    if (result.success) { showToast('Invoice emailed to client'); onUpdated() }
+                    else showToast(result.error || 'Failed to send')
+                  }}>Email to Client</button>
+                )}
                 <button className="modal-btn-save" onClick={() => setEditing(true)}>Edit</button>
               </div>
             </div>

@@ -16,27 +16,33 @@ echo "════════════════════════�
 
 # Deploy contact-submit
 echo ""
-echo "1/4 Deploying contact-submit..."
+echo "1/5 Deploying contact-submit..."
 npx supabase functions deploy contact-submit \
   --project-ref "$PROJECT_REF" \
   --no-verify-jwt
 
 # Deploy license-reminders
 echo ""
-echo "2/4 Deploying license-reminders..."
+echo "2/5 Deploying license-reminders..."
 npx supabase functions deploy license-reminders \
   --project-ref "$PROJECT_REF" \
   --no-verify-jwt
 
 echo ""
-echo "3/4 Deploying contract-sign..."
+echo "3/5 Deploying contract-sign..."
 npx supabase functions deploy contract-sign \
   --project-ref "$PROJECT_REF" \
   --no-verify-jwt
 
 echo ""
-echo "4/4 Deploying contract-send..."
+echo "4/5 Deploying contract-send..."
 npx supabase functions deploy contract-send \
+  --project-ref "$PROJECT_REF" \
+  --no-verify-jwt
+
+echo ""
+echo "5/5 Deploying invoice-send..."
+npx supabase functions deploy invoice-send \
   --project-ref "$PROJECT_REF" \
   --no-verify-jwt
 
@@ -86,6 +92,17 @@ if [ "$RESPONSE4" = "405" ]; then
 else
   echo "  contract-send: WARNING — returned $RESPONSE4"
   echo "  Check: https://supabase.com/dashboard/project/$PROJECT_REF/functions/contract-send/logs"
+fi
+
+# Verify invoice-send (expects 405 on GET since it's POST-only)
+RESPONSE5=$(curl -s -o /dev/null -w "%{http_code}" \
+  "https://$PROJECT_REF.supabase.co/functions/v1/invoice-send")
+
+if [ "$RESPONSE5" = "405" ]; then
+  echo "  invoice-send: alive (GET $RESPONSE5 — expected, POST only)"
+else
+  echo "  invoice-send: WARNING — returned $RESPONSE5"
+  echo "  Check: https://supabase.com/dashboard/project/$PROJECT_REF/functions/invoice-send/logs"
 fi
 
 echo ""
