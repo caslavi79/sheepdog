@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom'
 import { supabase } from '../lib/supabase'
 import { useEscapeKey, useBodyLock, useToast } from '../lib/hooks'
 import { COLORS } from '../lib/format'
+import { askAssistant } from '../lib/assistant'
 
 const STAGES = [
   { id: 'lead', label: 'Lead' },
@@ -51,6 +52,26 @@ function AddDealModal({ onClose, onSaved }) {
   })
   const [saving, setSaving] = useState(false)
   const [error, setError] = useState('')
+  const [duplicates, setDuplicates] = useState([])
+  const dupTimerRef = useRef(null)
+
+  const checkDuplicates = (updatedForm) => {
+    if (dupTimerRef.current) clearTimeout(dupTimerRef.current)
+    dupTimerRef.current = setTimeout(async () => {
+      const { contact_name, business_name, email, phone } = updatedForm
+      if (!contact_name && !business_name && !email && !phone) { setDuplicates([]); return }
+      try {
+        const result = await askAssistant({ action: 'duplicate_check', data: { contact_name, business_name, email, phone } })
+        setDuplicates(result.matches || [])
+      } catch { /* silent */ }
+    }, 500)
+  }
+
+  const updateForm = (updates) => {
+    const next = { ...form, ...updates }
+    setForm(next)
+    checkDuplicates(next)
+  }
 
   const handleSubmit = async (e) => {
     e.preventDefault()
@@ -81,21 +102,32 @@ function AddDealModal({ onClose, onSaved }) {
           <div className="modal-row">
             <label className="modal-field">
               <span>Contact Name *</span>
-              <input required value={form.contact_name} onChange={e => setForm({...form, contact_name: e.target.value})} placeholder="John Smith" />
+              <input required value={form.contact_name} onChange={e => updateForm({ contact_name: e.target.value })} placeholder="John Smith" />
             </label>
             <label className="modal-field">
               <span>Business Name</span>
-              <input value={form.business_name} onChange={e => setForm({...form, business_name: e.target.value})} placeholder="The Rusty Nail" />
+              <input value={form.business_name} onChange={e => updateForm({ business_name: e.target.value })} placeholder="The Rusty Nail" />
             </label>
           </div>
+          {duplicates.length > 0 && (
+            <div className="ai-result-card" style={{ borderColor: 'rgba(201, 146, 46, 0.3)', background: 'rgba(201, 146, 46, 0.06)' }}>
+              <div style={{ fontSize: 12, fontFamily: 'var(--fh)', fontWeight: 700, color: '#C9922E', letterSpacing: '0.5px', textTransform: 'uppercase', marginBottom: 6 }}>Possible duplicates</div>
+              {duplicates.map((d, i) => (
+                <div key={i} style={{ fontSize: 13, color: 'var(--white)', display: 'flex', gap: 6, alignItems: 'center', marginBottom: 2 }}>
+                  <span style={{ color: '#C9922E' }}>●</span>
+                  {d.name || d.business}{d.stage ? ` (${d.type} — ${d.stage})` : ` (${d.type})`}
+                </div>
+              ))}
+            </div>
+          )}
           <div className="modal-row">
             <label className="modal-field">
               <span>Phone</span>
-              <input value={form.phone} onChange={e => setForm({...form, phone: e.target.value})} placeholder="(979) 555-0123" />
+              <input value={form.phone} onChange={e => updateForm({ phone: e.target.value })} placeholder="(979) 555-0123" />
             </label>
             <label className="modal-field">
               <span>Email</span>
-              <input type="email" value={form.email} onChange={e => setForm({...form, email: e.target.value})} placeholder="john@example.com" />
+              <input type="email" value={form.email} onChange={e => updateForm({ email: e.target.value })} placeholder="john@example.com" />
             </label>
           </div>
           <div className="modal-row">
@@ -169,6 +201,31 @@ function DealDetailModal({ deal, onClose, onUpdated, onDeleted, navigate }) {
 
   const [currentStage, setCurrentStage] = useState(deal.stage)
   const stageColor = STAGE_COLORS[currentStage] || '#7A8490'
+  const [aiScore, setAiScore] = useState(null)
+  const [aiScoreLoading, setAiScoreLoading] = useState(false)
+  const [aiDraft, setAiDraft] = useState('')
+  const [aiDraftLoading, setAiDraftLoading] = useState(false)
+  const [aiError, setAiError] = useState('')
+
+  const handleScoreLead = async () => {
+    setAiScoreLoading(true)
+    setAiError('')
+    try {
+      const result = await askAssistant({ action: 'lead_score', data: { deal_id: deal.id }, context: { page: 'pipeline' } })
+      setAiScore({ score: result.score, reasoning: result.reply })
+    } catch (err) { setAiError(err.message) }
+    finally { setAiScoreLoading(false) }
+  }
+
+  const handleDraftFollowUp = async () => {
+    setAiDraftLoading(true)
+    setAiError('')
+    try {
+      const result = await askAssistant({ action: 'follow_up_draft', data: { deal_id: deal.id }, context: { page: 'pipeline' } })
+      setAiDraft(result.reply || '')
+    } catch (err) { setAiError(err.message) }
+    finally { setAiDraftLoading(false) }
+  }
 
   const handleStageChange = async (newStage) => {
     const prev = currentStage
@@ -239,6 +296,36 @@ function DealDetailModal({ deal, onClose, onUpdated, onDeleted, navigate }) {
                   </button>
                 ) : null}
               </div>
+            </div>
+            <div className="detail-section">
+              <h3 className="detail-section-title">AI Tools</h3>
+              <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', marginBottom: 8 }}>
+                <button className="modal-btn-cancel ai-tool-btn" onClick={handleScoreLead} disabled={aiScoreLoading}>
+                  {aiScoreLoading ? 'Scoring...' : 'Score Lead'}
+                </button>
+                <button className="modal-btn-cancel ai-tool-btn" onClick={handleDraftFollowUp} disabled={aiDraftLoading}>
+                  {aiDraftLoading ? 'Drafting...' : 'Draft Follow-up'}
+                </button>
+              </div>
+              {aiError && <div style={{ color: 'var(--red)', fontSize: 13, marginBottom: 8 }}>{aiError}</div>}
+              {aiScore && (
+                <div className="ai-result-card">
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 6 }}>
+                    <span className="ai-score-badge" data-score={aiScore.score <= 3 ? 'low' : aiScore.score <= 6 ? 'mid' : 'high'}>{aiScore.score}/10</span>
+                    <span style={{ fontSize: 12, color: 'var(--steel)', fontFamily: 'var(--fh)', fontWeight: 700, letterSpacing: '0.5px', textTransform: 'uppercase' }}>Lead Score</span>
+                  </div>
+                  <p style={{ fontSize: 13, color: 'var(--white)', lineHeight: 1.5 }}>{aiScore.reasoning}</p>
+                </div>
+              )}
+              {aiDraft && (
+                <div className="ai-result-card">
+                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 6 }}>
+                    <span style={{ fontSize: 12, color: 'var(--steel)', fontFamily: 'var(--fh)', fontWeight: 700, letterSpacing: '0.5px', textTransform: 'uppercase' }}>Follow-up Draft</span>
+                    <button className="ai-copy-btn" onClick={() => { navigator.clipboard.writeText(aiDraft) }}>Copy</button>
+                  </div>
+                  <p style={{ fontSize: 13, color: 'var(--white)', lineHeight: 1.5, whiteSpace: 'pre-wrap' }}>{aiDraft}</p>
+                </div>
+              )}
             </div>
             <div className="detail-actions" style={{ justifyContent: 'space-between' }}>
               {confirmDelete ? (
@@ -454,6 +541,32 @@ export default function Pipeline() {
     }
   }
 
+  const [tab, setTab] = useState('pipeline')
+  const [submissions, setSubmissions] = useState([])
+  const [subsLoading, setSubsLoading] = useState(false)
+  const [selectedSub, setSelectedSub] = useState(null)
+
+  const loadSubmissions = async () => {
+    setSubsLoading(true)
+    const { data } = await supabase.from('contact_submissions').select('*').order('created_at', { ascending: false })
+    setSubmissions(data || [])
+    setSubsLoading(false)
+  }
+
+  useEffect(() => {
+    if (tab === 'submissions' && submissions.length === 0) loadSubmissions()
+  }, [tab])
+
+  const deleteSubmission = async (id) => {
+    if (!window.confirm('Delete this submission?')) return
+    const { error, count } = await supabase.from('contact_submissions').delete({ count: 'exact' }).eq('id', id)
+    if (error) { showToast('Delete failed: ' + error.message); return }
+    if (count === 0) { showToast('Delete blocked — check RLS policy'); return }
+    setSubmissions(s => s.filter(x => x.id !== id))
+    if (selectedSub?.id === id) setSelectedSub(null)
+    showToast('Submission deleted')
+  }
+
   const filteredDeals = search
     ? deals.filter(d => {
         const q = search.toLowerCase()
@@ -475,14 +588,22 @@ export default function Pipeline() {
       <div className="pipeline-header">
         <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
           <h1>Pipeline</h1>
-          <button className="clients-add-btn" onClick={() => setShowAdd(true)}>+ Add Deal</button>
+          {tab === 'pipeline' && <button className="clients-add-btn" onClick={() => setShowAdd(true)}>+ Add Deal</button>}
         </div>
-        <input className="clients-search" placeholder="Search deals..." value={search} onChange={e => setSearch(e.target.value)} style={{ maxWidth: 250, marginTop: 8 }} />
-        <p>{filteredDeals.filter(d => d.stage !== 'lost').length} active deals
-          {totalPipelineValue > 0 && ` · $${totalPipelineValue.toLocaleString()} in play`}
-          {wonValue > 0 && ` · $${wonValue.toLocaleString()} under contract`}
-        </p>
       </div>
+      <div className="detail-tabs" role="tablist" style={{ padding: 0, marginBottom: 16 }}>
+        <button className={`detail-tab ${tab === 'pipeline' ? 'detail-tab--active' : ''}`} role="tab" aria-selected={tab === 'pipeline'} onClick={() => setTab('pipeline')}>Pipeline</button>
+        <button className={`detail-tab ${tab === 'submissions' ? 'detail-tab--active' : ''}`} role="tab" aria-selected={tab === 'submissions'} onClick={() => setTab('submissions')}>Submissions{submissions.length > 0 ? ` (${submissions.length})` : ''}</button>
+      </div>
+      {tab === 'pipeline' && (
+        <>
+          <input className="clients-search" placeholder="Search deals..." value={search} onChange={e => setSearch(e.target.value)} style={{ width: 250, flex: 'none', marginBottom: 8 }} />
+          <p style={{ fontSize: 13, color: 'var(--steel)', marginBottom: 12 }}>{filteredDeals.filter(d => d.stage !== 'lost').length} active deals
+            {totalPipelineValue > 0 && ` · $${totalPipelineValue.toLocaleString()} in play`}
+            {wonValue > 0 && ` · $${wonValue.toLocaleString()} under contract`}
+          </p>
+        </>
+      )}
 
       {dragError && (
         <div style={{ background: '#3d2020', border: '1px solid #C23B2244', color: '#C23B22', padding: '10px 16px', borderRadius: 4, fontSize: 13, marginBottom: 12 }}>
@@ -496,39 +617,136 @@ export default function Pipeline() {
         </div>
       )}
 
-      {loading ? (
-        <div className="clients-loading">Loading...</div>
-      ) : deals.length === 0 ? (
-        <div className="clients-empty" style={{ textAlign: 'center', padding: 40 }}>
-          <p>No deals yet. Add your first one to start tracking your pipeline.</p>
-          <button className="clients-add-btn" style={{ marginTop: 16 }} onClick={() => setShowAdd(true)}>+ Add Deal</button>
-        </div>
+      {tab === 'pipeline' ? (
+        <>
+          {loading ? (
+            <div className="clients-loading">Loading...</div>
+          ) : deals.length === 0 ? (
+            <div className="clients-empty" style={{ textAlign: 'center', padding: 40 }}>
+              <p>No deals yet. Add your first one to start tracking your pipeline.</p>
+            </div>
+          ) : (
+            <div className="pipeline-board">
+              {STAGES.map(stage => (
+                <PipelineColumn
+                  key={stage.id}
+                  stage={stage}
+                  deals={dealsByStage(stage.id)}
+                  onDragOver={setDragOverStage}
+                  onDrop={handleDrop}
+                  onDragStart={handleDragStart}
+                  onDragEnd={handleDragEnd}
+                  onCardClick={setSelected}
+                  onStageChange={async (deal, newStage) => {
+                    if (deal.stage === newStage) return
+                    const prev = deal.stage
+                    setDeals(d => d.map(x => x.id === deal.id ? { ...x, stage: newStage } : x))
+                    const { error } = await supabase.from('pipeline').update({ stage: newStage, last_activity: new Date().toISOString(), updated_at: new Date().toISOString() }).eq('id', deal.id)
+                    if (error) {
+                      setDeals(d => d.map(x => x.id === deal.id ? { ...x, stage: prev } : x))
+                      setDragError('Failed to move card — changes reverted.')
+                      setTimeout(() => setDragError(''), 4000)
+                    }
+                  }}
+                  isDragOver={dragOverStage === stage.id}
+                />
+              ))}
+            </div>
+          )}
+        </>
       ) : (
-        <div className="pipeline-board">
-          {STAGES.map(stage => (
-            <PipelineColumn
-              key={stage.id}
-              stage={stage}
-              deals={dealsByStage(stage.id)}
-              onDragOver={setDragOverStage}
-              onDrop={handleDrop}
-              onDragStart={handleDragStart}
-              onDragEnd={handleDragEnd}
-              onCardClick={setSelected}
-              onStageChange={async (deal, newStage) => {
-                if (deal.stage === newStage) return
-                const prev = deal.stage
-                setDeals(d => d.map(x => x.id === deal.id ? { ...x, stage: newStage } : x))
-                const { error } = await supabase.from('pipeline').update({ stage: newStage, last_activity: new Date().toISOString(), updated_at: new Date().toISOString() }).eq('id', deal.id)
-                if (error) {
-                  setDeals(d => d.map(x => x.id === deal.id ? { ...x, stage: prev } : x))
-                  setDragError('Failed to move card — changes reverted.')
-                  setTimeout(() => setDragError(''), 4000)
-                }
-              }}
-              isDragOver={dragOverStage === stage.id}
-            />
-          ))}
+        <div>
+          {subsLoading ? (
+            <div className="clients-loading">Loading...</div>
+          ) : submissions.length === 0 ? (
+            <div className="clients-empty" style={{ textAlign: 'center', padding: 40 }}>
+              <p>No form submissions yet.</p>
+            </div>
+          ) : (
+            <table className="clients-table">
+              <thead>
+                <tr>
+                  <th>Name</th>
+                  <th>Company</th>
+                  <th>Email</th>
+                  <th>Phone</th>
+                  <th>Service</th>
+                  <th>Date</th>
+                  <th></th>
+                </tr>
+              </thead>
+              <tbody>
+                {submissions.map(s => (
+                  <tr key={s.id} onClick={() => setSelectedSub(s)} style={{ cursor: 'pointer' }}>
+                    <td>{s.name || '—'}</td>
+                    <td>{s.company || '—'}</td>
+                    <td>{s.email || '—'}</td>
+                    <td>{s.phone || '—'}</td>
+                    <td>{s.service || '—'}</td>
+                    <td>{s.created_at ? new Date(s.created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }) : '—'}</td>
+                    <td>
+                      <button
+                        className="modal-btn-cancel"
+                        style={{ fontSize: 11, color: '#C23B22', borderColor: '#C23B2244', padding: '3px 8px' }}
+                        onClick={(e) => { e.stopPropagation(); deleteSubmission(s.id) }}
+                      >
+                        Delete
+                      </button>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          )}
+          {selectedSub && (
+            <div className="modal-overlay" role="presentation" onClick={() => setSelectedSub(null)}>
+              <div className="detail-panel" role="dialog" aria-modal="true" onClick={e => e.stopPropagation()} style={{ maxWidth: 520 }}>
+                <div className="detail-header">
+                  <div>
+                    <h2 className="detail-name">{selectedSub.name || 'No name'}</h2>
+                    {selectedSub.company && <p className="detail-business">{selectedSub.company}</p>}
+                  </div>
+                  <button className="modal-btn-cancel" onClick={() => setSelectedSub(null)} style={{ fontSize: 12 }}>Close</button>
+                </div>
+                <div className="detail-body">
+                  <div className="detail-section">
+                    <h3 className="detail-section-title">Contact Info</h3>
+                    <div className="detail-grid">
+                      <div className="detail-item"><span className="detail-label">Phone</span><span>{selectedSub.phone || '—'}</span></div>
+                      <div className="detail-item"><span className="detail-label">Email</span><span>{selectedSub.email || '—'}</span></div>
+                      <div className="detail-item"><span className="detail-label">Service</span><span>{selectedSub.service || '—'}</span></div>
+                      <div className="detail-item"><span className="detail-label">Submitted</span><span>{selectedSub.created_at ? new Date(selectedSub.created_at).toLocaleString() : '—'}</span></div>
+                    </div>
+                  </div>
+                  {selectedSub.message && (
+                    <div className="detail-section">
+                      <h3 className="detail-section-title">Message</h3>
+                      <p style={{ fontSize: 14, lineHeight: 1.6, color: 'var(--white)', whiteSpace: 'pre-wrap' }}>{selectedSub.message}</p>
+                    </div>
+                  )}
+                  <div className="detail-actions" style={{ justifyContent: 'space-between' }}>
+                    <button
+                      className="modal-btn-cancel"
+                      style={{ color: '#C23B22', borderColor: '#C23B2244' }}
+                      onClick={() => { deleteSubmission(selectedSub.id); setSelectedSub(null) }}
+                    >
+                      Delete
+                    </button>
+                    <button
+                      className="modal-btn-save"
+                      onClick={() => {
+                        setSelectedSub(null)
+                        setTab('pipeline')
+                        setShowAdd(true)
+                      }}
+                    >
+                      Create Deal from This
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
         </div>
       )}
 

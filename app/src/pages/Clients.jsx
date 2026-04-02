@@ -3,6 +3,7 @@ import { useNavigate, useLocation } from 'react-router-dom'
 import { supabase } from '../lib/supabase'
 import { useEscapeKey, useBodyLock, useToast } from '../lib/hooks'
 import { COLORS } from '../lib/format'
+import { askAssistant } from '../lib/assistant'
 
 const SERVICE_LINES = ['events', 'staffing', 'both']
 const STATUSES = ['active', 'inactive', 'prospect']
@@ -156,6 +157,17 @@ function ClientDetail({ client, onClose, onUpdated, onDeleted, navigate }) {
   const [events, setEvents] = useState([])
   const [invoices, setInvoices] = useState([])
   const [contracts, setContracts] = useState([])
+  const [healthScore, setHealthScore] = useState(null)
+  const [healthLoading, setHealthLoading] = useState(false)
+
+  const fetchHealthScore = async () => {
+    setHealthLoading(true)
+    try {
+      const result = await askAssistant({ action: 'client_health', data: { client_id: client.id }, context: { page: 'clients' } })
+      setHealthScore({ score: result.score, reasoning: result.reply })
+    } catch { /* silent */ }
+    finally { setHealthLoading(false) }
+  }
 
   useEffect(() => {
     supabase.from('events').select('*').eq('client_id', client.id).order('date', { ascending: false }).limit(5)
@@ -294,6 +306,24 @@ function ClientDetail({ client, onClose, onUpdated, onDeleted, navigate }) {
               </div>
             </div>
 
+            <div className="detail-section">
+              <h3 className="detail-section-title">AI Insights</h3>
+              {healthScore ? (
+                <div className="ai-result-card">
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 6 }}>
+                    <span className="ai-score-badge" data-score={healthScore.score <= 3 ? 'low' : healthScore.score <= 6 ? 'mid' : 'high'}>{healthScore.score}/10</span>
+                    <span style={{ fontSize: 12, color: 'var(--steel)', fontFamily: 'var(--fh)', fontWeight: 700, letterSpacing: '0.5px', textTransform: 'uppercase' }}>Relationship Health</span>
+                    <button className="ai-copy-btn" onClick={fetchHealthScore} disabled={healthLoading} style={{ marginLeft: 'auto' }}>{healthLoading ? '...' : 'Refresh'}</button>
+                  </div>
+                  <p style={{ fontSize: 13, color: 'var(--white)', lineHeight: 1.5 }}>{healthScore.reasoning}</p>
+                </div>
+              ) : (
+                <button className="modal-btn-cancel ai-tool-btn" onClick={fetchHealthScore} disabled={healthLoading}>
+                  {healthLoading ? 'Analyzing...' : 'Check Health Score'}
+                </button>
+              )}
+            </div>
+            {saveError && <p role="alert" style={{ color: '#C23B22', fontSize: 13, marginBottom: 8 }}>{saveError}</p>}
             <div className="detail-actions" style={{ justifyContent: 'space-between' }}>
               {confirmDelete ? (
                 <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
@@ -302,7 +332,7 @@ function ClientDetail({ client, onClose, onUpdated, onDeleted, navigate }) {
                   <button className="modal-btn-save" style={{ background: '#C23B22' }} onClick={handleDelete}>Yes, Delete</button>
                 </div>
               ) : (
-                <button className="modal-btn-cancel" style={{ color: '#C23B22', borderColor: '#C23B2244' }} onClick={() => setConfirmDelete(true)}>Delete</button>
+                <button className="modal-btn-cancel" style={{ color: '#C23B22', borderColor: '#C23B2244' }} onClick={() => { setSaveError(''); setConfirmDelete(true) }}>Delete</button>
               )}
               <button className="modal-btn-save" onClick={() => setEditing(true)}>Edit Client</button>
             </div>

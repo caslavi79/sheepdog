@@ -51,7 +51,7 @@ function StaffModal({ staff, onClose, onSaved }) {
   useEscapeKey(onClose)
   useBodyLock()
   const isEdit = !!staff?.id
-  const [form, setForm] = useState({ name: '', phone: '', email: '', role: '', default_pay_rate: '', status: 'active', background_check: 'none', ...staff })
+  const [form, setForm] = useState({ name: '', phone: '', email: '', role: '', default_pay_rate: '', status: 'active', background_check: 'none', address: '', city: '', state: '', zip: '', ...staff })
   const [saving, setSaving] = useState(false)
   const [error, setError] = useState('')
 
@@ -102,6 +102,12 @@ function StaffModal({ staff, onClose, onSaved }) {
             <label className="modal-field"><span>Background Check</span>
               <select value={form.background_check || 'none'} onChange={e => setForm({ ...form, background_check: e.target.value })}>{BG_CHECKS.map(s => <option key={s} value={s}>{s}</option>)}</select>
             </label>
+          </div>
+          <label className="modal-field"><span>Street Address</span><input placeholder="123 Main St" value={form.address || ''} onChange={e => setForm({ ...form, address: e.target.value })} /></label>
+          <div className="modal-row">
+            <label className="modal-field"><span>City</span><input placeholder="Bryan" value={form.city || ''} onChange={e => setForm({ ...form, city: e.target.value })} /></label>
+            <label className="modal-field"><span>State</span><input placeholder="TX" value={form.state || ''} onChange={e => setForm({ ...form, state: e.target.value })} /></label>
+            <label className="modal-field"><span>ZIP</span><input placeholder="77801" value={form.zip || ''} onChange={e => setForm({ ...form, zip: e.target.value })} /></label>
           </div>
           {error && <p role="alert" style={{ color: 'var(--red)', fontSize: 13 }}>{error}</p>}
           <div className="modal-actions">

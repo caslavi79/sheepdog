@@ -75,7 +75,7 @@ table.inventory tr:last-child td{border-bottom:2px solid var(--fog)}
 <h2>Event Details</h2>
 <table class="info">
 <tr><td>Event Name / Type</td><td><span class="field">[EVENT NAME]</span></td></tr>
-<tr><td>Venue</td><td><span class="field">[VENUE NAME AND ADDRESS]</span></td></tr>
+<tr><td>Venue</td><td><span class="field">[VENUE NAME]</span></td></tr>
 <tr><td>Event Date</td><td><span class="field">[EVENT DATE]</span></td></tr>
 <tr><td>Event Start Time</td><td><span class="field">[EVENT START TIME]</span></td></tr>
 <tr><td>Event End Time</td><td><span class="field">[EVENT END TIME]</span></td></tr>
@@ -91,19 +91,19 @@ table.inventory tr:last-child td{border-bottom:2px solid var(--fog)}
 
 <h2>Crew &amp; Schedule</h2>
 <table class="info">
-<tr><td>Number of Crew</td><td><span class="field">[NUMBER OF CREW MEMBERS]</span></td></tr>
+<tr><td>Number of Crew</td><td><span class="field">[CREW COUNT]</span></td></tr>
 <tr><td>Hourly Rate (per person)</td><td><span class="field">[HOURLY RATE]</span></td></tr>
-<tr><td>Setup Arrival Time</td><td><span class="field">[SETUP CREW ARRIVAL TIME]</span></td></tr>
-<tr><td>Setup Complete By</td><td><span class="field">[SETUP DEADLINE - before event starts]</span></td></tr>
-<tr><td>Takedown Start Time</td><td><span class="field">[TAKEDOWN START - e.g. immediately after event ends]</span></td></tr>
+<tr><td>Setup Arrival Time</td><td><span class="field">[SETUP ARRIVAL TIME]</span></td></tr>
+<tr><td>Setup Complete By</td><td><span class="field">[SETUP DEADLINE]</span></td></tr>
+<tr><td>Takedown Start Time</td><td><span class="field">[TAKEDOWN START TIME]</span></td></tr>
 <tr><td>Estimated Takedown Duration</td><td><span class="field">[ESTIMATED HOURS]</span></td></tr>
-<tr><td>Cleanup Complete By</td><td><span class="field">[CLEANUP DEADLINE - e.g. midnight, next morning by 8am]</span></td></tr>
+<tr><td>Cleanup Complete By</td><td><span class="field">[CLEANUP DEADLINE]</span></td></tr>
 </table>
 
 <h2>Venue Access &amp; Logistics</h2>
 <ul>
-<li><strong>Vehicle access:</strong> Client must confirm that Sheepdog's crew vehicle(s) can access the venue for loading and unloading. If a loading zone, gate code, or special parking arrangement is needed, provide details here: <span class="field">[VEHICLE ACCESS NOTES - loading zone, gate code, parking instructions, or N/A]</span></li>
-<li><strong>Venue unlocked:</strong> The venue must be unlocked and accessible at least <span class="field">[MINUTES BEFORE - e.g. 15, 30]</span> minutes before the crew's scheduled arrival time.</li>
+<li><strong>Vehicle access:</strong> Client must confirm that Sheepdog's crew vehicle(s) can access the venue for loading and unloading. If a loading zone, gate code, or special parking arrangement is needed, provide details here: <span class="field">[VEHICLE ACCESS NOTES]</span></li>
+<li><strong>Venue unlocked:</strong> The venue must be unlocked and accessible at least <span class="field">[MINUTES BEFORE]</span> minutes before the crew's scheduled arrival time.</li>
 <li><strong>Utilities:</strong> Client must ensure power, water, and adequate lighting are available in all areas where setup, takedown, or cleanup will occur. If the venue has limited power or no running water, notify Sheepdog in advance.</li>
 <li><strong>Waste disposal:</strong> Client is responsible for ensuring adequate trash receptacles or dumpster access at the venue. If cleanup is included, Sheepdog crew will bag and stage trash at the designated disposal area. Removal from the premises (e.g., hauling to an off-site dump) is not included unless separately agreed.</li>
 </ul>
@@ -111,7 +111,7 @@ table.inventory tr:last-child td{border-bottom:2px solid var(--fog)}
 <h2>Setup Scope of Work</h2>
 <p>If setup is included, Sheepdog crew will perform the following:</p>
 <ul>
-<li><span class="field">[DESCRIBE SETUP TASKS - e.g. arrange tables and chairs per layout diagram, set up tent/canopy, hang string lights, place signage, set up bar area, lay dance floor, arrange centerpieces per client instructions]</span></li>
+<li><span class="field">[SETUP SCOPE OF WORK]</span></li>
 </ul>
 
 <div class="context">
@@ -127,13 +127,13 @@ table.inventory tr:last-child td{border-bottom:2px solid var(--fog)}
 <h2>Takedown Scope of Work</h2>
 <p>If takedown is included, Sheepdog crew will perform the following:</p>
 <ul>
-<li><span class="field">[DESCRIBE TAKEDOWN TASKS - e.g. break down tables and chairs, remove tent/canopy, take down string lights and decor, disassemble bar area, stack/stage rental equipment for pickup, load client-owned items into designated area]</span></li>
+<li><span class="field">[TAKEDOWN SCOPE OF WORK]</span></li>
 </ul>
 
 <h2>Cleanup Scope of Work</h2>
 <p>If cleanup is included, Sheepdog crew will perform the following:</p>
 <ul>
-<li><span class="field">[DESCRIBE CLEANUP TASKS - e.g. trash removal and bagging, sweep/mop hard floors, wipe down tables and surfaces, clean bar area, remove all event debris, return venue to pre-event condition]</span></li>
+<li><span class="field">[CLEANUP SCOPE OF WORK]</span></li>
 </ul>
 
 <div class="warning">
@@ -153,8 +153,8 @@ table.inventory tr:last-child td{border-bottom:2px solid var(--fog)}
 <tr><td>Setup (estimated hours x crew x rate)</td><td><span class="field">[SETUP SUBTOTAL]</span></td></tr>
 <tr><td>Takedown (estimated hours x crew x rate)</td><td><span class="field">[TAKEDOWN SUBTOTAL]</span></td></tr>
 <tr><td>Cleanup (estimated hours x crew x rate)</td><td><span class="field">[CLEANUP SUBTOTAL]</span></td></tr>
-<tr><td>Flat Rate Option (if applicable)</td><td><span class="field">[FLAT RATE - or N/A]</span></td></tr>
-<tr><td><strong>Total Estimate</strong></td><td><strong><span class="field">[TOTAL ESTIMATED AMOUNT]</span></strong></td></tr>
+<tr><td>Flat Rate Option (if applicable)</td><td><span class="field">[FLAT RATE]</span></td></tr>
+<tr><td><strong>Total Estimate</strong></td><td><strong><span class="field">[TOTAL ESTIMATE]</span></strong></td></tr>
 </table>
 
 <p>If billed hourly, the final amount may vary from the estimate based on actual hours worked. Sheepdog will notify the Client's on-site contact if the job is running significantly over the estimated time.</p>
@@ -162,7 +162,7 @@ table.inventory tr:last-child td{border-bottom:2px solid var(--fog)}
 <h2>Payment Terms</h2>
 <ul>
 <li>A non-refundable deposit of <span class="field">[DEPOSIT AMOUNT]</span> is due at signing.</li>
-<li>Remaining balance is due <span class="field">[PAYMENT DUE DATE / TERMS - e.g. day of event, upon completion, net 15]</span>.</li>
+<li>Remaining balance is due <span class="field">[PAYMENT TERMS]</span> (e.g. day of event, upon completion, net 15).</li>
 <li>If billed hourly, the final invoice will be sent within 48 hours of job completion.</li>
 <li>Accepted payment methods: <span class="field">[PAYMENT METHODS]</span>.</li>
 </ul>
@@ -184,11 +184,11 @@ table.inventory tr:last-child td{border-bottom:2px solid var(--fog)}
 <h2>Delays &amp; Standby Time</h2>
 <ul>
 <li>If the crew arrives at the scheduled time and cannot begin work (venue not open, another vendor blocking the space, client not available, required materials not on-site), standby time is billed at the full hourly rate from the scheduled arrival time.</li>
-<li>If the delay exceeds <span class="field">[MAX WAIT TIME - e.g. 1 hour, 2 hours]</span>, Sheepdog may reschedule or leave the site. The minimum call time (below) still applies.</li>
+<li>If the delay exceeds <span class="field">[MAX WAIT TIME]</span>, Sheepdog may reschedule or leave the site. The minimum call time (below) still applies.</li>
 </ul>
 
 <h2>Minimum Call Time</h2>
-<p>Once the crew is dispatched, a minimum of <span class="field">[MINIMUM HOURS - e.g. 2 hours, 4 hours]</span> per crew member will be billed, regardless of how long the actual work takes. This applies even if the job is cancelled after the crew is en route or on-site.</p>
+<p>Once the crew is dispatched, a minimum of <span class="field">[MINIMUM HOURS]</span> per crew member will be billed, regardless of how long the actual work takes. This applies even if the job is cancelled after the crew is en route or on-site.</p>
 
 <h2>Cancellation Policy</h2>
 <ul>
@@ -224,7 +224,7 @@ table.inventory tr:last-child td{border-bottom:2px solid var(--fog)}
 
 <div class="context">
 <h3>Additional Notes</h3>
-<p><span class="field">[ANY ADDITIONAL NOTES, SPECIAL INSTRUCTIONS, OR LAYOUT DIAGRAM REFERENCE]</span></p>
+<p><span class="field">[ADDITIONAL NOTES]</span></p>
 </div>
 
 

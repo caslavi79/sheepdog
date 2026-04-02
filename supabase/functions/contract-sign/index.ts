@@ -52,105 +52,35 @@ Deno.serve(async (req: Request) => {
       });
     }
 
-    // ─── GET: Render signing page ───
+    // ─── GET: Return contract data as JSON (signing page is in the React app) ───
     if (req.method === "GET") {
-      if (contract.status === "signed") {
-        return new Response(renderPage("Contract Signed", `
-          <div style="text-align:center;margin-top:40px;">
-            <div style="font-size:48px;margin-bottom:16px;">✓</div>
-            <h2 style="color:#357A38;margin-bottom:8px;">Contract Signed</h2>
-            <p style="color:#929BAA;">This contract was signed on ${new Date(contract.signed_at).toLocaleDateString("en-US", { month: "long", day: "numeric", year: "numeric" })}.</p>
-            <p style="color:#929BAA;margin-top:4px;">Signed by: ${escapeHtml(contract.signer_name || "—")}</p>
-          </div>
-        `), { status: 200, headers: { ...corsHeaders, "Content-Type": "text/html; charset=utf-8" } });
-      }
-
       // Mark as viewed
       if (contract.status === "sent") {
         await supabase.from("contracts").update({ status: "viewed", updated_at: new Date().toISOString() }).eq("id", contract.id);
       }
 
-      const signingHtml = `
-        <div style="margin-bottom:32px;">
-          ${contract.filled_html || "<p>No contract content available.</p>"}
-        </div>
-        <div style="border-top:2px solid ${BRAND_COLOR};padding-top:32px;margin-top:32px;">
-          <h2 style="font-family:Arial,sans-serif;font-size:20px;color:${BRAND_COLOR};margin-bottom:16px;">Sign This Contract</h2>
-          <form id="signForm">
-            <label style="display:block;margin-bottom:16px;">
-              <span style="display:block;font-size:13px;font-weight:700;color:#4A4A4A;margin-bottom:4px;">Full Legal Name *</span>
-              <input id="signerName" type="text" required placeholder="Enter your full name"
-                style="width:100%;padding:12px;border:1px solid #D0D0D0;border-radius:6px;font-size:16px;font-family:Arial,sans-serif;" />
-            </label>
-            <label style="display:block;margin-bottom:8px;">
-              <span style="display:block;font-size:13px;font-weight:700;color:#4A4A4A;margin-bottom:4px;">Signature *</span>
-            </label>
-            <canvas id="sigCanvas" width="600" height="180"
-              style="border:1px solid #D0D0D0;border-radius:6px;cursor:crosshair;width:100%;max-width:600px;touch-action:none;background:#FAFAFA;"></canvas>
-            <div style="display:flex;gap:8px;margin:8px 0 20px;">
-              <button type="button" id="clearBtn" style="background:none;border:1px solid #D0D0D0;color:#929BAA;padding:6px 14px;border-radius:4px;font-size:13px;cursor:pointer;">Clear Signature</button>
-            </div>
-            <label style="display:flex;align-items:flex-start;gap:10px;margin-bottom:24px;cursor:pointer;">
-              <input type="checkbox" id="agreeCheck" required style="margin-top:3px;width:18px;height:18px;" />
-              <span style="font-size:14px;color:#4A4A4A;">I have read and agree to the terms of this contract. I understand that my electronic signature is legally binding.</span>
-            </label>
-            <button type="submit" id="submitBtn"
-              style="background:${BRAND_COLOR};color:#FFFFFF;border:none;padding:14px 32px;border-radius:6px;font-size:16px;font-weight:700;cursor:pointer;width:100%;">
-              Sign & Submit
-            </button>
-            <p id="errorMsg" style="color:#D4483A;font-size:13px;margin-top:8px;display:none;"></p>
-          </form>
-        </div>
-        <script>
-          const canvas = document.getElementById('sigCanvas');
-          const ctx = canvas.getContext('2d');
-          let drawing = false, hasDrawn = false;
-          const rect = () => canvas.getBoundingClientRect();
-          const getPos = (e) => {
-            const r = rect();
-            const t = e.touches ? e.touches[0] : e;
-            return [(t.clientX - r.left) * (canvas.width / r.width), (t.clientY - r.top) * (canvas.height / r.height)];
-          };
-          const start = (e) => { e.preventDefault(); drawing = true; ctx.beginPath(); const [x,y] = getPos(e); ctx.moveTo(x,y); };
-          const draw = (e) => { if (!drawing) return; e.preventDefault(); hasDrawn = true; const [x,y] = getPos(e); ctx.lineTo(x,y); ctx.strokeStyle = '${BRAND_COLOR}'; ctx.lineWidth = 2.5; ctx.lineCap = 'round'; ctx.stroke(); };
-          const stop = () => { drawing = false; };
-          canvas.addEventListener('mousedown', start); canvas.addEventListener('mousemove', draw); canvas.addEventListener('mouseup', stop); canvas.addEventListener('mouseleave', stop);
-          canvas.addEventListener('touchstart', start); canvas.addEventListener('touchmove', draw); canvas.addEventListener('touchend', stop); canvas.addEventListener('touchcancel', stop);
-          document.getElementById('clearBtn').addEventListener('click', () => { ctx.clearRect(0, 0, canvas.width, canvas.height); hasDrawn = false; });
+      // Strip document wrappers from filled_html
+      let contractContent = contract.filled_html || "";
+      contractContent = contractContent
+        .replace(/<!DOCTYPE[^>]*>/gi, "")
+        .replace(/<html[^>]*>/gi, "").replace(/<\/html>/gi, "")
+        .replace(/<head[^>]*>[\s\S]*?<\/head>/gi, "")
+        .replace(/<body[^>]*>/gi, "").replace(/<\/body>/gi, "")
+        .trim();
 
-          document.getElementById('signForm').addEventListener('submit', async (e) => {
-            e.preventDefault();
-            const name = document.getElementById('signerName').value.trim();
-            const errEl = document.getElementById('errorMsg');
-            const btn = document.getElementById('submitBtn');
-            if (!name) { errEl.textContent = 'Please enter your full name.'; errEl.style.display = 'block'; return; }
-            if (!hasDrawn) { errEl.textContent = 'Please draw your signature above.'; errEl.style.display = 'block'; return; }
-            if (!document.getElementById('agreeCheck').checked) { errEl.textContent = 'Please agree to the terms.'; errEl.style.display = 'block'; return; }
-            errEl.style.display = 'none';
-            btn.disabled = true; btn.textContent = 'Submitting...';
-            try {
-              const res = await fetch(window.location.href, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ signer_name: name, signature_data: canvas.toDataURL('image/png') })
-              });
-              const data = await res.json();
-              if (data.success) {
-                document.getElementById('signForm').innerHTML = '<div style="text-align:center;padding:40px 0;"><div style="font-size:48px;margin-bottom:16px;">✓</div><h2 style="color:#357A38;">Contract Signed</h2><p style="color:#929BAA;margin-top:8px;">A confirmation has been sent to your email.</p></div>';
-              } else {
-                errEl.textContent = data.error || 'Something went wrong. Please try again.'; errEl.style.display = 'block';
-                btn.disabled = false; btn.textContent = 'Sign & Submit';
-              }
-            } catch (err) {
-              errEl.textContent = 'Network error. Please try again.'; errEl.style.display = 'block';
-              btn.disabled = false; btn.textContent = 'Sign & Submit';
-            }
-          });
-        </script>
-      `;
-
-      return new Response(renderPage(contract.title || "Contract", signingHtml), {
-        status: 200, headers: { ...corsHeaders, "Content-Type": "text/html; charset=utf-8" },
+      return new Response(JSON.stringify({
+        success: true,
+        contract: {
+          id: contract.id,
+          title: contract.title || contract.template_name || "Contract",
+          status: contract.status,
+          filled_html: contractContent,
+          signer_name: contract.signer_name || null,
+          signed_at: contract.signed_at || null,
+        },
+      }), {
+        status: 200,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }
 

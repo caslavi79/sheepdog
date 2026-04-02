@@ -16,39 +16,51 @@ echo "════════════════════════�
 
 # Deploy contact-submit
 echo ""
-echo "1/6 Deploying contact-submit..."
+echo "1/8 Deploying contact-submit..."
 npx supabase functions deploy contact-submit \
   --project-ref "$PROJECT_REF" \
   --no-verify-jwt
 
 # Deploy license-reminders
 echo ""
-echo "2/6 Deploying license-reminders..."
+echo "2/8 Deploying license-reminders..."
 npx supabase functions deploy license-reminders \
   --project-ref "$PROJECT_REF" \
   --no-verify-jwt
 
 echo ""
-echo "3/6 Deploying contract-sign..."
+echo "3/8 Deploying contract-sign..."
 npx supabase functions deploy contract-sign \
   --project-ref "$PROJECT_REF" \
   --no-verify-jwt
 
 echo ""
-echo "4/6 Deploying contract-send..."
+echo "4/8 Deploying contract-send..."
 npx supabase functions deploy contract-send \
   --project-ref "$PROJECT_REF" \
   --no-verify-jwt
 
 echo ""
-echo "5/6 Deploying invoice-send..."
+echo "5/8 Deploying invoice-send..."
 npx supabase functions deploy invoice-send \
   --project-ref "$PROJECT_REF" \
   --no-verify-jwt
 
 echo ""
-echo "6/6 Deploying payment-reminders..."
+echo "6/8 Deploying payment-reminders..."
 npx supabase functions deploy payment-reminders \
+  --project-ref "$PROJECT_REF" \
+  --no-verify-jwt
+
+echo ""
+echo "7/8 Deploying claude-assistant..."
+npx supabase functions deploy claude-assistant \
+  --project-ref "$PROJECT_REF" \
+  --no-verify-jwt
+
+echo ""
+echo "8/8 Deploying claude-cron..."
+npx supabase functions deploy claude-cron \
   --project-ref "$PROJECT_REF" \
   --no-verify-jwt
 
@@ -120,6 +132,28 @@ if [ "$RESPONSE5" = "405" ]; then
 else
   echo "  invoice-send: WARNING — returned $RESPONSE5"
   echo "  Check: https://supabase.com/dashboard/project/$PROJECT_REF/functions/invoice-send/logs"
+fi
+
+# Verify claude-assistant (expects 405 on GET since it's POST-only)
+RESPONSE7=$(curl -s -o /dev/null -w "%{http_code}" \
+  "https://$PROJECT_REF.supabase.co/functions/v1/claude-assistant")
+
+if [ "$RESPONSE7" = "405" ]; then
+  echo "  claude-assistant: alive (GET $RESPONSE7 — expected, POST only)"
+else
+  echo "  claude-assistant: WARNING — returned $RESPONSE7"
+  echo "  Check: https://supabase.com/dashboard/project/$PROJECT_REF/functions/claude-assistant/logs"
+fi
+
+# Verify claude-cron
+RESPONSE8=$(curl -s -o /dev/null -w "%{http_code}" \
+  "https://$PROJECT_REF.supabase.co/functions/v1/claude-cron")
+
+if [ "$RESPONSE8" = "200" ]; then
+  echo "  claude-cron: alive (GET $RESPONSE8)"
+else
+  echo "  claude-cron: WARNING — returned $RESPONSE8"
+  echo "  Check: https://supabase.com/dashboard/project/$PROJECT_REF/functions/claude-cron/logs"
 fi
 
 echo ""

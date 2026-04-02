@@ -12,6 +12,7 @@ import Financials from './pages/Financials'
 import Compliance from './pages/Compliance'
 import Scheduling from './pages/Scheduling'
 import Placeholder from './pages/Placeholder'
+import Sign from './pages/Sign'
 import './App.css'
 
 export default function App() {
@@ -20,6 +21,7 @@ export default function App() {
       <Routes>
         <Route path="/login" element={<Login />} />
         <Route path="/reset-password" element={<ResetPassword />} />
+        <Route path="/sign" element={<Sign />} />
         <Route element={<ProtectedRoute><Layout /></ProtectedRoute>}>
           <Route index element={<Hub />} />
           <Route path="resources" element={<Resources />} />

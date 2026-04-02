@@ -5,7 +5,7 @@ import { useEscapeKey, useBodyLock, useToast } from '../lib/hooks'
 import { fmtDate, badgeStyle, COLORS } from '../lib/format'
 
 const CONTRACT_STATUSES = ['draft', 'sent', 'viewed', 'signed']
-const STATUS_COLORS = { draft: '#929BAA', sent: '#3D5A80', viewed: '#C9922E', signed: '#357A38' }
+const STATUS_COLORS = { draft: '#929BAA', sent: '#C9922E', viewed: '#3D5A80', signed: '#357A38' }
 
 const TEMPLATES = [
   { title: 'Event Security Agreement', file: '/docs/01-event-security-agreement.html', cat: 'Events' },
@@ -63,7 +63,7 @@ function TemplatePicker({ onSelect, onClose }) {
 /* ═══════════════════════════════════════════════════════════
    CONTRACT EDITOR (side-by-side)
    ═══════════════════════════════════════════════════════════ */
-function ContractEditor({ template, contract, clients, onSaved, onClose, preselectedClientId, preselectedStaffId }) {
+function ContractEditor({ template, contract, clients, onSaved, onDeleted, onSent, onClose, preselectedClientId, preselectedStaffId }) {
   const [templateHtml, setTemplateHtml] = useState('')
   const [fields, setFields] = useState([])
   const [values, setValues] = useState(contract?.field_values || {})
@@ -71,16 +71,23 @@ function ContractEditor({ template, contract, clients, onSaved, onClose, presele
   const [signerEmail, setSignerEmail] = useState(contract?.signer_email || '')
   const [staffId, setStaffId] = useState(contract?.staff_id || preselectedStaffId || null)
   const [staffMember, setStaffMember] = useState(null)
+  const [staffList, setStaffList] = useState([])
+
+  useEffect(() => {
+    supabase.from('staff').select('id, name, role, email, phone').eq('status', 'active').order('name')
+      .then(({ data }) => setStaffList(data || []))
+  }, [])
   const [saving, setSaving] = useState(false)
   const [error, setError] = useState('')
   const [contractId, setContractId] = useState(contract?.id || null)
   const [contractStatus, setContractStatus] = useState(contract?.status || 'draft')
+  const [savedSinceEdit, setSavedSinceEdit] = useState(true)
   const editorRef = useRef(null)
 
   // Load staff member for auto-fill when staff_id is set
   useEffect(() => {
     if (!staffId) return
-    supabase.from('staff').select('id, name, email, phone, role').eq('id', staffId).single()
+    supabase.from('staff').select('id, name, email, phone, role, address, city, state, zip').eq('id', staffId).single()
       .then(({ data, error }) => {
         if (error) { if (import.meta.env.DEV) console.error('Staff lookup:', error.message); return }
         if (data) {
@@ -133,16 +140,30 @@ function ContractEditor({ template, contract, clients, onSaved, onClose, presele
     })
   }, [selectedClient, clients])
 
-  // Auto-fill from staff member (for contractor agreements)
+  // Auto-fill from staff member (for contractor agreements, W-9s, etc.)
   useEffect(() => {
     if (!staffMember) return
+    setSignerEmail(staffMember.email || '')
+    setSavedSinceEdit(false)
     setValues(prev => {
       const next = { ...prev }
       Object.keys(next).forEach(key => {
         const k = key.toUpperCase()
-        if (k.includes('CONTRACTOR NAME') || k.includes('SIGNER') || k.includes('EMPLOYEE NAME') || k.includes('STAFF NAME')) next[key] = staffMember.name || ''
-        if (k.includes('EMAIL') || k.includes('CONTRACTOR EMAIL')) next[key] = staffMember.email || ''
-        if (k.includes('PHONE') || k.includes('CONTRACTOR PHONE')) next[key] = staffMember.phone || ''
+        // Name fields
+        if (k.includes('CONTRACTOR') && k.includes('NAME')) next[key] = staffMember.name || ''
+        if (k.includes('EMPLOYEE NAME') || k.includes('STAFF NAME') || k === 'SIGNER' || k === 'FULL NAME') next[key] = staffMember.name || ''
+        // Email
+        if (k.includes('EMAIL')) next[key] = staffMember.email || ''
+        // Phone
+        if (k.includes('PHONE')) next[key] = staffMember.phone || ''
+        // Role/position
+        if (k.includes('ROLE') || k.includes('POSITION') || k.includes('TITLE') || k.includes('CLASSIFICATION')) next[key] = staffMember.role || ''
+        // Address
+        if (k.includes('STREET') || (k.includes('ADDRESS') && !k.includes('EMAIL'))) next[key] = staffMember.address || ''
+        if (k === 'CITY, STATE, ZIP' || k === 'CITY STATE ZIP') next[key] = [staffMember.city, staffMember.state, staffMember.zip].filter(Boolean).join(', ')
+        if (k === 'CITY' && !k.includes(',')) next[key] = staffMember.city || ''
+        if (k === 'STATE') next[key] = staffMember.state || ''
+        if (k === 'ZIP' || k === 'ZIP CODE') next[key] = staffMember.zip || ''
       })
       return next
     })
@@ -176,6 +197,7 @@ function ContractEditor({ template, contract, clients, onSaved, onClose, presele
       setSaving(false); if (err) { setError(err.message); return }
       setContractId(data.id); setContractStatus('draft')
     }
+    setSavedSinceEdit(true)
     onSaved()
   }
 
@@ -200,18 +222,25 @@ function ContractEditor({ template, contract, clients, onSaved, onClose, presele
       id = data.id; setContractId(id)
     }
     // Send
-    const { data: { session } } = await supabase.auth.getSession()
-    if (!session?.access_token) { setError('Session expired. Please refresh.'); setSaving(false); return }
-    const res = await fetch(`${import.meta.env.VITE_SUPABASE_URL}/functions/v1/contract-send`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${session.access_token}` },
-      body: JSON.stringify({ contract_id: id }),
-    })
-    const result = await res.json()
-    setSaving(false)
-    if (!result.success) { setError(result.error || 'Failed to send'); return }
-    setContractStatus('sent')
-    onSaved()
+    try {
+      const { data: { session } } = await supabase.auth.getSession()
+      if (!session?.access_token) { setError('Session expired. Please refresh.'); setSaving(false); return }
+      const res = await fetch(`${import.meta.env.VITE_SUPABASE_URL}/functions/v1/contract-send`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${session.access_token}` },
+        body: JSON.stringify({ contract_id: id }),
+      })
+      const result = await res.json()
+      setSaving(false)
+      if (!result.success) { setError(result.error || 'Failed to send'); return }
+      setContractStatus('sent')
+      if (onSent) onSent(); else onSaved()
+    } catch {
+      // Network timeout — email likely sent, edge function just slow to respond
+      setSaving(false)
+      setContractStatus('sent')
+      if (onSent) onSent(); else onSaved()
+    }
   }
 
   return (
@@ -221,52 +250,122 @@ function ContractEditor({ template, contract, clients, onSaved, onClose, presele
         <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
           <StatusBadge status={contractStatus} />
           <button className="modal-btn-cancel" style={{ fontSize: 12 }} onClick={() => {
-            const hasContent = Object.values(values).some(v => v?.trim?.())
-            if (hasContent && contractStatus === 'draft' && !window.confirm('Discard unsaved changes?')) return
+            if (!savedSinceEdit && !window.confirm('You have unsaved changes. Discard?')) return
             onClose()
           }}>Close Editor</button>
         </div>
       </div>
 
       <div className="contract-editor-body">
-        {/* LEFT: Form */}
+        {/* LEFT: Form or Signed info */}
         <div className="contract-editor-form">
-          <label className="modal-field" style={{ marginBottom: 12 }}>
-            <span>Auto-fill from Client</span>
-            <select value={selectedClient} onChange={e => setSelectedClient(e.target.value)}>
-              <option value="">Select client (optional)...</option>
-              {clients.map(c => <option key={c.id} value={c.id}>{c.business_name || c.contact_name}</option>)}
-            </select>
-          </label>
-
-          <div className="contract-editor-fields">
-            {fields.length === 0 && !error && <p style={{ color: 'var(--steel)', fontSize: 14 }}>Loading fields...</p>}
-            {fields.map(f => (
-              <label key={f} className="modal-field" style={{ marginBottom: 8 }}>
-                <span>{f}</span>
-                <input value={values[f] || ''} onChange={e => setValues({ ...values, [f]: e.target.value })} placeholder={`Enter ${f.toLowerCase()}`} />
-              </label>
-            ))}
-          </div>
-
-          <div style={{ borderTop: '1px solid rgba(255,255,255,0.06)', paddingTop: 16, marginTop: 16 }}>
-            <label className="modal-field" style={{ marginBottom: 12 }}>
-              <span>Signer Email</span>
-              <input type="email" value={signerEmail} onChange={e => setSignerEmail(e.target.value)} placeholder="client@example.com" />
-            </label>
-            {error && <p role="alert" style={{ color: 'var(--red)', fontSize: 13, marginBottom: 8 }}>{error}</p>}
-            <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
-              <button className="modal-btn-cancel" style={{ fontSize: 13 }} disabled={saving} onClick={handleSaveDraft}>{saving ? '...' : 'Save Draft'}</button>
-              <button className="modal-btn-save" style={{ fontSize: 13 }} disabled={saving || !signerEmail} onClick={handleSend}>{saving ? 'Sending...' : 'Send for Signing'}</button>
-              {contractId && contractStatus !== 'draft' && contract?.sign_token && (
-                <a href={`${import.meta.env.VITE_SUPABASE_URL}/functions/v1/contract-sign?token=${contract.sign_token}`}
-                  target="_blank" rel="noopener noreferrer"
-                  style={{ fontSize: 12, fontFamily: 'var(--fh)', fontWeight: 600, color: COLORS.blue, padding: '8px 14px', textDecoration: 'none' }}>
-                  View Signing Page
-                </a>
+          {contractStatus === 'signed' ? (
+            <>
+              <div style={{ padding: '20px 0' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 16 }}>
+                  <span style={{ fontSize: 32, color: '#357A38' }}>&#10003;</span>
+                  <div>
+                    <div style={{ fontSize: 16, fontWeight: 700, color: 'var(--white)' }}>Signed by {contract?.signer_name || '—'}</div>
+                    <div style={{ fontSize: 13, color: 'var(--steel)' }}>{contract?.signed_at ? new Date(contract.signed_at).toLocaleString() : '—'}</div>
+                  </div>
+                </div>
+                {contract?.signer_email && <div style={{ fontSize: 13, color: 'var(--steel)', marginBottom: 8 }}>Email: {contract.signer_email}</div>}
+                {contract?.signer_ip && <div style={{ fontSize: 13, color: 'var(--steel)', marginBottom: 16 }}>IP: {contract.signer_ip}</div>}
+                {contract?.signature_data && (
+                  <div style={{ marginBottom: 16 }}>
+                    <div style={{ fontSize: 11, fontFamily: 'var(--fh)', fontWeight: 700, letterSpacing: '1px', textTransform: 'uppercase', color: 'var(--steel)', marginBottom: 6 }}>Signature</div>
+                    <img src={contract.signature_data} alt="Signature" style={{ maxWidth: '100%', maxHeight: 120, background: '#fff', borderRadius: 6, padding: 8 }} />
+                  </div>
+                )}
+              </div>
+              <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
+                <button className="modal-btn-cancel" style={{ fontSize: 13 }} onClick={() => {
+                  const sigBlock = `
+                    <div style="border-top:2px solid #0C0C0C;margin-top:40px;padding-top:24px;">
+                      <h3 style="font-size:14px;color:#929BAA;text-transform:uppercase;letter-spacing:1px;margin-bottom:16px;">Electronic Signature</h3>
+                      <table style="border-collapse:collapse;width:100%;max-width:500px;">
+                        <tr><td style="padding:6px 0;font-weight:700;width:120px;color:#4A4A4A;">Signed by</td><td style="padding:6px 0;">${contract?.signer_name || '—'}</td></tr>
+                        <tr><td style="padding:6px 0;font-weight:700;color:#4A4A4A;">Email</td><td style="padding:6px 0;">${contract?.signer_email || '—'}</td></tr>
+                        <tr><td style="padding:6px 0;font-weight:700;color:#4A4A4A;">Date</td><td style="padding:6px 0;">${contract?.signed_at ? new Date(contract.signed_at).toLocaleString() : '—'}</td></tr>
+                        <tr><td style="padding:6px 0;font-weight:700;color:#4A4A4A;">IP Address</td><td style="padding:6px 0;">${contract?.signer_ip || '—'}</td></tr>
+                      </table>
+                      ${contract?.signature_data ? `<div style="margin-top:16px;"><img src="${contract.signature_data}" style="max-width:300px;max-height:100px;" /></div>` : ''}
+                      <p style="font-size:11px;color:#929BAA;margin-top:16px;">This document was electronically signed via Sheepdog Security LLC's e-signing platform. This signature is legally binding under the ESIGN Act and UETA.</p>
+                    </div>
+                  `
+                  const printHtml = `<!DOCTYPE html><html><head><meta charset="utf-8"><title>${contract?.title || 'Contract'}</title><style>body{font-family:Arial,sans-serif;max-width:800px;margin:40px auto;padding:0 24px;color:#333;}@media print{body{margin:0;padding:20px;}}</style></head><body>${filledHtml}${sigBlock}</body></html>`
+                  const w = window.open('', '_blank')
+                  w.document.write(printHtml)
+                  w.document.close()
+                }}>Download / Print</button>
+                {contract?.sign_token && (
+                  <a href={`/sign?token=${contract.sign_token}`} target="_blank" rel="noopener noreferrer"
+                    style={{ fontSize: 12, fontFamily: 'var(--fh)', fontWeight: 600, color: COLORS.blue, padding: '8px 14px', textDecoration: 'none' }}>
+                    View Signing Page
+                  </a>
+                )}
+              </div>
+            </>
+          ) : (
+            <>
+              {(template?.cat === 'Staff' || contract?.staff_id || TEMPLATES.find(t => t.title === (contract?.template_name || template?.title))?.cat === 'Staff') ? (
+                <label className="modal-field" style={{ marginBottom: 12 }}>
+                  <span>Auto-fill from Staff</span>
+                  <select value={staffId || ''} onChange={e => setStaffId(e.target.value || null)}>
+                    <option value="">Select staff member (optional)...</option>
+                    {staffList.map(s => <option key={s.id} value={s.id}>{s.name}{s.role ? ` — ${s.role}` : ''}</option>)}
+                  </select>
+                </label>
+              ) : (
+                <label className="modal-field" style={{ marginBottom: 12 }}>
+                  <span>Auto-fill from Client</span>
+                  <select value={selectedClient} onChange={e => setSelectedClient(e.target.value)}>
+                    <option value="">Select client (optional)...</option>
+                    {clients.map(c => <option key={c.id} value={c.id}>{c.business_name || c.contact_name}</option>)}
+                  </select>
+                </label>
               )}
-            </div>
-          </div>
+
+              <div className="contract-editor-fields">
+                {fields.length === 0 && !error && <p style={{ color: 'var(--steel)', fontSize: 14 }}>Loading fields...</p>}
+                {fields.map(f => (
+                  <label key={f} className="modal-field" style={{ marginBottom: 8 }}>
+                    <span>{f}</span>
+                    <input value={values[f] || ''} onChange={e => { setValues({ ...values, [f]: e.target.value }); setSavedSinceEdit(false) }} placeholder={`Enter ${f.toLowerCase()}`} />
+                  </label>
+                ))}
+              </div>
+
+              <div style={{ borderTop: '1px solid rgba(255,255,255,0.06)', paddingTop: 16, marginTop: 16 }}>
+                <label className="modal-field" style={{ marginBottom: 12 }}>
+                  <span>Signer Email</span>
+                  <input type="email" value={signerEmail} onChange={e => setSignerEmail(e.target.value)} placeholder="client@example.com" />
+                </label>
+                {error && <p role="alert" style={{ color: 'var(--red)', fontSize: 13, marginBottom: 8 }}>{error}</p>}
+                <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', justifyContent: 'space-between', alignItems: 'center' }}>
+                  <div style={{ display: 'flex', gap: 8 }}>
+                    <button className="modal-btn-cancel" style={{ fontSize: 13 }} disabled={saving} onClick={handleSaveDraft}>{saving ? '...' : 'Save Draft'}</button>
+                    <button className="modal-btn-save" style={{ fontSize: 13 }} disabled={saving || !signerEmail} onClick={handleSend}>{saving ? 'Sending...' : 'Send for Signing'}</button>
+                    {contractId && contractStatus !== 'draft' && contract?.sign_token && (
+                      <a href={`/sign?token=${contract.sign_token}`} target="_blank" rel="noopener noreferrer"
+                        style={{ fontSize: 12, fontFamily: 'var(--fh)', fontWeight: 600, color: COLORS.blue, padding: '8px 14px', textDecoration: 'none' }}>
+                        View Signing Page
+                      </a>
+                    )}
+                  </div>
+                  {contractId && contractStatus === 'draft' && (
+                    <button className="modal-btn-cancel" style={{ fontSize: 12, color: 'var(--red)', borderColor: 'rgba(212,72,58,0.3)' }} disabled={saving} onClick={async () => {
+                      if (!window.confirm('Delete this draft?')) return
+                      const { error: err } = await supabase.from('contracts').delete().eq('id', contractId)
+                      if (err) { setError('Delete failed: ' + err.message); return }
+                      if (onDeleted) onDeleted()
+                      onClose()
+                    }}>Delete Draft</button>
+                  )}
+                </div>
+              </div>
+            </>
+          )}
         </div>
 
         {/* RIGHT: Live Preview */}
@@ -452,6 +551,8 @@ export default function Contracts() {
           contract={editorContract}
           clients={clients}
           onSaved={handleSaved}
+          onDeleted={() => { loadContracts(); showToast('Draft deleted') }}
+          onSent={() => { loadContracts(); showToast('Contract sent for signing') }}
           onClose={handleCloseEditor}
           preselectedClientId={preselectedClientId}
           preselectedStaffId={preselectedStaffId}

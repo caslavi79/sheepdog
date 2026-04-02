@@ -36,7 +36,10 @@ The client-facing site and the app code both live in the `sheepdog` repo. The `s
 
 The BRAND_* secrets make the contract signing system reusable for other businesses — swap them out, upload new templates, zero code changes.
 
-## Edge Functions (4 total)
+- `ANTHROPIC_API_KEY` — Claude API key for AI features
+- `CLAUDE_MODEL` — Model identifier (default: claude-sonnet-4-20250514)
+
+## Edge Functions (8 total)
 
 ### Deploy command (CRITICAL)
 
@@ -44,7 +47,7 @@ The BRAND_* secrets make the contract signing system reusable for other business
 bash scripts/deploy-edge.sh
 ```
 
-This deploys ALL 4 functions with `--no-verify-jwt` and verifies each endpoint. **Never deploy edge functions any other way.** Without `--no-verify-jwt`, Supabase re-enables JWT verification and public functions (contact form, signing page) silently break.
+This deploys ALL 8 functions with `--no-verify-jwt` and verifies each endpoint. **Never deploy edge functions any other way.** Without `--no-verify-jwt`, Supabase re-enables JWT verification and public functions (contact form, signing page) silently break.
 
 ### contact-submit
 
@@ -80,6 +83,22 @@ GET renders branded signing page with filled contract + signature canvas. POST c
 - **Method:** POST (called from app)
 
 Sends contract email via Resend with branded "Review & Sign" button. Validates contract exists, has content, isn't already signed. Updates status to 'sent'.
+
+### claude-assistant
+
+- **Endpoint:** `.../functions/v1/claude-assistant`
+- **Source:** `supabase/functions/claude-assistant/index.ts`
+- **Method:** POST (called from app with Bearer auth token)
+
+Central AI gateway. Routes requests by `action` field: `intake` (smart record creation from messy text/images), `chat`, `daily_briefing`, `lead_score`, `follow_up_draft`, `client_health`, `duplicate_check`, `screenshot_analyze`. The `intake` action is the primary entry point — it creates real DB records (pipeline, clients, events, invoices, contracts, staff, licenses) from unstructured input. Calls Anthropic Claude API, logs all interactions to `assistant_messages` and `assistant_actions` tables.
+
+### claude-cron
+
+- **Endpoint:** `.../functions/v1/claude-cron`
+- **Source:** `supabase/functions/claude-cron/index.ts`
+- **Method:** GET or POST (no auth — invoked by cron)
+
+Daily automated trigger checks: stale deals (7d/14d follow-ups), overdue invoices (3d reminder), tomorrow's event shift notifications, Monday weekly briefing. Generates AI-crafted emails, queues in `smart_emails` table, sends via Resend. Has idempotency checks to prevent duplicate emails.
 
 ### Email recipients (hardcoded in edge functions)
 
@@ -235,6 +254,11 @@ Unique index on (role, service_line).
 - **rate_limits** — rate limit tracking (ip, endpoint, created_at)
 - **shifts** — stub (not yet used)
 
+### Claude AI tables
+- **assistant_messages** — conversation history (user_id, session_id, role, content, action_type, context_page, metadata jsonb)
+- **assistant_actions** — audit log (message_id FK, action_type, target_table, target_id, payload jsonb, status)
+- **smart_emails** — email queue (trigger_type, trigger_id, recipient_email, recipient_type, subject, html_body, status, sent_at, error_message)
+
 ### RLS
 Row Level Security enabled on ALL tables. "authenticated only" policy on all ops tables. Edge functions use service role key to bypass RLS.
 
@@ -276,9 +300,13 @@ Vite + React 19 + React Router v7 + Supabase JS client.
 - `app/src/App.css` — all styles (responsive at 1024px and 768px)
 - `app/src/components/Layout.jsx` — sidebar nav + mobile bottom tab bar
 - `app/src/components/ProtectedRoute.jsx` — auth guard
-- `scripts/deploy-edge.sh` — deploys all 4 edge functions with --no-verify-jwt
+- `scripts/deploy-edge.sh` — deploys all 8 edge functions with --no-verify-jwt
 - `supabase/schema.sql` — database schema source of truth
 - `js/form.js` — shared contact form JS (static site only)
+- `app/src/components/AssistantPanel.jsx` — AI chat slide-out panel
+- `app/src/lib/assistant.js` — API helper for claude-assistant edge function
+- `supabase/functions/claude-assistant/index.ts` — central AI gateway (7 action handlers)
+- `supabase/functions/claude-cron/index.ts` — automated email triggers (5 trigger types)
 
 ### Deploy the app
 

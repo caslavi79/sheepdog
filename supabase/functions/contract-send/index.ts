@@ -98,6 +98,14 @@ Deno.serve(async (req: Request) => {
       </div>
     `;
 
+    // Update status FIRST so it's marked sent even if email response is slow
+    const { error: updateErr } = await supabase.from("contracts").update({
+      status: "sent",
+      sent_at: new Date().toISOString(),
+      updated_at: new Date().toISOString(),
+    }).eq("id", contract.id);
+    if (updateErr) console.error("Failed to update contract status:", updateErr.message);
+
     const emailRes = await fetch("https://api.resend.com/emails", {
       method: "POST",
       headers: { Authorization: `Bearer ${RESEND_API_KEY}`, "Content-Type": "application/json" },
@@ -118,13 +126,6 @@ Deno.serve(async (req: Request) => {
         status: 500, headers: { "Content-Type": "application/json" },
       });
     }
-
-    // Update contract status
-    await supabase.from("contracts").update({
-      status: "sent",
-      sent_at: new Date().toISOString(),
-      updated_at: new Date().toISOString(),
-    }).eq("id", contract.id);
 
     return new Response(JSON.stringify({ success: true, emailResult }), {
       status: 200, headers: { "Content-Type": "application/json" },

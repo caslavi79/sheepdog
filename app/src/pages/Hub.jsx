@@ -1,7 +1,8 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { Link } from 'react-router-dom'
 import { supabase } from '../lib/supabase'
 import { daysUntil, daysSince } from '../lib/format'
+import { askAssistant } from '../lib/assistant'
 
 const icons = {
   resources: <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><path d="M4 19.5v-15A2.5 2.5 0 0 1 6.5 2H20v20H6.5a2.5 2.5 0 0 1 0-5H20"/><path d="M8 7h6"/><path d="M8 11h4"/></svg>,
@@ -62,6 +63,78 @@ export default function Hub() {
   const [stats, setStats] = useState({ leads: '—', pipelineValue: '—', submissions7d: '—', activeClients: '—' })
   const [alerts, setAlerts] = useState([])
   const [alertsLoading, setAlertsLoading] = useState(true)
+  const [briefing, setBriefing] = useState(() => {
+    try {
+      const cached = localStorage.getItem('sheepdog_briefing')
+      if (cached) {
+        const { text, date } = JSON.parse(cached)
+        if (date === new Date().toISOString().slice(0, 10)) return text
+      }
+    } catch { /* ignore */ }
+    return null
+  })
+  const [briefingLoading, setBriefingLoading] = useState(false)
+  const [briefingError, setBriefingError] = useState('')
+
+  const [uploadResult, setUploadResult] = useState(null)
+  const [uploadLoading, setUploadLoading] = useState(false)
+  const [uploadError, setUploadError] = useState('')
+  const [dragOver, setDragOver] = useState(false)
+  const uploadInputRef = useRef(null)
+
+  const handleUpload = async (file) => {
+    if (!file || !file.type.startsWith('image/')) return
+    setUploadLoading(true)
+    setUploadError('')
+    setUploadResult(null)
+    try {
+      const base64 = await new Promise((resolve, reject) => {
+        const img = new Image()
+        img.onload = () => {
+          let w = img.width, h = img.height
+          if (w > 1024) { h = Math.round(h * (1024 / w)); w = 1024 }
+          const canvas = document.createElement('canvas')
+          canvas.width = w; canvas.height = h
+          canvas.getContext('2d').drawImage(img, 0, 0, w, h)
+          resolve(canvas.toDataURL('image/jpeg', 0.7).split(',')[1])
+        }
+        img.onerror = reject
+        img.src = URL.createObjectURL(file)
+      })
+      const result = await askAssistant({ action: 'intake', context: { page: 'hub' }, imageBase64: base64, imageMediaType: 'image/jpeg' })
+      setUploadResult({
+        summary: result.reply,
+        actions_taken: result.actions_taken || [],
+        intake: true,
+      })
+    } catch (err) {
+      setUploadError(err.message)
+    } finally {
+      setUploadLoading(false)
+    }
+  }
+
+  const handleDrop = (e) => {
+    e.preventDefault()
+    setDragOver(false)
+    const file = e.dataTransfer?.files?.[0]
+    if (file) handleUpload(file)
+  }
+
+  const fetchBriefing = async () => {
+    setBriefingLoading(true)
+    setBriefingError('')
+    try {
+      const result = await askAssistant({ action: 'daily_briefing', context: { page: 'hub' } })
+      const text = result.reply || ''
+      setBriefing(text)
+      localStorage.setItem('sheepdog_briefing', JSON.stringify({ text, date: new Date().toISOString().slice(0, 10) }))
+    } catch (err) {
+      setBriefingError(err.message)
+    } finally {
+      setBriefingLoading(false)
+    }
+  }
 
   useEffect(() => {
     const sevenDaysAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString()
@@ -145,6 +218,31 @@ export default function Hub() {
         <h1>Sheepdog HQ</h1>
         <p>Operations dashboard for Sheepdog Security LLC</p>
       </div>
+      <div className="hub-briefing-section">
+        {briefing ? (
+          <div className="hub-briefing">
+            <div className="hub-briefing-header">
+              <span className="hub-briefing-label">AI Briefing</span>
+              <button className="hub-briefing-refresh" onClick={fetchBriefing} disabled={briefingLoading}>
+                {briefingLoading ? 'Updating...' : 'Refresh'}
+              </button>
+            </div>
+            <div className="hub-briefing-text">{briefing}</div>
+          </div>
+        ) : (
+          <button className="hub-briefing-btn" onClick={fetchBriefing} disabled={briefingLoading}>
+            {briefingLoading ? (
+              <span>Generating briefing...</span>
+            ) : (
+              <>
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 2a10 10 0 0 1 10 10c0 6-10 12-10 12S2 18 2 12A10 10 0 0 1 12 2z"/></svg>
+                Get Today's Briefing
+              </>
+            )}
+          </button>
+        )}
+        {briefingError && <div style={{ color: 'var(--red)', fontSize: 13, marginTop: 6 }}>{briefingError}</div>}
+      </div>
       <div className="hub-stats">
         <div className="hub-stat-card">
           <div className="hub-stat-value">{stats.leads}</div>
@@ -174,6 +272,59 @@ export default function Hub() {
           ))}
         </div>
       ) : null}
+      <div
+        className={`hub-upload-zone${dragOver ? ' hub-upload-zone--active' : ''}`}
+        onDragOver={(e) => { e.preventDefault(); setDragOver(true) }}
+        onDragLeave={() => setDragOver(false)}
+        onDrop={handleDrop}
+        onClick={() => uploadInputRef.current?.click()}
+        role="button"
+        tabIndex={0}
+        aria-label="Upload a photo for AI analysis"
+      >
+        <input
+          ref={uploadInputRef}
+          type="file"
+          accept="image/*"
+          style={{ display: 'none' }}
+          onChange={(e) => { const f = e.target.files?.[0]; if (f) handleUpload(f); e.target.value = '' }}
+        />
+        {uploadLoading ? (
+          <span style={{ color: 'var(--steel)', fontSize: 14 }}>Analyzing image...</span>
+        ) : (
+          <>
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="var(--steel)" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+              <rect x="3" y="3" width="18" height="18" rx="2" ry="2"/>
+              <circle cx="8.5" cy="8.5" r="1.5"/>
+              <polyline points="21 15 16 10 5 21"/>
+            </svg>
+            <span>Drop a photo or click to upload — W-9, license, text message, business card, invoice</span>
+          </>
+        )}
+      </div>
+      {uploadError && <div style={{ color: 'var(--red)', fontSize: 13, marginBottom: 12 }}>{uploadError}</div>}
+      {uploadResult && (
+        <div className="ai-result-card" style={{ marginBottom: 20 }}>
+          <div style={{ fontSize: 13, color: 'var(--white)', lineHeight: 1.6, whiteSpace: 'pre-wrap', marginBottom: uploadResult.actions_taken?.length ? 10 : 0 }}>
+            {uploadResult.summary}
+          </div>
+          {uploadResult.actions_taken?.length > 0 && (
+            <div className="intake-actions">
+              {uploadResult.actions_taken.map((action, j) => (
+                <Link key={j} to={action.table === 'pipeline' ? '/pipeline' : action.table === 'clients' ? '/clients' : action.table === 'events' ? '/scheduling' : action.table === 'invoices' ? '/financials' : action.table === 'contracts' ? '/contracts' : '/compliance'} className="intake-action-card" style={{ textDecoration: 'none' }}>
+                  <span className="intake-action-badge" style={{ background: action.table === 'pipeline' ? '#3D5A80' : action.table === 'clients' ? '#357A38' : action.table === 'events' ? '#C9922E' : action.table === 'invoices' ? '#D4483A' : '#7A8490' }}>
+                    {action.table === 'pipeline' ? 'LEAD' : action.table.toUpperCase()}
+                  </span>
+                  <span className="intake-action-label">{action.label}</span>
+                  {action.extra && <span className="intake-action-extra">{action.extra}</span>}
+                  <span className="intake-action-status">{action.status}</span>
+                </Link>
+              ))}
+            </div>
+          )}
+          <button className="modal-btn-cancel" style={{ marginTop: 10, fontSize: 12 }} onClick={() => setUploadResult(null)}>Dismiss</button>
+        </div>
+      )}
       <div className="hub-grid">
         {modules.map((mod) => (
           <Link

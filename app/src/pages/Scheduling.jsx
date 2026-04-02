@@ -24,7 +24,7 @@ function ServiceBadge({ line }) {
 /* ═══════════════════════════════════════════════════════════
    ADD/EDIT EVENT MODAL
    ═══════════════════════════════════════════════════════════ */
-function EventModal({ event, clients, staff, licenses, onClose, onSaved, defaultDate }) {
+function EventModal({ event, clients, staff, licenses, onClose, onSaved, onDeleted, defaultDate }) {
   useEscapeKey(onClose)
   useBodyLock()
   const isEdit = !!event?.id
@@ -36,6 +36,14 @@ function EventModal({ event, clients, staff, licenses, onClose, onSaved, default
   const [saving, setSaving] = useState(false)
   const [error, setError] = useState('')
   const [updateSeries, setUpdateSeries] = useState(false)
+  const [confirmDelete, setConfirmDelete] = useState(false)
+
+  const handleDelete = async () => {
+    const { error: err } = await supabase.from('events').delete().eq('id', event.id)
+    if (err) { setError('Delete failed: ' + err.message); setConfirmDelete(false); return }
+    if (onDeleted) onDeleted()
+    onClose()
+  }
 
   const handleSubmit = async (e) => {
     e.preventDefault()
@@ -140,9 +148,22 @@ function EventModal({ event, clients, staff, licenses, onClose, onSaved, default
             </label>
           )}
           {error && <p role="alert" style={{ color: 'var(--red)', fontSize: 13 }}>{error}</p>}
-          <div className="modal-actions">
-            <button type="button" className="modal-btn-cancel" onClick={onClose}>Cancel</button>
-            <button type="submit" className="modal-btn-save" disabled={saving}>{saving ? 'Saving...' : isEdit ? 'Save' : 'Create Event'}</button>
+          <div className="modal-actions" style={{ justifyContent: isEdit ? 'space-between' : 'flex-end' }}>
+            {isEdit && (
+              confirmDelete ? (
+                <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
+                  <span style={{ fontSize: 13, color: 'var(--red)' }}>Delete this event?</span>
+                  <button type="button" className="modal-btn-cancel" onClick={() => setConfirmDelete(false)}>No</button>
+                  <button type="button" className="modal-btn-save" style={{ background: 'var(--red)' }} onClick={handleDelete}>Yes, Delete</button>
+                </div>
+              ) : (
+                <button type="button" className="modal-btn-cancel" style={{ color: 'var(--red)', borderColor: 'rgba(212,72,58,0.3)' }} onClick={() => setConfirmDelete(true)}>Delete</button>
+              )
+            )}
+            <div style={{ display: 'flex', gap: 8 }}>
+              <button type="button" className="modal-btn-cancel" onClick={onClose}>Cancel</button>
+              <button type="submit" className="modal-btn-save" disabled={saving}>{saving ? 'Saving...' : isEdit ? 'Save' : 'Create Event'}</button>
+            </div>
           </div>
         </form>
       </div>
@@ -627,7 +648,7 @@ export default function Scheduling() {
       )}
 
       {/* Modals */}
-      {showEventModal !== null && <EventModal event={showEventModal.id ? showEventModal : null} clients={clients} staff={staff} licenses={licenses} onClose={() => { setShowEventModal(null); setDefaultDate('') }} onSaved={() => { loadEvents(); showToast(showEventModal.id ? 'Event updated' : 'Event created') }} defaultDate={defaultDate} />}
+      {showEventModal !== null && <EventModal event={showEventModal.id ? showEventModal : null} clients={clients} staff={staff} licenses={licenses} onClose={() => { setShowEventModal(null); setDefaultDate('') }} onSaved={() => { loadEvents(); showToast(showEventModal.id ? 'Event updated' : 'Event created') }} onDeleted={() => { loadEvents(); showToast('Event deleted') }} defaultDate={defaultDate} />}
       {showPlacementModal !== null && <PlacementModal placement={showPlacementModal.id ? showPlacementModal : null} clients={clients} onClose={() => setShowPlacementModal(null)} onSaved={() => { loadPlacements(); showToast(showPlacementModal.id ? 'Placement updated' : 'Placement created') }} />}
       {dayDetail && (
         <div className="modal-overlay" role="presentation" onClick={() => setDayDetail(null)}>

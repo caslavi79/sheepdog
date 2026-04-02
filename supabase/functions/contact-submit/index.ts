@@ -26,7 +26,7 @@ const RATE_LIMIT_MAX = 5;
 const RATE_LIMIT_WINDOW_MS = 10 * 60 * 1000;
 
 const VALID_SERVICES = [
-  "events-security", "events-bartending", "events-both",
+  "events-security", "events-bartending", "events-both", "events-rental", "events-setup",
   "staffing", "field-ops", "logistics", "facility", "warehouse", "project", "ongoing",
   "other",
 ];
@@ -35,6 +35,8 @@ const SERVICE_TO_PIPELINE: Record<string, string> = {
   "events-security": "events",
   "events-bartending": "events",
   "events-both": "events",
+  "events-rental": "events",
+  "events-setup": "events",
   "staffing": "staffing",
   "field-ops": "staffing",
   "logistics": "staffing",
@@ -49,6 +51,8 @@ const SERVICE_LABELS: Record<string, string> = {
   "events-security": "Event Security",
   "events-bartending": "Mobile Bartending",
   "events-both": "Security + Bartending",
+  "events-rental": "Table & Chair Rental",
+  "events-setup": "Setup, Takedown & Cleanup",
   "staffing": "Contracted Staffing",
   "field-ops": "Field Operations",
   "logistics": "Logistics Support",

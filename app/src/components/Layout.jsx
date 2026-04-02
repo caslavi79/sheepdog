@@ -1,10 +1,15 @@
 import { useState } from 'react'
-import { NavLink, Outlet, useNavigate } from 'react-router-dom'
+import { NavLink, Outlet, useNavigate, useLocation } from 'react-router-dom'
 import { supabase } from '../lib/supabase'
+import AssistantPanel from './AssistantPanel'
 
 export default function Layout() {
   const navigate = useNavigate()
+  const location = useLocation()
   const [moreOpen, setMoreOpen] = useState(false)
+  const [assistantOpen, setAssistantOpen] = useState(false)
+
+  const currentPage = location.pathname === '/' ? 'hub' : location.pathname.slice(1)
 
   const handleLogout = async () => {
     const { error } = await supabase.auth.signOut()
@@ -58,6 +63,22 @@ export default function Layout() {
       <main className="app-main" id="main-content">
         <Outlet />
       </main>
+      <button
+        className="assistant-fab"
+        onClick={() => setAssistantOpen(true)}
+        aria-label="Open AI assistant"
+        title="Sheepdog AI"
+      >
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+          <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
+        </svg>
+      </button>
+      {assistantOpen && (
+        <AssistantPanel
+          onClose={() => setAssistantOpen(false)}
+          currentPage={currentPage}
+        />
+      )}
     </div>
   )
 }

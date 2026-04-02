@@ -13,6 +13,10 @@ Item_2_InfoLetterEntity.pdf
 *.png
 !og-image.png
 !apple-touch-icon.png
+!favicon-16x16.png
+!favicon-32x32.png
+!android-chrome-192x192.png
+!android-chrome-512x512.png
 *.pdf
 app/legacy-docs/
 app/README.md

@@ -42,8 +42,8 @@ CREATE TABLE IF NOT EXISTS public.pipeline (
   business_name text,
   phone text,
   email text,
-  service_line text,
-  stage text,
+  service_line text CHECK (service_line = ANY (ARRAY['events', 'staffing', 'both'])),
+  stage text CHECK (stage = ANY (ARRAY['lead', 'outreach_sent', 'responded', 'meeting_scheduled', 'proposal_sent', 'under_contract', 'lost'])),
   value numeric,
   source text,
   notes text,
@@ -169,6 +169,10 @@ CREATE TABLE IF NOT EXISTS public.staff (
   default_pay_rate numeric,
   status text DEFAULT 'active',
   background_check text DEFAULT 'none',
+  address text,
+  city text,
+  state text,
+  zip text,
   created_at timestamptz DEFAULT now(),
   updated_at timestamptz DEFAULT now()
 );
@@ -218,6 +222,56 @@ CREATE TABLE IF NOT EXISTS public.pay_rate_defaults (
 CREATE UNIQUE INDEX IF NOT EXISTS idx_pay_rate_defaults_lookup ON public.pay_rate_defaults (role, service_line);
 
 -- =============================================================================
+-- CLAUDE AI INTEGRATION TABLES
+-- =============================================================================
+
+CREATE TABLE IF NOT EXISTS public.assistant_messages (
+  id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+  user_id uuid NOT NULL,
+  session_id uuid NOT NULL,
+  role text NOT NULL,
+  content text NOT NULL,
+  action_type text,
+  context_page text,
+  metadata jsonb DEFAULT '{}',
+  created_at timestamptz DEFAULT now()
+);
+
+CREATE INDEX IF NOT EXISTS idx_assistant_messages_session ON public.assistant_messages (session_id, created_at);
+CREATE INDEX IF NOT EXISTS idx_assistant_messages_user ON public.assistant_messages (user_id, created_at DESC);
+
+CREATE TABLE IF NOT EXISTS public.assistant_actions (
+  id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+  message_id uuid REFERENCES public.assistant_messages(id),
+  action_type text NOT NULL,
+  target_table text,
+  target_id uuid,
+  payload jsonb DEFAULT '{}',
+  status text DEFAULT 'completed',
+  created_at timestamptz DEFAULT now()
+);
+
+CREATE INDEX IF NOT EXISTS idx_assistant_actions_message ON public.assistant_actions (message_id);
+CREATE INDEX IF NOT EXISTS idx_assistant_actions_type ON public.assistant_actions (action_type, created_at DESC);
+
+CREATE TABLE IF NOT EXISTS public.smart_emails (
+  id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+  trigger_type text NOT NULL,
+  trigger_id uuid,
+  recipient_email text NOT NULL,
+  recipient_type text,
+  subject text,
+  html_body text,
+  status text DEFAULT 'pending',
+  sent_at timestamptz,
+  error_message text,
+  created_at timestamptz DEFAULT now()
+);
+
+CREATE INDEX IF NOT EXISTS idx_smart_emails_status ON public.smart_emails (status, created_at);
+CREATE INDEX IF NOT EXISTS idx_smart_emails_trigger ON public.smart_emails (trigger_type, trigger_id);
+
+-- =============================================================================
 -- ROW LEVEL SECURITY
 -- =============================================================================
 
@@ -234,6 +288,9 @@ ALTER TABLE public.placements ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.shifts ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.staff ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.pay_rate_defaults ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.assistant_messages ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.assistant_actions ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.smart_emails ENABLE ROW LEVEL SECURITY;
 
 -- Authenticated users can read/write all ops tables
 DO $$ BEGIN
@@ -273,9 +330,19 @@ DO $$ BEGIN
   IF NOT EXISTS (SELECT 1 FROM pg_policies WHERE policyname = 'authenticated only' AND tablename = 'pay_rate_defaults') THEN
     CREATE POLICY "authenticated only" ON public.pay_rate_defaults FOR ALL USING (auth.role() = 'authenticated');
   END IF;
+  IF NOT EXISTS (SELECT 1 FROM pg_policies WHERE policyname = 'authenticated only' AND tablename = 'assistant_messages') THEN
+    CREATE POLICY "authenticated only" ON public.assistant_messages FOR ALL USING (auth.role() = 'authenticated');
+  END IF;
+  IF NOT EXISTS (SELECT 1 FROM pg_policies WHERE policyname = 'authenticated only' AND tablename = 'assistant_actions') THEN
+    CREATE POLICY "authenticated only" ON public.assistant_actions FOR ALL USING (auth.role() = 'authenticated');
+  END IF;
+  IF NOT EXISTS (SELECT 1 FROM pg_policies WHERE policyname = 'authenticated only' AND tablename = 'smart_emails') THEN
+    CREATE POLICY "authenticated only" ON public.smart_emails FOR ALL USING (auth.role() = 'authenticated');
+  END IF;
 END $$;
 
 -- rate_limits: NO policies — only accessible via service role key (edge function)
+-- smart_emails: also written by edge functions via service role key (cron triggers)
 
 -- =============================================================================
 -- INDEXES
@@ -287,3 +354,29 @@ CREATE INDEX IF NOT EXISTS idx_pipeline_created ON public.pipeline (created_at D
 CREATE INDEX IF NOT EXISTS idx_contact_submissions_created ON public.contact_submissions (created_at DESC);
 CREATE INDEX IF NOT EXISTS idx_clients_service_line ON public.clients (service_line);
 CREATE INDEX IF NOT EXISTS idx_clients_status ON public.clients (status);
+
+-- =============================================================================
+-- CRON JOBS (pg_cron + pg_net)
+-- =============================================================================
+
+-- Extensions (pg_cron is pre-enabled on Supabase, pg_net may need enabling)
+-- CREATE EXTENSION IF NOT EXISTS pg_cron WITH SCHEMA pg_catalog;
+-- CREATE EXTENSION IF NOT EXISTS pg_net WITH SCHEMA extensions;
+
+-- Daily claude-cron trigger at 8am CDT (13:00 UTC)
+-- In winter (CST), fires at 7am local — still reasonable
+-- To apply: run in SQL editor (cron.schedule requires superuser)
+--
+-- SELECT cron.schedule(
+--   'claude-cron-daily',
+--   '0 13 * * *',
+--   $$
+--   SELECT net.http_get(
+--     url := 'https://sezzqhmsfulclcqmfwja.supabase.co/functions/v1/claude-cron',
+--     headers := '{"Content-Type": "application/json"}'::jsonb
+--   );
+--   $$
+-- );
+--
+-- Verify: SELECT * FROM cron.job;
+-- Unschedule: SELECT cron.unschedule('claude-cron-daily');
