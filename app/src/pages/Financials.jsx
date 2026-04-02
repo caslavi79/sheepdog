@@ -4,6 +4,15 @@ import { supabase } from '../lib/supabase'
 import { useEscapeKey, useBodyLock, useToast } from '../lib/hooks'
 import { fmtMoney, fmtDate, daysUntil, badgeStyle, COLORS } from '../lib/format'
 
+function downloadCSV(rows, headers, filename) {
+  const escape = (v) => `"${String(v ?? '').replace(/"/g, '""')}"`
+  const csv = [headers.map(escape).join(','), ...rows.map(r => r.map(escape).join(','))].join('\n')
+  const blob = new Blob([csv], { type: 'text/csv' })
+  const url = URL.createObjectURL(blob)
+  const a = document.createElement('a'); a.href = url; a.download = filename; a.click()
+  URL.revokeObjectURL(url)
+}
+
 const PAGE_SIZE = 25
 const STATUSES = ['draft', 'sent', 'paid', 'overdue']
 const SERVICE_LINES = ['events', 'staffing', 'both']
@@ -989,8 +998,12 @@ export default function Financials() {
             <div className="clients-empty">All staff have been paid out. No outstanding payouts.</div>
           ) : (
             <>
-              <div style={{ marginBottom: 12 }}>
+              <div style={{ marginBottom: 12, display: 'flex', gap: 8 }}>
                 <button className="modal-btn-save" style={{ fontSize: 13 }} onClick={handleBulkPaidOut} disabled={bulkPaying}>{bulkPaying ? 'Processing...' : `Mark All as Paid (${unpaidStaff.length})`}</button>
+                <button className="modal-btn-cancel" style={{ fontSize: 13 }} onClick={() => {
+                  const rows = unpaidStaff.map(s => [s.name, s.role || '', s._invoiceNumber || '', clientMap[s._clientId] || '', s.hours || '', s.pay_rate || '', s.pay_total || ''])
+                  downloadCSV(rows, ['Staff', 'Role', 'Invoice', 'Client', 'Hours', 'Rate', 'Owed'], `payouts-${new Date().toISOString().split('T')[0]}.csv`)
+                }}>Export CSV</button>
               </div>
               <div className="clients-table-wrap">
                 <table className="clients-table">
@@ -1025,6 +1038,15 @@ export default function Financials() {
               <option value="quarter">This Quarter</option>
               <option value="year">Year to Date</option>
             </select>
+            {earningsList.length > 0 && (
+              <button className="modal-btn-cancel" style={{ fontSize: 13 }} onClick={() => {
+                const rows = earningsList.map(e => {
+                  const ytd = ytdEarnings[e.staff_id || ('name:' + e.name)]
+                  return [e.name, e.jobs, e.hours, e.total.toFixed(2), ytd ? ytd.total.toFixed(2) : '0.00', ytd && ytd.total >= 600 ? 'YES' : 'NO']
+                })
+                downloadCSV(rows, ['Staff', 'Jobs', 'Hours', 'Period Total', 'YTD Total', '1099'], `staff-earnings-${earningsPeriod}-${new Date().toISOString().split('T')[0]}.csv`)
+              }}>Export CSV</button>
+            )}
           </div>
           <div className="hub-stats" style={{ marginBottom: 24 }}>
             <div className="hub-stat-card"><div className="hub-stat-value">{fmtMoney(earningsTotal)}</div><div className="hub-stat-label">Total Paid ({earningsPeriod === 'month' ? 'Month' : earningsPeriod === 'quarter' ? 'Quarter' : 'YTD'})</div></div>

@@ -277,6 +277,7 @@ export default function Scheduling() {
   const [filterStatus, setFilterStatus] = useState('')
   const [filterLine, setFilterLine] = useState('')
   const [eventSearch, setEventSearch] = useState('')
+  const [dayDetail, setDayDetail] = useState(null) // { date, events[] }
   const [toast, setToast] = useState('')
   const fireToast = useToast()
   const showToast = (msg) => fireToast(setToast, msg)
@@ -456,7 +457,7 @@ export default function Scheduling() {
                       {ev.title || ev.venue_name || clientMap[ev.client_id] || 'Event'}
                     </div>
                   ))}
-                  {dayEvents.length > 3 && <div className="cal-event-more">+{dayEvents.length - 3} more</div>}
+                  {dayEvents.length > 3 && <div className="cal-event-more" onClick={(e) => { e.stopPropagation(); setDayDetail({ date: ds, events: dayEvents }) }} style={{ cursor: 'pointer' }}>+{dayEvents.length - 3} more</div>}
                 </div>
               )
             })}
@@ -554,6 +555,29 @@ export default function Scheduling() {
       {/* Modals */}
       {showEventModal !== null && <EventModal event={showEventModal.id ? showEventModal : null} clients={clients} staff={staff} licenses={licenses} onClose={() => { setShowEventModal(null); setDefaultDate('') }} onSaved={() => { loadEvents(); showToast(showEventModal.id ? 'Event updated' : 'Event created') }} defaultDate={defaultDate} />}
       {showPlacementModal !== null && <PlacementModal placement={showPlacementModal.id ? showPlacementModal : null} clients={clients} onClose={() => setShowPlacementModal(null)} onSaved={() => { loadPlacements(); showToast(showPlacementModal.id ? 'Placement updated' : 'Placement created') }} />}
+      {dayDetail && (
+        <div className="modal-overlay" role="presentation" onClick={() => setDayDetail(null)}>
+          <div className="modal-card" role="dialog" aria-modal="true" onClick={e => e.stopPropagation()} style={{ maxWidth: 440 }}>
+            <h2 className="modal-title">{fmtDate(dayDetail.date)}</h2>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+              {dayDetail.events.map(ev => (
+                <div key={ev.id} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '10px 12px', background: 'var(--char)', borderRadius: 6, borderLeft: `3px solid ${ev.service_line === 'events' ? COLORS.amber : COLORS.blue}`, cursor: 'pointer' }}
+                  onClick={() => { setDayDetail(null); setShowEventModal(ev) }}>
+                  <div>
+                    <div style={{ fontWeight: 700, fontSize: 13 }}>{ev.title || ev.venue_name || clientMap[ev.client_id] || 'Event'}</div>
+                    {ev.start_time && <div style={{ fontSize: 12, color: 'var(--steel)' }}>{ev.start_time}{ev.end_time ? ` – ${ev.end_time}` : ''}</div>}
+                  </div>
+                  <StatusBadge status={ev.status} />
+                </div>
+              ))}
+            </div>
+            <div className="modal-actions" style={{ marginTop: 16 }}>
+              <button className="modal-btn-cancel" onClick={() => setDayDetail(null)}>Close</button>
+              <button className="modal-btn-save" onClick={() => { setDayDetail(null); setDefaultDate(dayDetail.date); setShowEventModal({}) }}>+ New Event</button>
+            </div>
+          </div>
+        </div>
+      )}
       {toast && <div className="toast">{toast}</div>}
     </div>
   )

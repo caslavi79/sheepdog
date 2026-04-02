@@ -228,12 +228,16 @@ function DealDetailModal({ deal, onClose, onUpdated, onDeleted, navigate }) {
                     View Client
                   </button>
                 )}
-                {deal.client_id && (deal.stage === 'proposal_sent' || deal.stage === 'meeting_scheduled') && (
+                {deal.client_id && (deal.stage === 'proposal_sent' || deal.stage === 'meeting_scheduled') ? (
                   <button className="modal-btn-save" style={{ fontSize: 13, background: COLORS.amber }}
                     onClick={() => { onClose(); navigate(`/contracts?client_id=${deal.client_id}`) }}>
                     Send Contract
                   </button>
-                )}
+                ) : deal.client_id && deal.stage !== 'under_contract' && deal.stage !== 'lost' ? (
+                  <button className="modal-btn-cancel" style={{ fontSize: 13, opacity: 0.5 }} disabled title="Move to Proposal Sent or Meeting Scheduled to send a contract">
+                    Send Contract
+                  </button>
+                ) : null}
               </div>
             </div>
             <div className="detail-actions" style={{ justifyContent: 'space-between' }}>

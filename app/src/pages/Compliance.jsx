@@ -245,6 +245,10 @@ export default function Compliance() {
   const [filterLicenseStatus, setFilterLicenseStatus] = useState('')
   const [filterDocType, setFilterDocType] = useState('')
   const [filterDocStatus, setFilterDocStatus] = useState('')
+  const [staffPage, setStaffPage] = useState(0)
+  const [licensePage, setLicensePage] = useState(0)
+  const [docPage, setDocPage] = useState(0)
+  const COMP_PAGE_SIZE = 50
   const [showStaffModal, setShowStaffModal] = useState(null) // null=closed, {}=add, {staff}=edit
   const [showLicenseModal, setShowLicenseModal] = useState(null)
   const [showDocModal, setShowDocModal] = useState(null)
@@ -373,7 +377,7 @@ export default function Compliance() {
               <table className="clients-table">
                 <thead><tr><th>Name</th><th>Role</th><th>Phone</th><th>Email</th><th>Status</th><th>BG Check</th><th>Pay Rate</th><th>Docs</th><th></th></tr></thead>
                 <tbody>
-                  {filteredStaff.map(s => {
+                  {filteredStaff.slice(staffPage * COMP_PAGE_SIZE, (staffPage + 1) * COMP_PAGE_SIZE).map(s => {
                     const staffDocs = docs.filter(d => d.staff_id === s.id)
                     const hasAgreement = staffDocs.some(d => d.doc_type === 'agreement' && d.status === 'received')
                     const hasW9 = staffDocs.some(d => d.doc_type === 'w9' && d.status === 'received')
@@ -413,6 +417,13 @@ export default function Compliance() {
               </table>
             </div>
           )}
+          {Math.ceil(filteredStaff.length / COMP_PAGE_SIZE) > 1 && (
+            <div className="pagination">
+              <button className="pagination-btn" disabled={staffPage === 0} onClick={() => setStaffPage(p => p - 1)}>Prev</button>
+              <span className="pagination-info">Page {staffPage + 1} of {Math.ceil(filteredStaff.length / COMP_PAGE_SIZE)}</span>
+              <button className="pagination-btn" disabled={staffPage >= Math.ceil(filteredStaff.length / COMP_PAGE_SIZE) - 1} onClick={() => setStaffPage(p => p + 1)}>Next</button>
+            </div>
+          )}
         </>
       )}
 
@@ -440,7 +451,7 @@ export default function Compliance() {
               <table className="clients-table">
                 <thead><tr><th>Staff</th><th>Type</th><th>License #</th><th>Authority</th><th>Issued</th><th>Expires</th><th>Status</th><th></th></tr></thead>
                 <tbody>
-                  {filteredLicenses.map(l => (
+                  {filteredLicenses.slice(licensePage * COMP_PAGE_SIZE, (licensePage + 1) * COMP_PAGE_SIZE).map(l => (
                     <tr key={l.id}>
                       <td className="clients-name" style={{ cursor: 'pointer' }} onClick={() => setShowLicenseModal(l)}>{staffMap[l.staff_id] || '—'}</td>
                       <td><span style={badgeStyle('#3D5A80')}>{l.license_type.toUpperCase()}</span></td>
@@ -463,6 +474,13 @@ export default function Compliance() {
                   ))}
                 </tbody>
               </table>
+            </div>
+          )}
+          {Math.ceil(filteredLicenses.length / COMP_PAGE_SIZE) > 1 && (
+            <div className="pagination">
+              <button className="pagination-btn" disabled={licensePage === 0} onClick={() => setLicensePage(p => p - 1)}>Prev</button>
+              <span className="pagination-info">Page {licensePage + 1} of {Math.ceil(filteredLicenses.length / COMP_PAGE_SIZE)}</span>
+              <button className="pagination-btn" disabled={licensePage >= Math.ceil(filteredLicenses.length / COMP_PAGE_SIZE) - 1} onClick={() => setLicensePage(p => p + 1)}>Next</button>
             </div>
           )}
         </>
@@ -490,7 +508,7 @@ export default function Compliance() {
               <table className="clients-table">
                 <thead><tr><th>Staff</th><th>Document</th><th>Status</th><th>Signed</th><th>Notes</th><th></th></tr></thead>
                 <tbody>
-                  {filteredDocs.map(d => (
+                  {filteredDocs.slice(docPage * COMP_PAGE_SIZE, (docPage + 1) * COMP_PAGE_SIZE).map(d => (
                     <tr key={d.id}>
                       <td className="clients-name" style={{ cursor: 'pointer' }} onClick={() => setShowDocModal(d)}>{staffMap[d.staff_id] || '—'}</td>
                       <td>{d.doc_type === 'w9' ? 'W-9' : d.doc_type.charAt(0).toUpperCase() + d.doc_type.slice(1)}</td>
@@ -511,6 +529,13 @@ export default function Compliance() {
                   ))}
                 </tbody>
               </table>
+            </div>
+          )}
+          {Math.ceil(filteredDocs.length / COMP_PAGE_SIZE) > 1 && (
+            <div className="pagination">
+              <button className="pagination-btn" disabled={docPage === 0} onClick={() => setDocPage(p => p - 1)}>Prev</button>
+              <span className="pagination-info">Page {docPage + 1} of {Math.ceil(filteredDocs.length / COMP_PAGE_SIZE)}</span>
+              <button className="pagination-btn" disabled={docPage >= Math.ceil(filteredDocs.length / COMP_PAGE_SIZE) - 1} onClick={() => setDocPage(p => p + 1)}>Next</button>
             </div>
           )}
         </>
