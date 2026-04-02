@@ -4,6 +4,15 @@ import { supabase } from '../lib/supabase'
 import { useEscapeKey, useBodyLock, useToast } from '../lib/hooks'
 import { fmtDate, daysUntil, badgeStyle, COLORS } from '../lib/format'
 
+function downloadCSV(rows, headers, filename) {
+  const escape = (v) => `"${String(v ?? '').replace(/"/g, '""')}"`
+  const csv = [headers.map(escape).join(','), ...rows.map(r => r.map(escape).join(','))].join('\n')
+  const blob = new Blob([csv], { type: 'text/csv' })
+  const url = URL.createObjectURL(blob)
+  const a = document.createElement('a'); a.href = url; a.download = filename; a.click()
+  URL.revokeObjectURL(url)
+}
+
 const STAFF_STATUSES = ['active', 'inactive']
 const BG_CHECKS = ['none', 'pending', 'cleared']
 const LICENSE_TYPES = ['general', 'tabc']
@@ -386,6 +395,10 @@ export default function Compliance() {
         <>
           <div className="clients-toolbar">
             <input className="clients-search" placeholder="Search staff..." value={search} onChange={e => setSearch(e.target.value)} />
+            {staff.length > 0 && <button className="modal-btn-cancel" style={{ fontSize: 12, padding: '6px 14px' }} onClick={() => {
+              const rows = staff.map(s => [s.name, s.role || '', s.phone || '', s.email || '', s.status, s.background_check, s.default_pay_rate || ''])
+              downloadCSV(rows, ['Name', 'Role', 'Phone', 'Email', 'Status', 'BG Check', 'Pay Rate'], `staff-roster-${new Date().toISOString().split('T')[0]}.csv`)
+            }}>Export</button>}
             <button className="clients-add-btn" onClick={() => setShowStaffModal({})}>+ Add Staff</button>
           </div>
           {bulkSelected.size > 0 && (
@@ -432,8 +445,8 @@ export default function Compliance() {
                       <td>
                         {confirmDeleteId === s.id && confirmDeleteType === 'staff' ? (
                           <span style={{ display: 'flex', gap: 4, alignItems: 'center' }}>
-                            <button className="modal-btn-save" style={{ fontSize: 11, padding: '2px 8px', background: 'var(--red)' }} onClick={() => handleDelete('staff', s.id)}>Yes</button>
-                            <button className="modal-btn-cancel" style={{ fontSize: 11, padding: '2px 8px' }} onClick={() => { setConfirmDeleteId(null); setConfirmDeleteType(null) }}>No</button>
+                            <button className="modal-btn-save" style={{ fontSize: 12, padding: '4px 12px', background: 'var(--red)' }} onClick={() => handleDelete('staff', s.id)}>Yes</button>
+                            <button className="modal-btn-cancel" style={{ fontSize: 12, padding: '4px 12px' }} onClick={() => { setConfirmDeleteId(null); setConfirmDeleteType(null) }}>No</button>
                           </span>
                         ) : (
                           <button style={{ background: 'none', border: 'none', color: 'var(--red)', cursor: 'pointer', fontSize: 12, fontFamily: 'var(--fh)', fontWeight: 600 }} onClick={() => { setConfirmDeleteId(s.id); setConfirmDeleteType('staff') }}>Del</button>
@@ -471,6 +484,10 @@ export default function Compliance() {
               <option value="expiring">Expiring (0-30 days)</option>
               <option value="expired">Expired</option>
             </select>
+            {licenses.length > 0 && <button className="modal-btn-cancel" style={{ fontSize: 12, padding: '6px 14px' }} onClick={() => {
+              const rows = licenses.map(l => [staffMap[l.staff_id] || '', l.license_type, l.license_number || '', l.issuing_authority || '', l.issue_date || '', l.expiration_date || ''])
+              downloadCSV(rows, ['Staff', 'Type', 'License #', 'Authority', 'Issue Date', 'Expiration'], `licenses-${new Date().toISOString().split('T')[0]}.csv`)
+            }}>Export</button>}
             <button className="clients-add-btn" onClick={() => setShowLicenseModal({})}>+ Add License</button>
           </div>
           {filteredLicenses.length === 0 ? (
@@ -492,8 +509,8 @@ export default function Compliance() {
                       <td>
                         {confirmDeleteId === l.id && confirmDeleteType === 'licenses' ? (
                           <span style={{ display: 'flex', gap: 4, alignItems: 'center' }}>
-                            <button className="modal-btn-save" style={{ fontSize: 11, padding: '2px 8px', background: 'var(--red)' }} onClick={() => handleDelete('licenses', l.id)}>Yes</button>
-                            <button className="modal-btn-cancel" style={{ fontSize: 11, padding: '2px 8px' }} onClick={() => { setConfirmDeleteId(null); setConfirmDeleteType(null) }}>No</button>
+                            <button className="modal-btn-save" style={{ fontSize: 12, padding: '4px 12px', background: 'var(--red)' }} onClick={() => handleDelete('licenses', l.id)}>Yes</button>
+                            <button className="modal-btn-cancel" style={{ fontSize: 12, padding: '4px 12px' }} onClick={() => { setConfirmDeleteId(null); setConfirmDeleteType(null) }}>No</button>
                           </span>
                         ) : (
                           <button style={{ background: 'none', border: 'none', color: 'var(--red)', cursor: 'pointer', fontSize: 12, fontFamily: 'var(--fh)', fontWeight: 600 }} onClick={() => { setConfirmDeleteId(l.id); setConfirmDeleteType('licenses') }}>Del</button>
@@ -547,8 +564,8 @@ export default function Compliance() {
                       <td>
                         {confirmDeleteId === d.id && confirmDeleteType === 'contractor_docs' ? (
                           <span style={{ display: 'flex', gap: 4, alignItems: 'center' }}>
-                            <button className="modal-btn-save" style={{ fontSize: 11, padding: '2px 8px', background: 'var(--red)' }} onClick={() => handleDelete('contractor_docs', d.id)}>Yes</button>
-                            <button className="modal-btn-cancel" style={{ fontSize: 11, padding: '2px 8px' }} onClick={() => { setConfirmDeleteId(null); setConfirmDeleteType(null) }}>No</button>
+                            <button className="modal-btn-save" style={{ fontSize: 12, padding: '4px 12px', background: 'var(--red)' }} onClick={() => handleDelete('contractor_docs', d.id)}>Yes</button>
+                            <button className="modal-btn-cancel" style={{ fontSize: 12, padding: '4px 12px' }} onClick={() => { setConfirmDeleteId(null); setConfirmDeleteType(null) }}>No</button>
                           </span>
                         ) : (
                           <button style={{ background: 'none', border: 'none', color: 'var(--red)', cursor: 'pointer', fontSize: 12, fontFamily: 'var(--fh)', fontWeight: 600 }} onClick={() => { setConfirmDeleteId(d.id); setConfirmDeleteType('contractor_docs') }}>Del</button>

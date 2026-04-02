@@ -557,8 +557,8 @@ export default function Scheduling() {
                       <td>
                         {confirmDeleteId === ev.id && confirmDeleteType === 'event' ? (
                           <span style={{ display: 'flex', gap: 4 }}>
-                            <button className="modal-btn-save" style={{ fontSize: 11, padding: '2px 8px', background: 'var(--red)' }} onClick={() => handleDeleteEvent(ev.id)}>Yes</button>
-                            <button className="modal-btn-cancel" style={{ fontSize: 11, padding: '2px 8px' }} onClick={() => { setConfirmDeleteId(null); setConfirmDeleteType(null) }}>No</button>
+                            <button className="modal-btn-save" style={{ fontSize: 12, padding: '4px 12px', background: 'var(--red)' }} onClick={() => handleDeleteEvent(ev.id)}>Yes</button>
+                            <button className="modal-btn-cancel" style={{ fontSize: 12, padding: '4px 12px' }} onClick={() => { setConfirmDeleteId(null); setConfirmDeleteType(null) }}>No</button>
                           </span>
                         ) : (
                           <button style={{ background: 'none', border: 'none', color: 'var(--red)', cursor: 'pointer', fontSize: 12, fontFamily: 'var(--fh)', fontWeight: 600 }} onClick={() => { setConfirmDeleteId(ev.id); setConfirmDeleteType('event') }}>Del</button>
@@ -595,8 +595,8 @@ export default function Scheduling() {
                         <button style={{ background: 'none', border: 'none', color: COLORS.blue, cursor: 'pointer', fontSize: 12, fontFamily: 'var(--fh)', fontWeight: 600 }} onClick={() => handleGenerateEvents(p)}>Generate</button>
                         {confirmDeleteId === p.id && confirmDeleteType === 'placement' ? (
                           <span style={{ display: 'flex', gap: 4 }}>
-                            <button className="modal-btn-save" style={{ fontSize: 11, padding: '2px 8px', background: 'var(--red)' }} onClick={() => handleDeletePlacement(p.id)}>Yes</button>
-                            <button className="modal-btn-cancel" style={{ fontSize: 11, padding: '2px 8px' }} onClick={() => { setConfirmDeleteId(null); setConfirmDeleteType(null) }}>No</button>
+                            <button className="modal-btn-save" style={{ fontSize: 12, padding: '4px 12px', background: 'var(--red)' }} onClick={() => handleDeletePlacement(p.id)}>Yes</button>
+                            <button className="modal-btn-cancel" style={{ fontSize: 12, padding: '4px 12px' }} onClick={() => { setConfirmDeleteId(null); setConfirmDeleteType(null) }}>No</button>
                           </span>
                         ) : (
                           <button style={{ background: 'none', border: 'none', color: 'var(--red)', cursor: 'pointer', fontSize: 12, fontFamily: 'var(--fh)', fontWeight: 600 }} onClick={() => { setConfirmDeleteId(p.id); setConfirmDeleteType('placement') }}>Del</button>

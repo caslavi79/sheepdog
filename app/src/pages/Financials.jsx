@@ -286,7 +286,7 @@ function PayRateDefaultsModal({ onClose, payRateDefaults, onRefresh, showToast }
                     <td>
                       {confirmDeleteId === r.id ? (
                         <span style={{ display: 'flex', gap: 4 }}>
-                          <button className="modal-btn-save" style={{ fontSize: 11, padding: '2px 8px', background: 'var(--red)' }} onClick={() => handleDelete(r.id)}>Yes</button>
+                          <button className="modal-btn-save" style={{ fontSize: 12, padding: '4px 12px', background: 'var(--red)' }} onClick={() => handleDelete(r.id)}>Yes</button>
                           <button className="modal-btn-cancel" style={{ fontSize: 11, padding: '2px 8px' }} onClick={() => setConfirmDeleteId(null)}>No</button>
                         </span>
                       ) : (
