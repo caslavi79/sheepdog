@@ -16,33 +16,39 @@ echo "════════════════════════�
 
 # Deploy contact-submit
 echo ""
-echo "1/5 Deploying contact-submit..."
+echo "1/6 Deploying contact-submit..."
 npx supabase functions deploy contact-submit \
   --project-ref "$PROJECT_REF" \
   --no-verify-jwt
 
 # Deploy license-reminders
 echo ""
-echo "2/5 Deploying license-reminders..."
+echo "2/6 Deploying license-reminders..."
 npx supabase functions deploy license-reminders \
   --project-ref "$PROJECT_REF" \
   --no-verify-jwt
 
 echo ""
-echo "3/5 Deploying contract-sign..."
+echo "3/6 Deploying contract-sign..."
 npx supabase functions deploy contract-sign \
   --project-ref "$PROJECT_REF" \
   --no-verify-jwt
 
 echo ""
-echo "4/5 Deploying contract-send..."
+echo "4/6 Deploying contract-send..."
 npx supabase functions deploy contract-send \
   --project-ref "$PROJECT_REF" \
   --no-verify-jwt
 
 echo ""
-echo "5/5 Deploying invoice-send..."
+echo "5/6 Deploying invoice-send..."
 npx supabase functions deploy invoice-send \
+  --project-ref "$PROJECT_REF" \
+  --no-verify-jwt
+
+echo ""
+echo "6/6 Deploying payment-reminders..."
+npx supabase functions deploy payment-reminders \
   --project-ref "$PROJECT_REF" \
   --no-verify-jwt
 
@@ -92,6 +98,17 @@ if [ "$RESPONSE4" = "405" ]; then
 else
   echo "  contract-send: WARNING — returned $RESPONSE4"
   echo "  Check: https://supabase.com/dashboard/project/$PROJECT_REF/functions/contract-send/logs"
+fi
+
+# Verify payment-reminders
+RESPONSE6=$(curl -s -o /dev/null -w "%{http_code}" \
+  "https://$PROJECT_REF.supabase.co/functions/v1/payment-reminders")
+
+if [ "$RESPONSE6" = "200" ]; then
+  echo "  payment-reminders: alive (GET $RESPONSE6)"
+else
+  echo "  payment-reminders: WARNING — returned $RESPONSE6"
+  echo "  Check: https://supabase.com/dashboard/project/$PROJECT_REF/functions/payment-reminders/logs"
 fi
 
 # Verify invoice-send (expects 405 on GET since it's POST-only)

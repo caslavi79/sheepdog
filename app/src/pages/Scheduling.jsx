@@ -267,8 +267,10 @@ export default function Scheduling() {
   const [staff, setStaff] = useState([])
   const [licenses, setLicenses] = useState([])
   const [loading, setLoading] = useState(true)
+  const [calView, setCalView] = useState('month') // 'month' or 'week'
   const [calYear, setCalYear] = useState(new Date().getFullYear())
   const [calMonth, setCalMonth] = useState(new Date().getMonth())
+  const [weekOffset, setWeekOffset] = useState(0) // 0 = this week, +1 = next week, etc.
   const [showEventModal, setShowEventModal] = useState(null) // null=closed, {}=add, {event}=edit
   const [showPlacementModal, setShowPlacementModal] = useState(null)
   const [defaultDate, setDefaultDate] = useState('')
@@ -441,32 +443,84 @@ export default function Scheduling() {
       {/* ─── CALENDAR TAB ─── */}
       {tab === 'calendar' && (
         <>
-          <div className="cal-nav">
-            <button className="cal-nav-btn" onClick={() => { if (calMonth === 0) { setCalMonth(11); setCalYear(y => y - 1) } else setCalMonth(m => m - 1) }}>←</button>
-            <span className="cal-nav-title">{monthLabel}</span>
-            <button className="cal-nav-btn" onClick={() => { if (calMonth === 11) { setCalMonth(0); setCalYear(y => y + 1) } else setCalMonth(m => m + 1) }}>→</button>
+          <div style={{ display: 'flex', gap: 8, marginBottom: 12 }}>
+            <button className={`modal-btn-cancel`} style={{ fontSize: 12, padding: '4px 14px', ...(calView === 'month' ? { background: 'rgba(255,255,255,0.1)', color: '#fff' } : {}) }} onClick={() => setCalView('month')}>Month</button>
+            <button className={`modal-btn-cancel`} style={{ fontSize: 12, padding: '4px 14px', ...(calView === 'week' ? { background: 'rgba(255,255,255,0.1)', color: '#fff' } : {}) }} onClick={() => { setCalView('week'); setWeekOffset(0) }}>Week</button>
           </div>
-          <div className="cal-grid">
-            {['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'].map(d => <div key={d} className="cal-header">{d}</div>)}
-            {calDays.map((day, i) => {
-              const ds = dateStr(day.date)
-              const dayEvents = eventsByDate[ds] || []
-              const isToday = ds === dateStr(new Date())
-              return (
-                <div key={i} className={`cal-cell ${day.current ? '' : 'cal-cell--other'} ${isToday ? 'cal-cell--today' : ''}`}
-                  onClick={() => { setDefaultDate(ds); setShowEventModal({}) }}>
-                  <span className="cal-cell-date">{day.date.getDate()}</span>
-                  {dayEvents.slice(0, 3).map(ev => (
-                    <div key={ev.id} className="cal-event" style={{ borderLeftColor: ev.service_line === 'events' ? COLORS.amber : COLORS.blue }}
-                      onClick={(e) => { e.stopPropagation(); setShowEventModal(ev) }}>
-                      {ev.title || ev.venue_name || clientMap[ev.client_id] || 'Event'}
+
+          {calView === 'month' && (
+            <>
+              <div className="cal-nav">
+                <button className="cal-nav-btn" onClick={() => { if (calMonth === 0) { setCalMonth(11); setCalYear(y => y - 1) } else setCalMonth(m => m - 1) }}>←</button>
+                <span className="cal-nav-title">{monthLabel}</span>
+                <button className="cal-nav-btn" onClick={() => { if (calMonth === 11) { setCalMonth(0); setCalYear(y => y + 1) } else setCalMonth(m => m + 1) }}>→</button>
+              </div>
+              <div className="cal-grid">
+                {['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'].map(d => <div key={d} className="cal-header">{d}</div>)}
+                {calDays.map((day, i) => {
+                  const ds = dateStr(day.date)
+                  const dayEvents = eventsByDate[ds] || []
+                  const isToday = ds === dateStr(new Date())
+                  return (
+                    <div key={i} className={`cal-cell ${day.current ? '' : 'cal-cell--other'} ${isToday ? 'cal-cell--today' : ''}`}
+                      onClick={() => { setDefaultDate(ds); setShowEventModal({}) }}>
+                      <span className="cal-cell-date">{day.date.getDate()}</span>
+                      {dayEvents.slice(0, 3).map(ev => (
+                        <div key={ev.id} className="cal-event" style={{ borderLeftColor: ev.service_line === 'events' ? COLORS.amber : COLORS.blue }}
+                          onClick={(e) => { e.stopPropagation(); setShowEventModal(ev) }}>
+                          {ev.title || ev.venue_name || clientMap[ev.client_id] || 'Event'}
+                        </div>
+                      ))}
+                      {dayEvents.length > 3 && <div className="cal-event-more" onClick={(e) => { e.stopPropagation(); setDayDetail({ date: ds, events: dayEvents }) }} style={{ cursor: 'pointer' }}>+{dayEvents.length - 3} more</div>}
                     </div>
-                  ))}
-                  {dayEvents.length > 3 && <div className="cal-event-more" onClick={(e) => { e.stopPropagation(); setDayDetail({ date: ds, events: dayEvents }) }} style={{ cursor: 'pointer' }}>+{dayEvents.length - 3} more</div>}
+                  )
+                })}
+              </div>
+            </>
+          )}
+
+          {calView === 'week' && (() => {
+            const today = new Date(); today.setHours(0, 0, 0, 0)
+            const mondayOffset = (today.getDay() + 6) % 7
+            const weekStart = new Date(today); weekStart.setDate(today.getDate() - mondayOffset + (weekOffset * 7))
+            const weekDays = Array.from({ length: 7 }, (_, i) => { const d = new Date(weekStart); d.setDate(weekStart.getDate() + i); return d })
+            const weekLabel = `${weekDays[0].toLocaleDateString('en-US', { month: 'short', day: 'numeric' })} — ${weekDays[6].toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}`
+            return (
+              <>
+                <div className="cal-nav">
+                  <button className="cal-nav-btn" onClick={() => setWeekOffset(w => w - 1)}>←</button>
+                  <span className="cal-nav-title">{weekLabel}</span>
+                  <button className="cal-nav-btn" onClick={() => setWeekOffset(w => w + 1)}>→</button>
+                  {weekOffset !== 0 && <button className="modal-btn-cancel" style={{ fontSize: 11, padding: '2px 10px', marginLeft: 8 }} onClick={() => setWeekOffset(0)}>Today</button>}
                 </div>
-              )
-            })}
-          </div>
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(7, 1fr)', gap: 1, background: 'rgba(255,255,255,0.04)', borderRadius: 8, overflow: 'hidden' }}>
+                  {weekDays.map((day, i) => {
+                    const ds = dateStr(day)
+                    const dayEvents = eventsByDate[ds] || []
+                    const isToday = ds === dateStr(new Date())
+                    return (
+                      <div key={i} style={{ background: 'var(--dark)', padding: 10, minHeight: 200, cursor: 'pointer' }}
+                        onClick={() => { setDefaultDate(ds); setShowEventModal({}) }}>
+                        <div style={{ fontFamily: 'var(--fh)', fontSize: 11, fontWeight: 700, letterSpacing: '1px', textTransform: 'uppercase', color: isToday ? COLORS.amber : 'var(--steel)', marginBottom: 4 }}>
+                          {day.toLocaleDateString('en-US', { weekday: 'short' })}
+                        </div>
+                        <div style={{ fontSize: 18, fontWeight: 700, color: isToday ? '#fff' : 'var(--steel)', marginBottom: 8 }}>
+                          {day.getDate()}
+                        </div>
+                        {dayEvents.map(ev => (
+                          <div key={ev.id} style={{ padding: '6px 8px', marginBottom: 4, borderRadius: 4, borderLeft: `3px solid ${ev.service_line === 'events' ? COLORS.amber : COLORS.blue}`, background: 'var(--char)', fontSize: 12, cursor: 'pointer' }}
+                            onClick={(e) => { e.stopPropagation(); setShowEventModal(ev) }}>
+                            <div style={{ fontWeight: 600, marginBottom: 2 }}>{ev.title || ev.venue_name || clientMap[ev.client_id] || 'Event'}</div>
+                            {ev.start_time && <div style={{ fontSize: 11, color: 'var(--steel)' }}>{ev.start_time}{ev.end_time ? ` – ${ev.end_time}` : ''}</div>}
+                          </div>
+                        ))}
+                      </div>
+                    )
+                  })}
+                </div>
+              </>
+            )
+          })()}
         </>
       )}
 

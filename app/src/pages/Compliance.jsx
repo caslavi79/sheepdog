@@ -249,6 +249,7 @@ export default function Compliance() {
   const [licensePage, setLicensePage] = useState(0)
   const [docPage, setDocPage] = useState(0)
   const COMP_PAGE_SIZE = 50
+  const [bulkSelected, setBulkSelected] = useState(new Set())
   const [showStaffModal, setShowStaffModal] = useState(null) // null=closed, {}=add, {staff}=edit
   const [showLicenseModal, setShowLicenseModal] = useState(null)
   const [showDocModal, setShowDocModal] = useState(null)
@@ -302,6 +303,23 @@ export default function Compliance() {
     if (table === 'staff') { loadStaff(); loadLicenses(); loadDocs(); showToast('Staff removed') }
     if (table === 'licenses') { loadLicenses(); showToast('License removed') }
     if (table === 'contractor_docs') { loadDocs(); showToast('Document removed') }
+  }
+
+  const handleBulkDelete = async (table) => {
+    if (bulkSelected.size === 0) return
+    if (!window.confirm(`Delete ${bulkSelected.size} ${table === 'staff' ? 'staff members' : table === 'licenses' ? 'licenses' : 'documents'}?`)) return
+    const ids = [...bulkSelected]
+    if (table === 'staff') {
+      await supabase.from('licenses').delete().in('staff_id', ids)
+      await supabase.from('contractor_docs').delete().in('staff_id', ids)
+    }
+    const { error } = await supabase.from(table).delete().in('id', ids)
+    if (error) { showToast('Failed to delete some records'); return }
+    setBulkSelected(new Set())
+    if (table === 'staff') { loadStaff(); loadLicenses(); loadDocs() }
+    if (table === 'licenses') { loadLicenses() }
+    if (table === 'contractor_docs') { loadDocs() }
+    showToast(`${ids.length} records deleted`)
   }
 
   const filteredStaff = useMemo(() => staff.filter(s => {
@@ -358,9 +376,9 @@ export default function Compliance() {
 
       {/* Tabs */}
       <div className="detail-tabs" role="tablist" style={{ padding: 0, marginBottom: 16 }}>
-        <button className={`detail-tab ${tab === 'roster' ? 'detail-tab--active' : ''}`} role="tab" aria-selected={tab === 'roster'} onClick={() => { setTab('roster'); setSearch(''); setConfirmDeleteId(null); setConfirmDeleteType(null) }}>Staff Roster ({staff.length})</button>
-        <button className={`detail-tab ${tab === 'licenses' ? 'detail-tab--active' : ''}`} role="tab" aria-selected={tab === 'licenses'} onClick={() => { setTab('licenses'); setSearch(''); setConfirmDeleteId(null); setConfirmDeleteType(null) }}>Licenses & Certs ({licenses.length})</button>
-        <button className={`detail-tab ${tab === 'docs' ? 'detail-tab--active' : ''}`} role="tab" aria-selected={tab === 'docs'} onClick={() => { setTab('docs'); setSearch(''); setConfirmDeleteId(null); setConfirmDeleteType(null) }}>Contractor Docs ({docs.length})</button>
+        <button className={`detail-tab ${tab === 'roster' ? 'detail-tab--active' : ''}`} role="tab" aria-selected={tab === 'roster'} onClick={() => { setTab('roster'); setSearch(''); setConfirmDeleteId(null); setConfirmDeleteType(null); setBulkSelected(new Set()) }}>Staff Roster ({staff.length})</button>
+        <button className={`detail-tab ${tab === 'licenses' ? 'detail-tab--active' : ''}`} role="tab" aria-selected={tab === 'licenses'} onClick={() => { setTab('licenses'); setSearch(''); setConfirmDeleteId(null); setConfirmDeleteType(null); setBulkSelected(new Set()) }}>Licenses & Certs ({licenses.length})</button>
+        <button className={`detail-tab ${tab === 'docs' ? 'detail-tab--active' : ''}`} role="tab" aria-selected={tab === 'docs'} onClick={() => { setTab('docs'); setSearch(''); setConfirmDeleteId(null); setConfirmDeleteType(null); setBulkSelected(new Set()) }}>Contractor Docs ({docs.length})</button>
       </div>
 
       {/* ─── STAFF ROSTER TAB ─── */}
@@ -370,12 +388,22 @@ export default function Compliance() {
             <input className="clients-search" placeholder="Search staff..." value={search} onChange={e => setSearch(e.target.value)} />
             <button className="clients-add-btn" onClick={() => setShowStaffModal({})}>+ Add Staff</button>
           </div>
+          {bulkSelected.size > 0 && (
+            <div style={{ display: 'flex', gap: 8, alignItems: 'center', padding: '10px 16px', background: 'var(--char)', borderRadius: 6, marginBottom: 12 }}>
+              <span style={{ fontSize: 13, fontFamily: 'var(--fh)', fontWeight: 600 }}>{bulkSelected.size} selected</span>
+              <button className="modal-btn-save" style={{ fontSize: 12, padding: '4px 12px', background: COLORS.red }} onClick={() => handleBulkDelete('staff')}>Delete Selected</button>
+              <button className="modal-btn-cancel" style={{ fontSize: 12, padding: '4px 12px', marginLeft: 'auto' }} onClick={() => setBulkSelected(new Set())}>Clear</button>
+            </div>
+          )}
           {filteredStaff.length === 0 ? (
             <div className="clients-empty">No staff members yet.</div>
           ) : (
             <div className="clients-table-wrap">
               <table className="clients-table">
-                <thead><tr><th>Name</th><th>Role</th><th>Phone</th><th>Email</th><th>Status</th><th>BG Check</th><th>Pay Rate</th><th>Docs</th><th></th></tr></thead>
+                <thead><tr>
+                  <th style={{ width: 32 }}><input type="checkbox" checked={filteredStaff.length > 0 && bulkSelected.size === filteredStaff.length} onChange={e => { if (e.target.checked) setBulkSelected(new Set(filteredStaff.map(s => s.id))); else setBulkSelected(new Set()) }} /></th>
+                  <th>Name</th><th>Role</th><th>Phone</th><th>Email</th><th>Status</th><th>BG Check</th><th>Pay Rate</th><th>Docs</th><th></th>
+                </tr></thead>
                 <tbody>
                   {filteredStaff.slice(staffPage * COMP_PAGE_SIZE, (staffPage + 1) * COMP_PAGE_SIZE).map(s => {
                     const staffDocs = docs.filter(d => d.staff_id === s.id)
@@ -383,6 +411,7 @@ export default function Compliance() {
                     const hasW9 = staffDocs.some(d => d.doc_type === 'w9' && d.status === 'received')
                     return (
                     <tr key={s.id}>
+                      <td><input type="checkbox" checked={bulkSelected.has(s.id)} onChange={e => { const next = new Set(bulkSelected); if (e.target.checked) next.add(s.id); else next.delete(s.id); setBulkSelected(next) }} /></td>
                       <td className="clients-name" style={{ cursor: 'pointer' }} onClick={() => setShowStaffModal(s)}>{s.name}</td>
                       <td>{s.role || '—'}</td>
                       <td>{s.phone || '—'}</td>
