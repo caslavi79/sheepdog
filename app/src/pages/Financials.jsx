@@ -855,6 +855,7 @@ export default function Financials() {
   const [showAdd, setShowAdd] = useState(false)
   const [showPayRates, setShowPayRates] = useState(false)
   const [mainTab, setMainTab] = useState('invoices')
+  const [selectedIds, setSelectedIds] = useState(new Set())
   const [allInvoices, setAllInvoices] = useState([]) // for payouts + earnings (full dataset)
   const [earningsPeriod, setEarningsPeriod] = useState('month') // month, quarter, year
   const [toast, setToast] = useState('')
@@ -940,6 +941,18 @@ export default function Financials() {
   const totalPages = Math.ceil(totalCount / PAGE_SIZE)
 
   const handleSaved = () => { load(); loadStats(); loadAllInvoices(); showToast('Invoice created') }
+
+  const handleBulkStatus = async (newStatus) => {
+    if (selectedIds.size === 0) return
+    const ids = [...selectedIds]
+    const payload = { status: newStatus, updated_at: new Date().toISOString() }
+    if (newStatus === 'paid') { payload.payment_date = new Date().toISOString().split('T')[0] }
+    const { error } = await supabase.from('invoices').update(payload).in('id', ids)
+    if (error) { showToast('Failed to update'); return }
+    setSelectedIds(new Set())
+    load(); loadStats(); loadAllInvoices()
+    showToast(`${ids.length} invoice${ids.length !== 1 ? 's' : ''} marked as ${newStatus}`)
+  }
   const handleUpdated = () => { load(); loadStats(); loadAllInvoices(); setSelected(null) }
   const handleDeleted = () => { load(); loadStats(); loadAllInvoices(); showToast('Invoice deleted') }
 
@@ -1171,14 +1184,26 @@ export default function Financials() {
         <div className="clients-empty">{invoices.length === 0 ? 'No invoices yet. Create your first one.' : 'No invoices match your filters.'}</div>
       ) : (
         <>
+          {selectedIds.size > 0 && (
+            <div style={{ display: 'flex', gap: 8, alignItems: 'center', padding: '10px 16px', background: 'var(--char)', borderRadius: 6, marginBottom: 12 }}>
+              <span style={{ fontSize: 13, fontFamily: 'var(--fh)', fontWeight: 600 }}>{selectedIds.size} selected</span>
+              <button className="modal-btn-cancel" style={{ fontSize: 12, padding: '4px 12px' }} onClick={() => handleBulkStatus('sent')}>Mark Sent</button>
+              <button className="modal-btn-save" style={{ fontSize: 12, padding: '4px 12px', background: COLORS.green }} onClick={() => handleBulkStatus('paid')}>Mark Paid</button>
+              <button className="modal-btn-cancel" style={{ fontSize: 12, padding: '4px 12px', marginLeft: 'auto' }} onClick={() => setSelectedIds(new Set())}>Clear</button>
+            </div>
+          )}
           <div className="clients-table-wrap">
             <table className="clients-table">
-              <thead><tr><th>Invoice #</th><th>Client</th><th>Service</th><th>Total</th><th>Status</th><th>Due Date</th><th>Created</th></tr></thead>
+              <thead><tr>
+                <th style={{ width: 32 }}><input type="checkbox" checked={filtered.length > 0 && selectedIds.size === filtered.length} onChange={e => { if (e.target.checked) setSelectedIds(new Set(filtered.map(i => i.id))); else setSelectedIds(new Set()) }} /></th>
+                <th>Invoice #</th><th>Client</th><th>Service</th><th>Total</th><th>Status</th><th>Due Date</th><th>Created</th>
+              </tr></thead>
               <tbody>
                 {filtered.map(inv => {
                   const hasInternal = inv.internal_line_items && inv.internal_line_items.length > 0
                   return (
                     <tr key={inv.id} onClick={() => setSelected(inv)}>
+                      <td onClick={e => e.stopPropagation()}><input type="checkbox" checked={selectedIds.has(inv.id)} onChange={e => { const next = new Set(selectedIds); if (e.target.checked) next.add(inv.id); else next.delete(inv.id); setSelectedIds(next) }} /></td>
                       <td className="clients-name">{inv.invoice_number || '—'}{hasInternal && <span title="Has staff assignments" style={{ color: COLORS.blue, marginLeft: 6, fontSize: 11 }}>●</span>}</td>
                       <td>{clientMap[inv.client_id] || '—'}</td>
                       <td><ServiceBadge line={inv.service_line} /></td>

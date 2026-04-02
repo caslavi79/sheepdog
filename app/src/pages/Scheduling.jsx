@@ -340,11 +340,16 @@ export default function Scheduling() {
 
   // Stats
   const now = new Date()
-  const weekStart = new Date(now); weekStart.setDate(now.getDate() - ((now.getDay() + 6) % 7)); weekStart.setHours(0, 0, 0, 0)
-  const weekEnd = new Date(weekStart); weekEnd.setDate(weekStart.getDate() + 7)
-  const thisWeekEvents = events.filter(ev => { const d = new Date(ev.date); return d >= weekStart && d < weekEnd })
-  const staffThisWeek = thisWeekEvents.reduce((s, ev) => s + (ev.staff_assigned?.length || 0), 0)
-  const unassigned = events.filter(ev => ev.status !== 'completed' && ev.status !== 'cancelled' && (ev.staff_needed > 0) && (!ev.staff_assigned || ev.staff_assigned.length < ev.staff_needed)).length
+  const { thisWeekEvents, staffThisWeek, unassigned } = useMemo(() => {
+    const ws = new Date(now); ws.setDate(now.getDate() - ((now.getDay() + 6) % 7)); ws.setHours(0, 0, 0, 0)
+    const we = new Date(ws); we.setDate(ws.getDate() + 7)
+    const tw = events.filter(ev => { const d = new Date(ev.date); return d >= ws && d < we })
+    return {
+      thisWeekEvents: tw,
+      staffThisWeek: tw.reduce((s, ev) => s + (ev.staff_assigned?.length || 0), 0),
+      unassigned: events.filter(ev => ev.status !== 'completed' && ev.status !== 'cancelled' && (ev.staff_needed > 0) && (!ev.staff_assigned || ev.staff_assigned.length < ev.staff_needed)).length,
+    }
+  }, [events])
 
   const handleDeleteEvent = async (id) => {
     const { error } = await supabase.from('events').delete().eq('id', id)
