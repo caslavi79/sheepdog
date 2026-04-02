@@ -1446,7 +1446,7 @@ body.modal-open { overflow: hidden; }
   .contract-editor-body { grid-template-columns: 1fr; }
   .contract-editor-form { max-height: none; border-right: none; border-bottom: 1px solid rgba(255,255,255,0.06); }
   .contract-editor-preview { min-height: 400px; }
-  .cal-cell { min-height: 60px; padding: 4px; }
+  .cal-cell { min-height: 72px; padding: 4px; }
   .cal-cell-date { font-size: 11px; }
   .cal-event { font-size: 10px; padding: 1px 4px; }
   .cal-nav-title { font-size: 15px; }

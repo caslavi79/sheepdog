@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react'
+import { useState, useEffect, useCallback, useMemo } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { supabase } from '../lib/supabase'
 import { useEscapeKey, useBodyLock, useToast } from '../lib/hooks'
@@ -12,7 +12,7 @@ const DOC_STATUSES = ['received', 'missing', 'expired']
 
 function LicenseStatusBadge({ expirationDate }) {
   const days = daysUntil(expirationDate)
-  if (days === null) return <span style={badgeStyle('#929BAA')}>NO DATE</span>
+  if (days === null) return <span style={badgeStyle('#7A8490')}>NO DATE</span>
   if (days < 0) return <span style={badgeStyle('#D4483A')}>EXPIRED</span>
   if (days <= 7) return <span style={badgeStyle('#D4483A')}>{days}d LEFT</span>
   if (days <= 30) return <span style={badgeStyle('#C9922E')}>{days}d LEFT</span>
@@ -199,7 +199,7 @@ function DocModal({ doc, staffList, onClose, onSaved }) {
   return (
     <div className="modal-overlay" role="presentation" onClick={onClose}>
       <div className="modal-card" role="dialog" aria-modal="true" onClick={e => e.stopPropagation()}>
-        <h2 className="modal-title">{isEdit ? 'Edit Document' : 'Add Document'}</h2>
+        <h2 className="modal-title">{isEdit ? 'Edit Contractor Document' : 'Add Contractor Document'}</h2>
         <form onSubmit={handleSubmit} className="modal-form">
           <div className="modal-row">
             <label className="modal-field"><span>Staff Member *</span>
@@ -278,10 +278,12 @@ export default function Compliance() {
   }, [])
 
   useEffect(() => {
-    Promise.all([loadStaff(), loadLicenses(), loadDocs()]).then(() => setLoading(false))
+    Promise.all([loadStaff(), loadLicenses(), loadDocs()])
+      .then(() => setLoading(false))
+      .catch(() => { setLoading(false); showToast('Failed to load some data') })
   }, [loadStaff, loadLicenses, loadDocs])
 
-  const staffMap = Object.fromEntries(staff.map(s => [s.id, s.name]))
+  const staffMap = useMemo(() => Object.fromEntries(staff.map(s => [s.id, s.name])), [staff])
 
   const handleDelete = async (table, id) => {
     if (table === 'staff') {
@@ -298,13 +300,13 @@ export default function Compliance() {
     if (table === 'contractor_docs') { loadDocs(); showToast('Document removed') }
   }
 
-  const filteredStaff = staff.filter(s => {
+  const filteredStaff = useMemo(() => staff.filter(s => {
     if (!search) return true
     const q = search.toLowerCase()
     return s.name.toLowerCase().includes(q) || (s.role || '').toLowerCase().includes(q) || (s.email || '').toLowerCase().includes(q)
-  })
+  }), [staff, search])
 
-  const filteredLicenses = licenses.filter(l => {
+  const filteredLicenses = useMemo(() => licenses.filter(l => {
     if (filterLicenseType && l.license_type !== filterLicenseType) return false
     if (filterLicenseStatus) {
       const days = daysUntil(l.expiration_date)
@@ -318,9 +320,9 @@ export default function Compliance() {
       if (!name.includes(q) && !(l.license_number || '').toLowerCase().includes(q)) return false
     }
     return true
-  })
+  }), [licenses, filterLicenseType, filterLicenseStatus, search, staffMap])
 
-  const filteredDocs = docs.filter(d => {
+  const filteredDocs = useMemo(() => docs.filter(d => {
     if (filterDocType && d.doc_type !== filterDocType) return false
     if (filterDocStatus && d.status !== filterDocStatus) return false
     if (search) {
@@ -329,7 +331,7 @@ export default function Compliance() {
       if (!name.includes(q)) return false
     }
     return true
-  })
+  }), [docs, filterDocType, filterDocStatus, search, staffMap])
 
   if (loading) return <div className="clients-loading">Loading compliance data...</div>
 
@@ -436,7 +438,7 @@ export default function Compliance() {
           ) : (
             <div className="clients-table-wrap">
               <table className="clients-table">
-                <thead><tr><th>Staff</th><th>Type</th><th>License #</th><th>Authority</th><th>Expires</th><th>Status</th><th></th></tr></thead>
+                <thead><tr><th>Staff</th><th>Type</th><th>License #</th><th>Authority</th><th>Issued</th><th>Expires</th><th>Status</th><th></th></tr></thead>
                 <tbody>
                   {filteredLicenses.map(l => (
                     <tr key={l.id}>
@@ -444,6 +446,7 @@ export default function Compliance() {
                       <td><span style={badgeStyle('#3D5A80')}>{l.license_type.toUpperCase()}</span></td>
                       <td>{l.license_number || '—'}</td>
                       <td>{l.issuing_authority || '—'}</td>
+                      <td>{fmtDate(l.issue_date)}</td>
                       <td>{fmtDate(l.expiration_date)}</td>
                       <td><LicenseStatusBadge expirationDate={l.expiration_date} /></td>
                       <td>
@@ -514,7 +517,7 @@ export default function Compliance() {
       )}
 
       {/* Modals */}
-      {showStaffModal !== null && <StaffModal staff={showStaffModal.id ? showStaffModal : null} onClose={() => setShowStaffModal(null)} onSaved={() => { loadStaff(); showToast(showStaffModal.id ? 'Staff updated' : 'Staff added') }} />}
+      {showStaffModal !== null && <StaffModal staff={showStaffModal.id ? showStaffModal : null} onClose={() => setShowStaffModal(null)} onSaved={() => { loadStaff(); loadDocs(); showToast(showStaffModal.id ? `Updated: ${showStaffModal.name || 'Staff'}` : 'Staff added') }} />}
       {showLicenseModal !== null && <LicenseModal license={showLicenseModal.id ? showLicenseModal : null} staffList={staff} onClose={() => setShowLicenseModal(null)} onSaved={() => { loadLicenses(); showToast(showLicenseModal.id ? 'License updated' : 'License added') }} />}
       {showDocModal !== null && <DocModal doc={showDocModal.id ? showDocModal : null} staffList={staff} onClose={() => setShowDocModal(null)} onSaved={() => { loadDocs(); showToast(showDocModal.id ? 'Document updated' : 'Document added') }} />}
       {toast && <div className="toast">{toast}</div>}

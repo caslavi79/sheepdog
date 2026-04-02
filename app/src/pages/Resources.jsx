@@ -58,9 +58,10 @@ export default function Resources() {
   useEffect(() => {
     const controller = new AbortController()
     resources.filter(r => r.file).forEach(r => {
-      fetch(r.file, { method: 'HEAD', signal: controller.signal }).then(res => {
-        if (!res.ok) setDeadLinks(prev => new Set([...prev, r.file]))
-      }).catch(e => { if (e.name !== 'AbortError') setDeadLinks(prev => new Set([...prev, r.file])) })
+      fetch(r.file, { method: 'HEAD', signal: controller.signal })
+        .then(res => { if (!res.ok) return fetch(r.file, { signal: controller.signal }) })
+        .then(res => { if (res && !res.ok) setDeadLinks(prev => new Set([...prev, r.file])) })
+        .catch(e => { if (e.name !== 'AbortError') setDeadLinks(prev => new Set([...prev, r.file])) })
     })
     return () => controller.abort()
   }, [])
@@ -79,6 +80,8 @@ export default function Resources() {
           <button
             className={`resource-section-header ${open[cat] ? 'open' : ''}`}
             onClick={() => toggle(cat)}
+            aria-expanded={open[cat]}
+            aria-controls={`section-${cat.replace(/\s+/g, '-')}`}
           >
             <span className="resource-section-title">{cat}</span>
             <span className="resource-section-count">{resources.filter(r => r.category === cat).length}</span>

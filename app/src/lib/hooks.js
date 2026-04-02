@@ -1,4 +1,4 @@
-import { useEffect, useRef } from 'react'
+import { useEffect, useRef, useCallback } from 'react'
 
 export function useEscapeKey(onClose) {
   useEffect(() => {
@@ -17,11 +17,11 @@ export function useBodyLock() {
 
 export function useToast() {
   const timerRef = useRef(null)
-  const show = (setToast, msg, duration = 3000) => {
+  const show = useCallback((setToast, msg, duration = 3000) => {
     if (timerRef.current) clearTimeout(timerRef.current)
     setToast(msg)
     timerRef.current = setTimeout(() => setToast(''), duration)
-  }
+  }, [])
   useEffect(() => () => { if (timerRef.current) clearTimeout(timerRef.current) }, [])
   return show
 }

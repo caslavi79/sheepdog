@@ -17,13 +17,13 @@ const STAGES = [
 const SERVICE_LINES = ['events', 'staffing', 'both']
 
 const STAGE_COLORS = {
-  lead: '#7A8490',
+  lead: '#6B7280',
   outreach_sent: '#3D5A80',
   responded: '#C9922E',
   meeting_scheduled: '#C9922E',
   proposal_sent: '#C23B22',
   under_contract: '#357A38',
-  lost: '#3d2020',
+  lost: '#6B3A3A',
 }
 
 const SERVICE_COLORS = { events: '#C23B22', staffing: '#3D5A80', both: '#C9922E' }
@@ -219,7 +219,7 @@ function DealDetailModal({ deal, onClose, onUpdated, onDeleted, navigate }) {
               <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
                 {!deal.client_id ? (
                   <button className="modal-btn-save" style={{ fontSize: 13, background: COLORS.blue }}
-                    onClick={() => { onClose(); navigate('/clients', { state: { fromDeal: { deal_id: deal.id, contact_name: deal.contact_name, business_name: deal.business_name, phone: deal.phone, email: deal.email, service_line: deal.service_line } } }) }}>
+                    onClick={() => { if (!window.confirm('Convert this deal to a new client?')) return; onClose(); navigate('/clients', { state: { fromDeal: { deal_id: deal.id, contact_name: deal.contact_name, business_name: deal.business_name, phone: deal.phone, email: deal.email, service_line: deal.service_line } } }) }}>
                     Convert to Client
                   </button>
                 ) : (
@@ -323,11 +323,12 @@ function DealCard({ deal, onDragStart, onDragEnd, onClick, onStageChange }) {
         <span style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
           <ServiceDot line={deal.service_line} />
           {deal.service_line}
-          {deal.client_id && <span style={{ fontSize: 9, fontWeight: 700, color: COLORS.green, background: `${COLORS.green}22`, padding: '1px 5px', borderRadius: 2, letterSpacing: '0.5px', fontFamily: 'var(--fh)' }}>CLIENT</span>}
+          {deal.client_id && <span title="Linked to client record" style={{ fontSize: 9, fontWeight: 700, color: COLORS.green, background: `${COLORS.green}22`, padding: '1px 5px', borderRadius: 2, letterSpacing: '0.5px', fontFamily: 'var(--fh)' }}>CLIENT</span>}
         </span>
         {isMobile && (
           <select
             value={deal.stage}
+            aria-label={`Change stage for ${deal.contact_name}`}
             onClick={e => e.stopPropagation()}
             onChange={e => { e.stopPropagation(); onStageChange(deal, e.target.value) }}
             style={{
@@ -403,6 +404,7 @@ export default function Pipeline() {
     if (error) { setLoadError('Failed to load deals. Please refresh.'); if (import.meta.env.DEV) console.error('Load deals error:', error.message) }
     else { setLoadError('') }
     setDeals(data || [])
+    if (data && data.length >= 100) setLoadError('Showing first 100 deals. Archive older deals to see more.')
     setLoading(false)
   }
 
@@ -480,6 +482,11 @@ export default function Pipeline() {
 
       {loading ? (
         <div className="clients-loading">Loading...</div>
+      ) : deals.length === 0 ? (
+        <div className="clients-empty" style={{ textAlign: 'center', padding: 40 }}>
+          <p>No deals yet. Add your first one to start tracking your pipeline.</p>
+          <button className="clients-add-btn" style={{ marginTop: 16 }} onClick={() => setShowAdd(true)}>+ Add Deal</button>
+        </div>
       ) : (
         <div className="pipeline-board">
           {STAGES.map(stage => (

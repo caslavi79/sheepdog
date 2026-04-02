@@ -61,6 +61,7 @@ const modules = [
 export default function Hub() {
   const [stats, setStats] = useState({ leads: '—', pipelineValue: '—', submissions7d: '—', activeClients: '—' })
   const [alerts, setAlerts] = useState([])
+  const [alertsLoading, setAlertsLoading] = useState(true)
 
   useEffect(() => {
     const sevenDaysAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString()
@@ -131,8 +132,10 @@ export default function Hub() {
       if (pastEventsNoInvoice.length > 0) a.push({ color: '#C9922E', text: `${pastEventsNoInvoice.length} past event${pastEventsNoInvoice.length !== 1 ? 's' : ''} without invoices`, link: '/scheduling' })
 
       setAlerts(a)
+      setAlertsLoading(false)
     }).catch(err => {
       if (import.meta.env.DEV) console.error('Hub stats error:', err)
+      setAlertsLoading(false)
     })
   }, [])
 
@@ -160,7 +163,9 @@ export default function Hub() {
           <div className="hub-stat-label">Active Clients</div>
         </div>
       </div>
-      {alerts.length > 0 && (
+      {alertsLoading ? (
+        <div style={{ color: 'var(--steel)', fontSize: 13, fontFamily: 'var(--fh)', padding: '8px 0' }}>Checking alerts...</div>
+      ) : alerts.length > 0 ? (
         <div className="hub-alerts">
           {alerts.map((a, i) => (
             <Link key={i} to={a.link} className="hub-alert" style={{ borderLeftColor: a.color }}>
@@ -168,7 +173,7 @@ export default function Hub() {
             </Link>
           ))}
         </div>
-      )}
+      ) : null}
       <div className="hub-grid">
         {modules.map((mod) => (
           <Link

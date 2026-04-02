@@ -119,11 +119,15 @@ function ContractEditor({ template, contract, clients, onSaved, onClose, presele
     setValues(prev => {
       const next = { ...prev }
       Object.keys(next).forEach(key => {
-        const k = key.toUpperCase()
-        if (k.includes('CLIENT NAME') || k.includes('CUSTOMER NAME') || k.includes('CONTRACTOR NAME') || k.includes('SIGNER')) next[key] = c.contact_name || ''
-        if (k.includes('COMPANY') || k.includes('BUSINESS NAME') || k.includes('ORGANIZATION')) next[key] = c.business_name || ''
-        if (k.includes('CLIENT EMAIL') || k.includes('EMAIL ADDRESS')) next[key] = c.email || ''
-        if (k.includes('CLIENT PHONE') || k.includes('PHONE')) next[key] = c.phone || ''
+        const k = key.toUpperCase().trim()
+        // Name fields — match specific patterns only
+        if (/^(CLIENT|CUSTOMER|SIGNER)\s*NAME$/.test(k) || k === 'SIGNER') next[key] = c.contact_name || ''
+        // Company fields
+        if (/^(COMPANY|BUSINESS)\s*NAME$/.test(k) || k === 'ORGANIZATION') next[key] = c.business_name || ''
+        // Email fields
+        if (/^(CLIENT\s*EMAIL|EMAIL\s*ADDRESS)$/.test(k)) next[key] = c.email || ''
+        // Phone fields
+        if (/^(CLIENT\s*PHONE|PHONE\s*(NUMBER)?)$/.test(k)) next[key] = c.phone || ''
       })
       return next
     })
@@ -216,7 +220,11 @@ function ContractEditor({ template, contract, clients, onSaved, onClose, presele
         <h2 style={{ fontFamily: 'var(--fh)', fontSize: 18, fontWeight: 800 }}>{template?.title || contract?.template_name || 'Contract'}</h2>
         <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
           <StatusBadge status={contractStatus} />
-          <button className="modal-btn-cancel" style={{ fontSize: 12 }} onClick={onClose}>Close Editor</button>
+          <button className="modal-btn-cancel" style={{ fontSize: 12 }} onClick={() => {
+            const hasContent = Object.values(values).some(v => v?.trim?.())
+            if (hasContent && contractStatus === 'draft' && !window.confirm('Discard unsaved changes?')) return
+            onClose()
+          }}>Close Editor</button>
         </div>
       </div>
 
