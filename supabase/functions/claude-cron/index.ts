@@ -1,10 +1,16 @@
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 
-const SUPABASE_URL = Deno.env.get("SUPABASE_URL")!;
-const SUPABASE_SERVICE_ROLE_KEY = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
-const ANTHROPIC_API_KEY = Deno.env.get("ANTHROPIC_API_KEY")!;
+function requireEnv(key: string): string {
+  const val = Deno.env.get(key);
+  if (!val) throw new Error(`Missing required env var: ${key}`);
+  return val;
+}
+
+const SUPABASE_URL = requireEnv("SUPABASE_URL");
+const SUPABASE_SERVICE_ROLE_KEY = requireEnv("SUPABASE_SERVICE_ROLE_KEY");
+const ANTHROPIC_API_KEY = requireEnv("ANTHROPIC_API_KEY");
 const CLAUDE_MODEL = Deno.env.get("CLAUDE_MODEL") || "claude-sonnet-4-20250514";
-const RESEND_API_KEY = Deno.env.get("RESEND_API_KEY")!;
+const RESEND_API_KEY = requireEnv("RESEND_API_KEY");
 const BRAND_NAME = Deno.env.get("BRAND_NAME") || "Sheepdog Security LLC";
 const BRAND_FROM_EMAIL = Deno.env.get("BRAND_FROM_EMAIL") || "noreply@sheepdogtexas.com";
 const BRAND_REPLY_TO = Deno.env.get("BRAND_REPLY_TO") || "";
@@ -31,16 +37,17 @@ function escapeHtml(str: string): string {
 }
 
 function daysSince(dateStr: string): number {
+  const d = new Date(dateStr + (dateStr.includes("T") ? "" : "T00:00:00Z"));
   const now = new Date();
-  const d = new Date(dateStr);
-  return Math.floor((now.getTime() - d.getTime()) / (1000 * 60 * 60 * 24));
+  const today = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate()));
+  return Math.floor((today.getTime() - d.getTime()) / 86400000);
 }
 
 function daysUntil(dateStr: string): number {
+  const d = new Date(dateStr + "T00:00:00Z");
   const now = new Date();
-  const [y, m, d] = dateStr.split("-").map(Number);
-  const target = new Date(y, m - 1, d);
-  return Math.ceil((target.getTime() - now.getTime()) / (1000 * 60 * 60 * 24));
+  const today = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate()));
+  return Math.floor((d.getTime() - today.getTime()) / 86400000);
 }
 
 function fmtMoney(val: number): string {

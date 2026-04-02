@@ -110,7 +110,14 @@ export default function Sign() {
           <h1>{contract?.title || 'Contract'}</h1>
         </div>
         {contract?.filled_html && (
-          <div className="sign-content" dangerouslySetInnerHTML={{ __html: contract.filled_html }} />
+          <div className="sign-content">
+            <iframe
+              srcDoc={contract.filled_html}
+              sandbox="allow-same-origin"
+              style={{ width: '100%', height: '100%', border: 'none', background: '#fff' }}
+              title="Contract Content"
+            />
+          </div>
         )}
         <div className="sign-form-section">
           <h2>Sign This Contract</h2>

@@ -1,8 +1,14 @@
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 
-const SUPABASE_URL = Deno.env.get("SUPABASE_URL")!;
-const SUPABASE_SERVICE_ROLE_KEY = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
-const RESEND_API_KEY = Deno.env.get("RESEND_API_KEY")!;
+function requireEnv(key: string): string {
+  const val = Deno.env.get(key);
+  if (!val) throw new Error(`Missing required env var: ${key}`);
+  return val;
+}
+
+const SUPABASE_URL = requireEnv("SUPABASE_URL");
+const SUPABASE_SERVICE_ROLE_KEY = requireEnv("SUPABASE_SERVICE_ROLE_KEY");
+const RESEND_API_KEY = requireEnv("RESEND_API_KEY");
 const BRAND_NAME = Deno.env.get("BRAND_NAME") || "Company";
 const BRAND_FROM_EMAIL = Deno.env.get("BRAND_FROM_EMAIL") || "noreply@example.com";
 const BRAND_REPLY_TO = Deno.env.get("BRAND_REPLY_TO") || "";
@@ -23,10 +29,10 @@ function fmtMoney(n: number): string {
 }
 
 function daysBetween(dateStr: string): number {
-  const now = new Date(); now.setHours(0, 0, 0, 0);
-  const [y, m, d] = dateStr.split("-").map(Number);
-  const then = new Date(y, m - 1, d);
-  return Math.ceil((now.getTime() - then.getTime()) / (1000 * 60 * 60 * 24));
+  const d = new Date(dateStr + "T00:00:00Z");
+  const now = new Date();
+  const today = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate()));
+  return Math.floor((today.getTime() - d.getTime()) / 86400000);
 }
 
 Deno.serve(async (_req: Request) => {

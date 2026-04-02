@@ -329,7 +329,7 @@ body{font-family:var(--fb);font-size:17px;line-height:1.65;color:var(--mid);back
 .addon-toggle{font-family:var(--fh);font-size:24px;font-weight:400;color:var(--amber);transition:transform .3s;flex-shrink:0;line-height:1;margin-top:2px}
 .addon-card.open .addon-toggle{transform:rotate(45deg)}
 .addon-body{max-height:0;overflow:hidden;transition:max-height .4s ease,padding .4s ease}
-.addon-card.open .addon-body{max-height:400px;padding:0 32px 28px}
+.addon-card.open .addon-body{max-height:500px;padding:0 32px 28px}
 .addon-body ul{list-style:none;display:flex;flex-direction:column;gap:8px;margin-bottom:20px}
 .addon-body li{font-size:15px;line-height:1.5;color:var(--mid);padding-left:20px;position:relative}
 .addon-body li::before{content:'';position:absolute;left:0;top:8px;width:8px;height:8px;border-radius:50%;background:var(--amber)}
@@ -561,7 +561,7 @@ a:focus-visible,button:focus-visible{outline:2px solid var(--amber);outline-offs
 
 <main id="main">
 <h1 class="sr-only">Event Security &amp; Mobile Bartending in Bryan-College Station TX</h1>
-<p class="sr-only">Sheepdog Texas provides professional event security guards, bouncers, door security, and armed or unarmed security guard services for hire in Bryan, College Station, BCS, and the Brazos Valley. Hire a security guard, bouncer, or doorman for your bar, nightclub, concert, festival, wedding, private party, house party, birthday, graduation, corporate event, Greek life event, fraternity party, sorority formal, or campus event near Texas A&amp;M University and Northgate. We also offer TABC-certified mobile bartenders, bartenders for hire, mobile bar service, portable bar rental, cocktail catering, beverage service, wedding bartenders, reception bar service, open bar and cash bar packages, BYOB bartender service, tailgate bartenders, Aggie gameday bar service, Kyle Field tailgate bartending, and drink catering for private parties, corporate events, and special occasions throughout Bryan-College Station, Brazos County, and Central Texas. Additional event services include table and chair rental, party rental, event setup, event takedown, venue cleanup, and full event staffing. Whether you need a bartender near me, security near me, bouncer near me, mobile bar near me, event security near me, or party security in College Station or Bryan TX, Sheepdog Texas is your local provider. Serving BCS, Bryan TX, College Station TX, Aggieland, Brazos Valley, Brazos County, and surrounding Central Texas communities.</p>
+<p class="sr-only">Sheepdog Texas provides event security guards, bouncers, door security, and armed or unarmed security for hire in Bryan, College Station, BCS, and the Brazos Valley. Hire a security guard or bouncer for your bar, nightclub, concert, wedding, private party, fraternity party, sorority formal, corporate event, or campus event near Texas A&amp;M University and Northgate. We offer TABC-certified mobile bartenders, bartenders for hire, mobile bar service, cocktail catering, wedding bartending, reception bar service, tailgate bartenders, Aggie gameday bartending, open bar and cash bar packages, and BYOB bartender service for events throughout Bryan-College Station. Additional services include table and chair rental, event setup, event takedown, venue cleanup, and full event staffing. Whether you need event security near me, a bouncer near me, a bartender near me, mobile bar near me, or party security in College Station or Bryan TX, Sheepdog Texas is your local provider serving BCS, Aggieland, Brazos Valley, Brazos County, and Central Texas.</p>
 <!-- HERO = DUAL CARDS -->
 <section class="hero">
 <div class="hero-card hero-card--sec si-left" id="cardSec" role="button" tabindex="0" onclick="expandCard('sec')" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();expandCard('sec')}">
@@ -651,7 +651,7 @@ a:focus-visible,button:focus-visible{outline:2px solid var(--amber);outline-offs
 <div class="title" style="text-align:center;font-size:28px;margin-bottom:8px">Complete Your Event</div>
 <p class="lead" style="text-align:center;margin:0 auto 40px">Beyond security and bartending — everything you need under one roof.</p>
 <div class="addon-grid">
-<div class="addon-card" onclick="toggleAddon(this)">
+<div class="addon-card" role="button" tabindex="0" aria-expanded="false" onclick="toggleAddon(this)" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();toggleAddon(this)}">
 <div class="addon-header">
 <div class="addon-header-text">
 <h3>Table &amp; Chair Rental</h3>
@@ -670,7 +670,7 @@ a:focus-visible,button:focus-visible{outline:2px solid var(--amber);outline-offs
 <a href="#contact" class="addon-cta" onclick="event.stopPropagation();document.getElementById('contact').scrollIntoView({behavior:'smooth'})">Get a Quote</a>
 </div>
 </div>
-<div class="addon-card" onclick="toggleAddon(this)">
+<div class="addon-card" role="button" tabindex="0" aria-expanded="false" onclick="toggleAddon(this)" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();toggleAddon(this)}">
 <div class="addon-header">
 <div class="addon-header-text">
 <h3>Event Setup, Takedown &amp; Cleanup</h3>
@@ -768,6 +768,7 @@ slides.forEach(el => obs.observe(el));
 // Addon card expand/collapse
 function toggleAddon(card) {
   card.classList.toggle('open');
+  card.setAttribute('aria-expanded', card.classList.contains('open'));
 }
 
 // Card expand/collapse

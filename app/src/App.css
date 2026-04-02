@@ -1568,22 +1568,8 @@ body.modal-open { overflow: hidden; }
 
 .sign-content {
   margin-bottom: 32px;
-  line-height: 1.7;
+  min-height: 60vh;
 }
-.sign-content h1 { font-size: 28px; color: #0C0C0C; margin-bottom: 6px; }
-.sign-content h2 { font-size: 20px; color: #1B2A4A; margin: 32px 0 12px; padding-bottom: 8px; border-bottom: 2px solid #F4F3F1; }
-.sign-content h3 { font-size: 17px; color: #2A2A2A; margin: 20px 0 8px; }
-.sign-content p { margin-bottom: 14px; }
-.sign-content table { width: 100%; border-collapse: collapse; margin: 16px 0; }
-.sign-content td { padding: 8px 12px; border-bottom: 1px solid #D0D0D0; vertical-align: top; }
-.sign-content td:first-child { font-weight: 700; font-size: 13px; color: #929BAA; text-transform: uppercase; letter-spacing: .3px; width: 180px; white-space: nowrap; }
-.sign-content .field { font-weight: 600; color: #3D5A80; }
-.sign-content .subtitle { font-size: 15px; color: #929BAA; margin-bottom: 32px; }
-.sign-content .section { border: 1px solid #D0D0D0; border-radius: 8px; padding: 24px; margin: 16px 0 32px; }
-.sign-content .context { background: rgba(61,90,128,.04); border: 1px solid rgba(61,90,128,.15); border-radius: 6px; padding: 20px; margin: 16px 0 24px; }
-.sign-content .warning { background: rgba(194,59,34,.04); border: 1px solid rgba(194,59,34,.15); border-radius: 6px; padding: 20px; margin: 16px 0 24px; }
-.sign-content ul, .sign-content ol { padding-left: 20px; margin-bottom: 16px; }
-.sign-content li { margin-bottom: 6px; }
 
 .sign-form-section {
   border-top: 2px solid #0C0C0C;
@@ -1671,7 +1657,7 @@ body.modal-open { overflow: hidden; }
 @media (max-width: 600px) {
   .sign-page { padding: 20px 16px 60px; }
   .sign-header h1 { font-size: 15px; }
-  .sign-content td:first-child { width: auto; }
+
 }
 
 /* ===================================================================
