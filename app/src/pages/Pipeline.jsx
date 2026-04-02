@@ -303,12 +303,24 @@ function DealDetailModal({ deal, onClose, onUpdated, onDeleted, navigate }) {
   )
 }
 
+const STAGE_IDS = STAGES.map(s => s.id)
+
 function DealCard({ deal, onDragStart, onDragEnd, onClick, onStageChange }) {
   const stageColor = STAGE_COLORS[deal.stage] || '#7A8490'
   const isMobile = typeof window !== 'undefined' && window.innerWidth <= 768
+  const handleKeyDown = (e) => {
+    if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); onClick(deal); return }
+    const idx = STAGE_IDS.indexOf(deal.stage)
+    if (e.key === 'ArrowRight' && idx < STAGE_IDS.length - 1) { e.preventDefault(); onStageChange(deal, STAGE_IDS[idx + 1]) }
+    if (e.key === 'ArrowLeft' && idx > 0) { e.preventDefault(); onStageChange(deal, STAGE_IDS[idx - 1]) }
+  }
   return (
     <div
       className="pipeline-card"
+      tabIndex={0}
+      role="button"
+      aria-label={`${deal.contact_name} — ${deal.stage}. Arrow keys to move between stages.`}
+      onKeyDown={handleKeyDown}
       draggable={!isMobile}
       onDragStart={e => !isMobile && onDragStart(e, deal)}
       onDragEnd={!isMobile ? onDragEnd : undefined}
