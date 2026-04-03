@@ -19,3 +19,7 @@ Item_2_InfoLetterEntity.pdf
 *.pdf
 app/legacy-docs/
 app/README.md
+AUDIT*.md
+SESSION-SUMMARY.md
+*blueprint*
+*BLUEPRINT*
