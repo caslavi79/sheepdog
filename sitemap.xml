@@ -7,60 +7,57 @@
   <!-- HOMEPAGE -->
   <url>
     <loc>https://sheepdogtexas.com/</loc>
-    <lastmod>2026-04-02</lastmod>
+    <lastmod>2026-04-03</lastmod>
     <changefreq>weekly</changefreq>
     <priority>1.0</priority>
     <image:image>
       <image:loc>https://sheepdogtexas.com/og-image.png</image:loc>
-      <image:title>Sheepdog Texas – Event Security Guards, Mobile Bartenders, Bouncers, Staffing Agency in Bryan-College Station TX</image:title>
-      <image:caption>Sheepdog Texas provides security guards, bouncers, mobile bartenders, bartenders for hire, mobile bar service, table and chair rental, event setup and cleanup, temp workers, warehouse staffing, and general labor in Bryan, College Station, BCS, Brazos Valley, Texas.</image:caption>
+      <image:title>Sheepdog Texas – Event Security, Mobile Bartending &amp; Staffing Agency in Bryan-College Station TX</image:title>
+      <image:caption>Sheepdog Texas homepage social sharing image showing the company logo and tagline for event security, mobile bartending, and workforce staffing services in Bryan-College Station, Texas.</image:caption>
       <image:geo_location>Bryan-College Station, Texas, United States</image:geo_location>
     </image:image>
     <image:image>
       <image:loc>https://sheepdogtexas.com/favicon.png</image:loc>
-      <image:title>Sheepdog Texas Logo – Security Guards, Bartenders for Hire, Staffing Agency Bryan-College Station TX</image:title>
-      <image:caption>Sheepdog Texas logo for security guards for hire, bouncers, mobile bartenders, bartender service, event staffing, temp agency, and workforce staffing in Bryan, College Station, BCS, Brazos Valley, Texas.</image:caption>
-      <image:geo_location>Bryan-College Station, Texas, United States</image:geo_location>
+      <image:title>Sheepdog Texas Logo</image:title>
+      <image:caption>Sheepdog Texas company logo icon used as the site favicon.</image:caption>
     </image:image>
   </url>
 
   <!-- EVENTS PAGE -->
   <url>
     <loc>https://sheepdogtexas.com/events/</loc>
-    <lastmod>2026-04-02</lastmod>
+    <lastmod>2026-04-03</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.9</priority>
     <image:image>
       <image:loc>https://sheepdogtexas.com/og-image.png</image:loc>
-      <image:title>Sheepdog Events – Security Guards, Bouncers, Mobile Bartenders, Bartenders for Hire in Bryan-College Station TX</image:title>
-      <image:caption>Hire security guards, bouncers, door security, mobile bartenders, bartenders for hire, mobile bar service, table and chair rental, and event setup and cleanup for weddings, tailgates, concerts, Greek life events, private parties, and corporate events in Bryan, College Station, BCS, Brazos Valley, Texas.</image:caption>
+      <image:title>Sheepdog Events – Event Security &amp; Mobile Bartending in Bryan-College Station TX</image:title>
+      <image:caption>Social sharing image for the Sheepdog Texas events page covering event security guards, bouncers, and mobile bartending services in Bryan-College Station.</image:caption>
       <image:geo_location>Bryan-College Station, Texas, United States</image:geo_location>
     </image:image>
     <image:image>
       <image:loc>https://sheepdogtexas.com/favicon.png</image:loc>
-      <image:title>Sheepdog Texas Logo – Security Guards, Bartenders, Bouncer Services Bryan-College Station TX</image:title>
-      <image:caption>Sheepdog Texas logo for security guards for hire, bouncers, bouncer services, mobile bartenders, bartender for hire, mobile bar, cocktail service, and event staffing in Bryan, College Station, BCS, Brazos Valley, Texas.</image:caption>
-      <image:geo_location>Bryan-College Station, Texas, United States</image:geo_location>
+      <image:title>Sheepdog Texas Logo</image:title>
+      <image:caption>Sheepdog Texas company logo icon used as the site favicon.</image:caption>
     </image:image>
   </url>
 
   <!-- STAFFING PAGE -->
   <url>
     <loc>https://sheepdogtexas.com/staffing/</loc>
-    <lastmod>2026-04-02</lastmod>
+    <lastmod>2026-04-03</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.9</priority>
     <image:image>
       <image:loc>https://sheepdogtexas.com/og-image.png</image:loc>
-      <image:title>Sheepdog Staffing – Staffing Agency, Temp Agency, Hire Workers in Bryan-College Station TX</image:title>
-      <image:caption>Staffing agency, temp agency, and employment agency providing temp workers, warehouse workers, general laborers, construction labor, day labor, contract workers, forklift operators, maintenance workers, and industrial staffing in Bryan, College Station, BCS, Brazos Valley, Texas.</image:caption>
+      <image:title>Sheepdog Staffing – Staffing Agency in Bryan-College Station TX</image:title>
+      <image:caption>Social sharing image for the Sheepdog Texas staffing page covering warehouse, logistics, construction, and facility maintenance staffing in Bryan-College Station.</image:caption>
       <image:geo_location>Bryan-College Station, Texas, United States</image:geo_location>
     </image:image>
     <image:image>
       <image:loc>https://sheepdogtexas.com/favicon.png</image:loc>
-      <image:title>Sheepdog Texas Logo – Staffing Agency, Temp Agency, Hire Workers Bryan-College Station TX</image:title>
-      <image:caption>Sheepdog Texas logo for staffing agency, temp agency, employment agency, hire workers, hire temps, warehouse staffing, general labor, and workforce solutions in Bryan, College Station, BCS, Brazos Valley, Texas.</image:caption>
-      <image:geo_location>Bryan-College Station, Texas, United States</image:geo_location>
+      <image:title>Sheepdog Texas Logo</image:title>
+      <image:caption>Sheepdog Texas company logo icon used as the site favicon.</image:caption>
     </image:image>
   </url>
 
