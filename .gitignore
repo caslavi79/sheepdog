@@ -21,5 +21,6 @@ app/legacy-docs/
 app/README.md
 AUDIT*.md
 SESSION-SUMMARY.md
+CLAUDE.md
+CLAUDE-API-BLUEPRINT.md
 *blueprint*
-*BLUEPRINT*
