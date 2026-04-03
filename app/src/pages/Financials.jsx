@@ -699,7 +699,7 @@ td{padding:10px 0;border-bottom:1px solid #f0f0f0;font-size:14px;color:#4A4A4A}
 </style></head><body>
 <div class="download-bar"><button class="download-btn" onclick="window.print()">Save as PDF</button><span class="download-info">Use "Save as PDF" in the print dialog</span></div>
 <div class="page">
-<div class="top"><div class="top-left"><img src="https://sheepdogtexas.com/favicon.jpg" alt=""><span class="brand">Sheepdog</span></div><span class="inv-label">INVOICE</span></div>
+<div class="top"><div class="top-left"><img src="https://sheepdogtexas.com/favicon.png" alt=""><span class="brand">Sheepdog</span></div><span class="inv-label">INVOICE</span></div>
 <div class="meta">${invoice.invoice_number || ''}<br>Date: ${new Date(invoice.created_at).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })}<br>Due: ${invoice.due_date || '—'}</div>
 <div class="grid"><div><div class="label">Bill To</div><div class="val">${clientName}</div></div><div><div class="label">Service</div><div class="val">${invoice.service_line || '—'}</div></div></div>
 ${items.length > 0 ? `<table><thead><tr><th>Description</th><th>Hours</th><th>Rate</th><th style="text-align:right">Total</th></tr></thead><tbody>${items.map(li => `<tr><td>${li.description}</td><td>${li.hours || ''}</td><td>$${Number(li.rate || 0).toFixed(2)}</td><td style="text-align:right">$${Number(li.total || 0).toFixed(2)}</td></tr>`).join('')}</tbody></table>` : ''}

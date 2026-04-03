@@ -106,7 +106,7 @@ export default function Sign() {
     <div className="sign-page">
       <div className="sign-container">
         <div className="sign-header">
-          <img src="https://sheepdogtexas.com/favicon.jpg" alt="" style={{ width: 40, height: 40, borderRadius: 6 }} />
+          <img src="https://sheepdogtexas.com/favicon.png" alt="" style={{ width: 40, height: 40, borderRadius: 6 }} />
           <h1>{contract?.title || 'Contract'}</h1>
         </div>
         {contract?.filled_html && (

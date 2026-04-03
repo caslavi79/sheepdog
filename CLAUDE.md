@@ -31,7 +31,7 @@ The client-facing site and the app code both live in the `sheepdog` repo. The `s
 - `BRAND_FROM_EMAIL` — "noreply@sheepdogtexas.com"
 - `BRAND_REPLY_TO` — "sheepdogsecurityllc@gmail.com"
 - `BRAND_COLOR` — "#0C0C0C"
-- `BRAND_LOGO_URL` — "https://sheepdogtexas.com/favicon.jpg"
+- `BRAND_LOGO_URL` — "https://sheepdogtexas.com/favicon.png"
 - `SIGNING_BASE_URL` — "https://sezzqhmsfulclcqmfwja.supabase.co/functions/v1/contract-sign"
 
 The BRAND_* secrets make the contract signing system reusable for other businesses — swap them out, upload new templates, zero code changes.
