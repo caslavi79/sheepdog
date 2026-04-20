@@ -105,6 +105,115 @@ CREATE INDEX IF NOT EXISTS idx_invoices_client ON public.invoices (client_id);
 CREATE INDEX IF NOT EXISTS idx_invoices_status ON public.invoices (status);
 CREATE INDEX IF NOT EXISTS idx_invoices_created ON public.invoices (created_at DESC);
 
+-- Stripe-related columns on invoices (added for online payment support)
+ALTER TABLE public.invoices ADD COLUMN IF NOT EXISTS payment_link_token uuid UNIQUE DEFAULT gen_random_uuid();
+ALTER TABLE public.invoices ADD COLUMN IF NOT EXISTS stripe_payment_intent_id text;
+ALTER TABLE public.invoices ADD COLUMN IF NOT EXISTS allow_card boolean DEFAULT true;
+ALTER TABLE public.invoices ADD COLUMN IF NOT EXISTS allow_ach boolean DEFAULT true;
+ALTER TABLE public.invoices ADD COLUMN IF NOT EXISTS surcharge_amount numeric DEFAULT 0;
+CREATE INDEX IF NOT EXISTS idx_invoices_pay_token ON public.invoices (payment_link_token);
+CREATE INDEX IF NOT EXISTS idx_invoices_stripe_pi ON public.invoices (stripe_payment_intent_id);
+
+-- =============================================================================
+-- STRIPE PAYMENT PROCESSING
+-- =============================================================================
+
+-- Maps internal clients to Stripe Customer records. One row per client once they
+-- make their first online payment (lazily created by stripe-payment-intent fn).
+--
+-- client_id uses ON DELETE SET NULL (not CASCADE) so payment history stays
+-- reconcilable even if the internal client record is deleted. Stripe retains
+-- the Customer object on their side regardless.
+CREATE TABLE IF NOT EXISTS public.stripe_customers (
+  id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+  client_id uuid UNIQUE REFERENCES public.clients(id) ON DELETE SET NULL,
+  stripe_customer_id text UNIQUE NOT NULL,
+  created_at timestamptz DEFAULT now(),
+  updated_at timestamptz DEFAULT now()
+);
+
+CREATE INDEX IF NOT EXISTS idx_stripe_customers_client ON public.stripe_customers (client_id);
+CREATE INDEX IF NOT EXISTS idx_stripe_customers_sc ON public.stripe_customers (stripe_customer_id);
+
+-- One row per PaymentIntent attempt. Updated by the webhook as events arrive.
+-- Method values: 'card', 'card_debit', 'us_bank_account', 'link', 'other'
+-- Status mirrors Stripe PI statuses: requires_payment_method, processing,
+-- requires_action, succeeded, canceled, failed.
+CREATE TABLE IF NOT EXISTS public.payments (
+  id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+  invoice_id uuid REFERENCES public.invoices(id) ON DELETE SET NULL,
+  client_id uuid REFERENCES public.clients(id) ON DELETE SET NULL,
+  stripe_payment_intent_id text UNIQUE NOT NULL,
+  stripe_charge_id text,
+  stripe_customer_id text,
+  amount numeric NOT NULL,              -- total charged (invoice total + surcharge)
+  base_amount numeric NOT NULL,         -- invoice total before surcharge
+  surcharge_amount numeric DEFAULT 0,   -- card surcharge passed to payer
+  stripe_fee numeric,                   -- Stripe's processing fee (filled by webhook)
+  net_amount numeric,                   -- amount - stripe_fee (what we actually receive)
+  method text,                          -- 'card', 'card_debit', 'us_bank_account', etc.
+  card_brand text,                      -- visa, mastercard, amex, discover (if card)
+  card_last4 text,
+  card_funding text,                    -- 'credit', 'debit', 'prepaid', 'unknown'
+  status text DEFAULT 'requires_payment_method',
+  receipt_url text,
+  failure_code text,
+  failure_message text,
+  refunded_amount numeric DEFAULT 0,
+  dispute_status text,                  -- 'warning_needs_response', 'lost', 'won', etc.
+  metadata jsonb DEFAULT '{}',
+  created_at timestamptz DEFAULT now(),
+  updated_at timestamptz DEFAULT now()
+);
+
+CREATE INDEX IF NOT EXISTS idx_payments_invoice ON public.payments (invoice_id);
+CREATE INDEX IF NOT EXISTS idx_payments_client ON public.payments (client_id);
+CREATE INDEX IF NOT EXISTS idx_payments_status ON public.payments (status);
+CREATE INDEX IF NOT EXISTS idx_payments_created ON public.payments (created_at DESC);
+-- Webhook handlers (charge.refunded, charge.dispute.*) filter by charge id; without
+-- this index every such event scans the full payments table.
+CREATE INDEX IF NOT EXISTS idx_payments_stripe_charge ON public.payments (stripe_charge_id);
+CREATE INDEX IF NOT EXISTS idx_payments_stripe_customer ON public.payments (stripe_customer_id);
+
+-- Webhook event log — primarily for idempotency. Stripe can redeliver events;
+-- we reject any event whose stripe_event_id we've already processed.
+CREATE TABLE IF NOT EXISTS public.stripe_events (
+  id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+  stripe_event_id text UNIQUE NOT NULL,
+  event_type text NOT NULL,
+  payload jsonb,
+  processed_at timestamptz,
+  error text,
+  created_at timestamptz DEFAULT now()
+);
+
+CREATE INDEX IF NOT EXISTS idx_stripe_events_type ON public.stripe_events (event_type);
+CREATE INDEX IF NOT EXISTS idx_stripe_events_created ON public.stripe_events (created_at DESC);
+
+-- Placeholder for future Stripe Connect (paying out security staff as contractors).
+-- Schema is ready but no code path uses it yet. When enabling Connect:
+--   1. Create Stripe Express connected accounts for each staff member
+--   2. Populate stripe_account_id
+--   3. Flip destination charges in stripe-payment-intent (commented TODO there)
+--
+-- staff_id uses ON DELETE RESTRICT (not CASCADE) — cascading staff deletion would
+-- orphan the Stripe-side connected account without closing it, creating payout
+-- reconciliation problems. Admins must explicitly resolve (close or reassign)
+-- the Connect account before deleting the staff row.
+CREATE TABLE IF NOT EXISTS public.stripe_connect_accounts (
+  id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+  staff_id uuid UNIQUE REFERENCES public.staff(id) ON DELETE RESTRICT,
+  stripe_account_id text UNIQUE NOT NULL,
+  account_type text DEFAULT 'express', -- 'express', 'standard', 'custom'
+  onboarding_complete boolean DEFAULT false,
+  charges_enabled boolean DEFAULT false,
+  payouts_enabled boolean DEFAULT false,
+  created_at timestamptz DEFAULT now(),
+  updated_at timestamptz DEFAULT now()
+);
+
+CREATE INDEX IF NOT EXISTS idx_stripe_connect_staff ON public.stripe_connect_accounts (staff_id);
+
 CREATE TABLE IF NOT EXISTS public.rate_limits (
   id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
   ip text,
@@ -291,6 +400,10 @@ ALTER TABLE public.pay_rate_defaults ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.assistant_messages ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.assistant_actions ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.smart_emails ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.stripe_customers ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.payments ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.stripe_events ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.stripe_connect_accounts ENABLE ROW LEVEL SECURITY;
 
 -- Authenticated users can read/write all ops tables
 DO $$ BEGIN
@@ -339,7 +452,18 @@ DO $$ BEGIN
   IF NOT EXISTS (SELECT 1 FROM pg_policies WHERE policyname = 'authenticated only' AND tablename = 'smart_emails') THEN
     CREATE POLICY "authenticated only" ON public.smart_emails FOR ALL USING (auth.role() = 'authenticated');
   END IF;
+  IF NOT EXISTS (SELECT 1 FROM pg_policies WHERE policyname = 'authenticated only' AND tablename = 'stripe_customers') THEN
+    CREATE POLICY "authenticated only" ON public.stripe_customers FOR ALL USING (auth.role() = 'authenticated');
+  END IF;
+  IF NOT EXISTS (SELECT 1 FROM pg_policies WHERE policyname = 'authenticated only' AND tablename = 'payments') THEN
+    CREATE POLICY "authenticated only" ON public.payments FOR ALL USING (auth.role() = 'authenticated');
+  END IF;
+  IF NOT EXISTS (SELECT 1 FROM pg_policies WHERE policyname = 'authenticated only' AND tablename = 'stripe_connect_accounts') THEN
+    CREATE POLICY "authenticated only" ON public.stripe_connect_accounts FOR ALL USING (auth.role() = 'authenticated');
+  END IF;
 END $$;
+
+-- stripe_events: NO policies — only written by edge functions via service role key
 
 -- rate_limits: NO policies — only accessible via service role key (edge function)
 -- smart_emails: also written by edge functions via service role key (cron triggers)

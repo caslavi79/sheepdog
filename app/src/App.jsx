@@ -1,4 +1,4 @@
-import { BrowserRouter, Routes, Route } from 'react-router-dom'
+import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
 import ProtectedRoute from './components/ProtectedRoute'
 import Layout from './components/Layout'
 import Login from './pages/Login'
@@ -13,6 +13,7 @@ import Compliance from './pages/Compliance'
 import Scheduling from './pages/Scheduling'
 import Placeholder from './pages/Placeholder'
 import Sign from './pages/Sign'
+import PayInvoice from './pages/PayInvoice'
 import './App.css'
 
 export default function App() {
@@ -22,6 +23,9 @@ export default function App() {
         <Route path="/login" element={<Login />} />
         <Route path="/reset-password" element={<ResetPassword />} />
         <Route path="/sign" element={<Sign />} />
+        <Route path="/pay/:token" element={<PayInvoice />} />
+        {/* Bare /pay redirects home — a token is required */}
+        <Route path="/pay" element={<Navigate to="/" replace />} />
         <Route element={<ProtectedRoute><Layout /></ProtectedRoute>}>
           <Route index element={<Hub />} />
           <Route path="resources" element={<Resources />} />

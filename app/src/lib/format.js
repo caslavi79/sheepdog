@@ -4,6 +4,9 @@ export function fmtMoney(n) {
   return n != null ? `$${parseFloat(n).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}` : '—'
 }
 
+/** Format cents (integer) → display dollars. */
+export const fmtCents = (c) => fmtMoney((Number(c) || 0) / 100)
+
 export function fmtDate(d) {
   if (!d) return '—'
   const raw = typeof d === 'string' && d.includes('T') ? d.split('T')[0] : d

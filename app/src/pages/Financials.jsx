@@ -3,6 +3,8 @@ import { useNavigate, useLocation } from 'react-router-dom'
 import { supabase } from '../lib/supabase'
 import { useEscapeKey, useBodyLock, useToast } from '../lib/hooks'
 import { fmtMoney, fmtDate, daysUntil, badgeStyle, COLORS } from '../lib/format'
+import { buildPayUrl, ensurePayToken } from '../lib/billing'
+import { isStripeConfigured } from '../lib/stripe'
 
 function downloadCSV(rows, headers, filename) {
   const escape = (v) => `"${String(v ?? '').replace(/"/g, '""')}"`
@@ -724,6 +726,39 @@ ${invoice.notes ? `<div class="notes"><strong>Notes:</strong> ${invoice.notes}</
                     if (result.success) { showToast('Invoice emailed to client'); onUpdated() }
                     else showToast(result.error || 'Failed to send')
                   }}>Email to Client</button>
+                )}
+                {invoice.status !== 'paid' && (
+                  <button
+                    className="modal-btn-cancel"
+                    style={{ color: COLORS.green, borderColor: `${COLORS.green}44` }}
+                    title={isStripeConfigured()
+                      ? 'Copy public payment link to share with client'
+                      : 'Stripe not configured — link will NOT work until keys are set. Do not share yet.'}
+                    onClick={async () => {
+                      let url = null
+                      try {
+                        // Prefer the already-loaded token to avoid a DB roundtrip
+                        const token = await ensurePayToken(invoice)
+                        url = buildPayUrl({ payment_link_token: token })
+                      } catch (e) {
+                        showToast('Could not generate link')
+                        return
+                      }
+                      // Clipboard API fails in insecure contexts and some older
+                      // browsers — fall back to showing the URL so the user can copy manually.
+                      try {
+                        if (navigator.clipboard?.writeText) {
+                          await navigator.clipboard.writeText(url)
+                          showToast(isStripeConfigured() ? 'Pay link copied' : 'Link copied (Stripe not live yet)')
+                        } else {
+                          throw new Error('no clipboard api')
+                        }
+                      } catch {
+                        // Manual fallback
+                        window.prompt('Copy this pay link:', url)
+                      }
+                    }}
+                  >Copy Pay Link</button>
                 )}
                 <button className="modal-btn-save" onClick={() => setEditing(true)}>Edit</button>
               </div>

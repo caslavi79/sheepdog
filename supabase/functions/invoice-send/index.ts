@@ -56,6 +56,24 @@ Deno.serve(async (req: Request) => {
       .eq("id", invoice_id)
       .single();
 
+    // Ensure a payment_link_token exists so we can include a pay-online CTA
+    // (the DB default should populate this but older rows may lack one)
+    if (invoice && !invoice.payment_link_token) {
+      const { data: updated, error: tokenErr } = await supabase
+        .from("invoices")
+        .update({ payment_link_token: crypto.randomUUID() })
+        .eq("id", invoice_id)
+        .select("payment_link_token")
+        .single();
+      if (tokenErr || !updated?.payment_link_token) {
+        // Graceful degradation: email ships without pay button. Log so the
+        // silent drop is visible in Supabase logs rather than invisible.
+        console.error("Failed to backfill payment_link_token for invoice", invoice_id, tokenErr);
+      } else {
+        invoice.payment_link_token = updated.payment_link_token;
+      }
+    }
+
     if (invErr || !invoice) {
       return new Response(JSON.stringify({ success: false, error: "Invoice not found" }), {
         status: 404, headers: { ...corsHeaders, "Content-Type": "application/json" },
@@ -99,6 +117,25 @@ Deno.serve(async (req: Request) => {
       : "";
 
     const title = invoice.invoice_number || "Invoice";
+
+    // Build "Pay Online" CTA if Stripe is configured and this invoice isn't already paid.
+    // The pay link is always safe to include — if Stripe isn't live, the page shows a
+    // graceful fallback. But to avoid sending pay buttons on an unconfigured system,
+    // we gate visibility on STRIPE_SECRET_KEY being present.
+    const stripeReady = !!Deno.env.get("STRIPE_SECRET_KEY");
+    // Strip trailing slashes so `PAY_APP_URL=https://app.sheepdogtexas.com/`
+    // doesn't produce `/pay//token`.
+    const payAppUrl = (Deno.env.get("PAY_APP_URL") || "https://app.sheepdogtexas.com").replace(/\/+$/, "");
+    const payUrl = stripeReady && invoice.payment_link_token && invoice.status !== "paid"
+      ? `${payAppUrl}/pay/${invoice.payment_link_token}`
+      : null;
+    const payButtonHtml = payUrl
+      ? `<div style="text-align:center;margin:24px 0;">
+          <a href="${payUrl}" style="display:inline-block;background:${BRAND_COLOR};color:#fff;padding:14px 32px;border-radius:8px;text-decoration:none;font-weight:700;font-size:15px;">Pay Online</a>
+          <div style="font-size:12px;color:#888;margin-top:8px;">Bank transfer (no fee) or card</div>
+        </div>`
+      : "";
+
     const emailHtml = `<div style="font-family:Arial,sans-serif;max-width:600px;margin:0 auto;">
       <div style="background:${BRAND_COLOR};padding:24px;border-radius:8px 8px 0 0;text-align:center;">
         ${BRAND_LOGO_URL ? `<img src="${BRAND_LOGO_URL}" alt="" style="width:40px;height:40px;border-radius:6px;margin-bottom:8px;">` : ""}
@@ -114,6 +151,7 @@ Deno.serve(async (req: Request) => {
         <div style="text-align:right;font-size:13px;color:#666;margin-top:8px;">Subtotal: ${fmtMoney(Number(invoice.subtotal || 0))}</div>
         <div style="text-align:right;font-size:13px;color:#666;">Tax: ${fmtMoney(Number(invoice.tax || 0))}</div>
         <div style="text-align:right;font-size:22px;font-weight:700;color:${BRAND_COLOR};margin:12px 0;">Total: ${fmtMoney(Number(invoice.total || 0))}</div>
+        ${payButtonHtml}
         ${invoice.notes ? `<div style="margin-top:16px;padding:12px;background:#f8f8f8;border-radius:6px;font-size:13px;color:#555;">${escapeHtml(invoice.notes)}</div>` : ""}
         <p style="font-size:13px;color:#888;margin-top:24px;">This invoice was sent by ${escapeHtml(BRAND_NAME)}. Please contact us if you have any questions.</p>
       </div>
