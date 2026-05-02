@@ -16,6 +16,8 @@ Item_2_InfoLetterEntity.pdf
 !android-chrome-192x192.png
 !android-chrome-512x512.png
 !favicon.png
+!favicon-16.png
+!favicon-32.png
 *.pdf
 app/legacy-docs/
 app/README.md
