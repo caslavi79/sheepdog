@@ -1,5 +1,5 @@
-import { useState, useEffect, useRef } from 'react'
-import { Link } from 'react-router-dom'
+import { useState, useEffect, useRef, useCallback } from 'react'
+import { Link, useNavigate } from 'react-router-dom'
 import { supabase } from '../lib/supabase'
 import { daysUntil, daysSince } from '../lib/format'
 import { askAssistant } from '../lib/assistant'
@@ -60,9 +60,11 @@ const modules = [
 ]
 
 export default function Hub() {
+  const navigate = useNavigate()
   const [stats, setStats] = useState({ leads: '—', pipelineValue: '—', submissions7d: '—', activeClients: '—' })
   const [alerts, setAlerts] = useState([])
   const [alertsLoading, setAlertsLoading] = useState(true)
+  const initialLoadDone = useRef(false)
   const [briefing, setBriefing] = useState(() => {
     try {
       const cached = localStorage.getItem('sheepdog_briefing')
@@ -136,7 +138,8 @@ export default function Hub() {
     }
   }
 
-  useEffect(() => {
+  const loadData = useCallback(() => {
+    const isInitial = !initialLoadDone.current
     const sevenDaysAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString()
     Promise.all([
       supabase.from('pipeline').select('stage, value, last_activity'),
@@ -167,17 +170,17 @@ export default function Hub() {
         return false
       })
       const outstandingTotal = invoices.filter(i => i.status === 'sent' || i.status === 'overdue').reduce((s, i) => s + (parseFloat(i.total) || 0), 0)
-      if (overdueInvoices.length > 0) a.push({ color: '#D4483A', text: `${overdueInvoices.length} overdue invoice${overdueInvoices.length !== 1 ? 's' : ''}`, link: '/financials' })
+      if (overdueInvoices.length > 0) a.push({ color: '#D4483A', text: `${overdueInvoices.length} overdue invoice${overdueInvoices.length !== 1 ? 's' : ''}`, link: '/financials', state: { filterStatus: 'overdue' } })
       if (outstandingTotal > 0) a.push({ color: '#C9922E', text: `$${outstandingTotal.toLocaleString()} outstanding`, link: '/financials' })
 
       const lics = licensesRes.data || []
       const expiredLics = lics.filter(l => { const d = daysUntil(l.expiration_date); return d !== null && d < 0 })
       const expiringLics = lics.filter(l => { const d = daysUntil(l.expiration_date); return d !== null && d >= 0 && d <= 30 })
-      if (expiredLics.length > 0) a.push({ color: '#D4483A', text: `${expiredLics.length} expired license${expiredLics.length !== 1 ? 's' : ''}`, link: '/compliance' })
-      if (expiringLics.length > 0) a.push({ color: '#C9922E', text: `${expiringLics.length} license${expiringLics.length !== 1 ? 's' : ''} expiring soon`, link: '/compliance' })
+      if (expiredLics.length > 0) a.push({ color: '#D4483A', text: `${expiredLics.length} expired license${expiredLics.length !== 1 ? 's' : ''}`, link: '/compliance', state: { tab: 'licenses', filterLicenseStatus: 'expired' } })
+      if (expiringLics.length > 0) a.push({ color: '#C9922E', text: `${expiringLics.length} license${expiringLics.length !== 1 ? 's' : ''} expiring soon`, link: '/compliance', state: { tab: 'licenses', filterLicenseStatus: 'expiring' } })
 
-      const missingDocs = (docsRes.data || []).filter(d => d.status === 'missing').length
-      if (missingDocs > 0) a.push({ color: '#D4483A', text: `${missingDocs} missing contractor doc${missingDocs !== 1 ? 's' : ''}`, link: '/compliance' })
+      const missingDocs = (docsRes.data || []).filter(d => d.status === 'pending').length
+      if (missingDocs > 0) a.push({ color: '#D4483A', text: `${missingDocs} missing contractor doc${missingDocs !== 1 ? 's' : ''}`, link: '/compliance', state: { tab: 'docs', filterDocStatus: 'pending' } })
 
       // Stale pipeline deals (14+ days without activity)
       const staleDeals = deals.filter(d => {
@@ -202,15 +205,21 @@ export default function Hub() {
         const ds = daysSince(e.date)
         return ds !== null && ds > 0
       })
-      if (pastEventsNoInvoice.length > 0) a.push({ color: '#C9922E', text: `${pastEventsNoInvoice.length} past event${pastEventsNoInvoice.length !== 1 ? 's' : ''} without invoices`, link: '/scheduling' })
+      if (pastEventsNoInvoice.length > 0) a.push({ color: '#C9922E', text: `${pastEventsNoInvoice.length} past event${pastEventsNoInvoice.length !== 1 ? 's' : ''} without invoices`, link: '/scheduling', state: { tab: 'events' } })
 
       setAlerts(a)
-      setAlertsLoading(false)
+      if (isInitial) { setAlertsLoading(false); initialLoadDone.current = true }
     }).catch(err => {
       if (import.meta.env.DEV) console.error('Hub stats error:', err)
-      setAlertsLoading(false)
+      if (isInitial) { setAlertsLoading(false); initialLoadDone.current = true }
     })
   }, [])
+
+  useEffect(() => {
+    loadData()
+    const interval = setInterval(loadData, 60_000)
+    return () => clearInterval(interval)
+  }, [loadData])
 
   return (
     <div className="hub">
@@ -266,9 +275,9 @@ export default function Hub() {
       ) : alerts.length > 0 ? (
         <div className="hub-alerts">
           {alerts.map((a, i) => (
-            <Link key={i} to={a.link} className="hub-alert" style={{ borderLeftColor: a.color }}>
+            <div key={i} className="hub-alert" style={{ borderLeftColor: a.color, cursor: 'pointer' }} onClick={() => navigate(a.link, a.state ? { state: a.state } : undefined)}>
               <span style={{ color: a.color, fontWeight: 700 }}>●</span> {a.text}
-            </Link>
+            </div>
           ))}
         </div>
       ) : null}

@@ -3,6 +3,23 @@ import { NavLink, Outlet, useNavigate, useLocation } from 'react-router-dom'
 import { supabase } from '../lib/supabase'
 import AssistantPanel from './AssistantPanel'
 
+function GuardedNavLink({ to, end, className, children }) {
+  const navigate = useNavigate()
+  const location = useLocation()
+  const isActive = end ? location.pathname === to : location.pathname.startsWith(to)
+  return (
+    <a
+      href={to}
+      className={typeof className === 'function' ? className({ isActive }) : `${className}${isActive ? ' active' : ''}`}
+      onClick={(e) => {
+        e.preventDefault()
+        if (window.__unsavedChangesGuard && !window.confirm('You have unsaved changes. Discard them?')) return
+        navigate(to)
+      }}
+    >{children}</a>
+  )
+}
+
 export default function Layout() {
   const navigate = useNavigate()
   const location = useLocation()
@@ -12,6 +29,7 @@ export default function Layout() {
   const currentPage = location.pathname === '/' ? 'hub' : location.pathname.slice(1)
 
   const handleLogout = async () => {
+    if (window.__unsavedChangesGuard && !window.confirm('You have unsaved changes. Discard them?')) return
     const { error } = await supabase.auth.signOut()
     if (error && import.meta.env.DEV) console.error('Logout error:', error.message)
     navigate('/login')
@@ -26,15 +44,15 @@ export default function Layout() {
         </div>
         <nav className="sidebar-nav">
           {/* Primary tabs — shown on mobile bottom nav */}
-          <NavLink to="/" end className="sidebar-link">Dashboard</NavLink>
-          <NavLink to="/clients" className="sidebar-link">Clients</NavLink>
-          <NavLink to="/pipeline" className="sidebar-link">Pipeline</NavLink>
-          <NavLink to="/financials" className="sidebar-link">Financials</NavLink>
+          <GuardedNavLink to="/" end className="sidebar-link">Dashboard</GuardedNavLink>
+          <GuardedNavLink to="/clients" className="sidebar-link">Clients</GuardedNavLink>
+          <GuardedNavLink to="/pipeline" className="sidebar-link">Pipeline</GuardedNavLink>
+          <GuardedNavLink to="/financials" className="sidebar-link">Financials</GuardedNavLink>
           {/* Secondary tabs — hidden on mobile, shown in More menu */}
-          <NavLink to="/resources" className="sidebar-link sidebar-link--secondary">Resources</NavLink>
-          <NavLink to="/contracts" className="sidebar-link sidebar-link--secondary">Contracts</NavLink>
-          <NavLink to="/scheduling" className="sidebar-link sidebar-link--secondary">Scheduling</NavLink>
-          <NavLink to="/compliance" className="sidebar-link sidebar-link--secondary">Compliance</NavLink>
+          <GuardedNavLink to="/resources" className="sidebar-link sidebar-link--secondary">Resources</GuardedNavLink>
+          <GuardedNavLink to="/contracts" className="sidebar-link sidebar-link--secondary">Contracts</GuardedNavLink>
+          <GuardedNavLink to="/scheduling" className="sidebar-link sidebar-link--secondary">Scheduling</GuardedNavLink>
+          <GuardedNavLink to="/compliance" className="sidebar-link sidebar-link--secondary">Compliance</GuardedNavLink>
 
           {/* Mobile "More" button — only visible on mobile via CSS */}
           <button
@@ -49,13 +67,16 @@ export default function Layout() {
 
         {/* Mobile overflow menu */}
         {moreOpen && (
-          <div className="sidebar-more-menu" onClick={() => setMoreOpen(false)}>
-            <NavLink to="/contracts" className="sidebar-more-link">Contracts</NavLink>
-            <NavLink to="/resources" className="sidebar-more-link">Resources</NavLink>
-            <NavLink to="/scheduling" className="sidebar-more-link">Scheduling</NavLink>
-            <NavLink to="/compliance" className="sidebar-more-link">Compliance</NavLink>
-            <button onClick={handleLogout} className="sidebar-more-link sidebar-more-logout">Log Out</button>
-          </div>
+          <>
+            <div className="sidebar-more-backdrop" onClick={() => setMoreOpen(false)} />
+            <div className="sidebar-more-menu">
+              <GuardedNavLink to="/contracts" className="sidebar-more-link">Contracts</GuardedNavLink>
+              <GuardedNavLink to="/resources" className="sidebar-more-link">Resources</GuardedNavLink>
+              <GuardedNavLink to="/scheduling" className="sidebar-more-link">Scheduling</GuardedNavLink>
+              <GuardedNavLink to="/compliance" className="sidebar-more-link">Compliance</GuardedNavLink>
+              <button onClick={handleLogout} className="sidebar-more-link sidebar-more-logout">Log Out</button>
+            </div>
+          </>
         )}
 
         <button onClick={handleLogout} className="sidebar-logout">Log Out</button>

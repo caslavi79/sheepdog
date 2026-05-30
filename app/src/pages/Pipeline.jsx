@@ -503,11 +503,10 @@ export default function Pipeline() {
 
   const loadDeals = async () => {
     setLoading(true)
-    const { data, error } = await supabase.from('pipeline').select('*').order('created_at', { ascending: false }).limit(100)
+    const { data, error } = await supabase.from('pipeline').select('*').order('created_at', { ascending: false })
     if (error) { setLoadError('Failed to load deals. Please refresh.'); if (import.meta.env.DEV) console.error('Load deals error:', error.message) }
     else { setLoadError('') }
     setDeals(data || [])
-    if (data && data.length >= 100) setLoadError('Showing first 100 deals. Archive older deals to see more.')
     setLoading(false)
   }
 

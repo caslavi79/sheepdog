@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { useNavigate, useLocation } from 'react-router-dom'
 import { supabase } from '../lib/supabase'
 import { useEscapeKey, useBodyLock, useToast } from '../lib/hooks'
@@ -69,14 +69,23 @@ function AddClientModal({ onClose, onSaved, fromDeal }) {
     const { data: newClient, error: err } = await supabase.from('clients').insert([{ ...form, contact_name: form.contact_name.trim() }]).select('id').single()
     setSaving(false)
     if (err) { setError(err.message); return }
-    // Link pipeline deal to new client and advance stage past 'lead'
+    // Link pipeline deal to new client
     if (fromDeal?.deal_id && newClient?.id) {
-      await supabase.from('pipeline').update({
+      // Always link client_id regardless of current stage
+      const { error: linkErr } = await supabase.from('pipeline').update({
         client_id: newClient.id,
-        stage: 'outreach_sent',
         last_activity: new Date().toISOString(),
         updated_at: new Date().toISOString(),
+      }).eq('id', fromDeal.deal_id)
+      // Advance past lead only if still at lead stage
+      const { error: stageErr } = await supabase.from('pipeline').update({
+        stage: 'outreach_sent',
       }).eq('id', fromDeal.deal_id).eq('stage', 'lead')
+      if (linkErr || stageErr) {
+        if (import.meta.env.DEV) console.error('Pipeline link after client create:', linkErr?.message, stageErr?.message)
+        setError(`Client saved, but couldn't auto-link the pipeline deal (${(linkErr || stageErr).message}). Open the deal in Pipeline to link it manually.`)
+        return
+      }
     }
     onSaved(); onClose()
   }
@@ -401,6 +410,7 @@ export default function Clients() {
   const [clients, setClients] = useState([])
   const [loading, setLoading] = useState(true)
   const [search, setSearch] = useState('')
+  const [searchInput, setSearchInput] = useState('')
   const [filterLine, setFilterLine] = useState('')
   const [filterStatus, setFilterStatus] = useState('')
   const [showAdd, setShowAdd] = useState(false)
@@ -409,26 +419,32 @@ export default function Clients() {
   const [loadError, setLoadError] = useState('')
   const [page, setPage] = useState(0)
   const [totalCount, setTotalCount] = useState(0)
+  const [sortCol, setSortCol] = useState('created_at')
+  const [sortDir, setSortDir] = useState('desc')
 
   const fireToast = useToast()
   const showToast = (msg) => fireToast(setToast, msg)
 
   // Open AddClientModal when arriving from Pipeline "Convert to Client"
+  const [initialFromDeal] = useState(() => location.state?.fromDeal || null)
   useEffect(() => {
-    if (location.state?.fromDeal) {
+    if (initialFromDeal) {
       setShowAdd(true)
       navigate(location.pathname, { replace: true, state: {} })
     }
   }, []) // eslint-disable-line react-hooks/exhaustive-deps — only run once on mount; state cleared by navigate()
+
+  const searchTimer = useRef(null)
 
   const loadClients = async () => {
     setLoading(true)
     setLoadError('')
     const from = page * CLIENTS_PAGE_SIZE
     const to = from + CLIENTS_PAGE_SIZE - 1
-    let q = supabase.from('clients').select('*', { count: 'exact' }).order('created_at', { ascending: false })
+    let q = supabase.from('clients').select('*', { count: 'exact' }).order(sortCol, { ascending: sortDir === 'asc' })
     if (filterLine) q = q.eq('service_line', filterLine)
     if (filterStatus) q = q.eq('status', filterStatus)
+    if (search) q = q.or(`contact_name.ilike.%${search}%,business_name.ilike.%${search}%,email.ilike.%${search}%`)
     q = q.range(from, to)
     const { data, count, error } = await q
     if (error) { setLoadError('Failed to load clients. Please refresh.'); if (import.meta.env.DEV) console.error('Load clients error:', error.message) }
@@ -437,17 +453,8 @@ export default function Clients() {
     setLoading(false)
   }
 
-  useEffect(() => { setPage(0) }, [filterLine, filterStatus])
-  useEffect(() => { loadClients() }, [filterLine, filterStatus, page])
-
-  const filtered = clients.filter(c => {
-    if (!search) return true
-    const s = search.toLowerCase()
-    return (c.contact_name || '').toLowerCase().includes(s) ||
-           (c.business_name || '').toLowerCase().includes(s) ||
-           (c.email || '').toLowerCase().includes(s) ||
-           (c.phone || '').includes(s)
-  })
+  useEffect(() => { setPage(0) }, [filterLine, filterStatus, sortCol, sortDir, search])
+  useEffect(() => { loadClients() }, [filterLine, filterStatus, page, sortCol, sortDir, search])
 
   return (
     <div className="clients-page">
@@ -463,8 +470,13 @@ export default function Clients() {
         <input
           className="clients-search"
           placeholder="Search by name, business, email, or phone..."
-          value={search}
-          onChange={e => { setSearch(e.target.value); setPage(0) }}
+          value={searchInput}
+          onChange={e => {
+            const val = e.target.value
+            setSearchInput(val)
+            clearTimeout(searchTimer.current)
+            searchTimer.current = setTimeout(() => setSearch(val), 300)
+          }}
         />
         <select className="clients-filter" value={filterLine} onChange={e => setFilterLine(e.target.value)}>
           <option value="">All Services</option>
@@ -484,7 +496,7 @@ export default function Clients() {
 
       {loading ? (
         <div className="clients-loading">Loading...</div>
-      ) : filtered.length === 0 ? (
+      ) : clients.length === 0 ? (
         <div className="clients-empty">
           <p>{search ? 'No clients match your search.' : 'No clients yet. Add your first one.'}</p>
         </div>
@@ -493,16 +505,23 @@ export default function Clients() {
           <table className="clients-table">
             <thead>
               <tr>
-                <th>Name</th>
-                <th>Business</th>
-                <th>Phone</th>
-                <th>Email</th>
-                <th>Service</th>
-                <th>Status</th>
+                {[
+                  { label: 'Name', col: 'contact_name' },
+                  { label: 'Business', col: 'business_name' },
+                  { label: 'Phone', col: null },
+                  { label: 'Email', col: null },
+                  { label: 'Service', col: 'service_line' },
+                  { label: 'Status', col: 'status' },
+                ].map(({ label, col }) => (
+                  <th key={label} onClick={col ? () => { if (sortCol === col) { setSortDir(d => d === 'asc' ? 'desc' : 'asc') } else { setSortCol(col); setSortDir('asc') } } : undefined}
+                    style={col ? { cursor: 'pointer', userSelect: 'none' } : undefined}>
+                    {label}{sortCol === col ? (sortDir === 'asc' ? ' ▲' : ' ▼') : ''}
+                  </th>
+                ))}
               </tr>
             </thead>
             <tbody>
-              {filtered.map(c => (
+              {clients.map(c => (
                 <tr key={c.id} onClick={() => setSelected(c)} onKeyDown={e => e.key === 'Enter' && setSelected(c)} tabIndex={0} style={{ cursor: 'pointer' }}>
                   <td className="clients-name">{c.contact_name}</td>
                   <td>{c.business_name || '—'}</td>
@@ -526,7 +545,7 @@ export default function Clients() {
       )}
 
       {toast && <div className="toast">{toast}</div>}
-      {showAdd && <AddClientModal onClose={() => setShowAdd(false)} onSaved={() => { loadClients(); showToast('Client added') }} fromDeal={location.state?.fromDeal} />}
+      {showAdd && <AddClientModal onClose={() => setShowAdd(false)} onSaved={() => { loadClients(); showToast('Client added') }} fromDeal={initialFromDeal} />}
       {selected && <ClientDetail client={selected} onClose={() => setSelected(null)} onUpdated={() => { loadClients(); setSelected(null); showToast('Client updated') }} onDeleted={() => { loadClients(); setSelected(null); showToast('Client deleted') }} navigate={navigate} />}
     </div>
   )

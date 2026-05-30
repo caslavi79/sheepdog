@@ -1038,6 +1038,8 @@ a { color: inherit; text-decoration: none; }
 /* MORE BUTTON + MENU — hidden on desktop */
 .sidebar-more-btn { display: none; }
 .sidebar-more-menu { display: none; }
+.sidebar-more-backdrop { display: none; }
+.cal-mobile-only { display: none; }
 
 /* BODY SCROLL LOCK FOR MODALS */
 body.modal-open { overflow: hidden; }
@@ -1103,6 +1105,15 @@ body.modal-open { overflow: hidden; }
 .cal-event:hover { background: var(--dark); }
 .cal-event-more { font-size: 10px; color: var(--steel); font-family: var(--fh); font-weight: 600; padding: 0 6px; }
 
+/* Calendar agenda (mobile) */
+.cal-agenda-day { margin-bottom: 16px; }
+.cal-agenda-date { font-family: var(--fh); font-size: 12px; font-weight: 700; letter-spacing: 1px; text-transform: uppercase; color: var(--steel); padding: 8px 0 6px; border-bottom: 1px solid rgba(255,255,255,0.06); margin-bottom: 6px; }
+.cal-agenda-date--today { color: var(--white); }
+.cal-agenda-event { padding: 10px 12px; margin-bottom: 4px; border-radius: 6px; background: var(--char); border-left: 3px solid; cursor: pointer; }
+.cal-agenda-event:active { background: var(--dark); }
+.cal-agenda-event-title { font-size: 14px; font-weight: 600; }
+.cal-agenda-event-time { font-size: 12px; color: var(--steel); margin-top: 2px; }
+
 /* CONTRACT EDITOR */
 .contract-editor { border: 1px solid rgba(255,255,255,0.08); border-radius: 8px; margin-top: 24px; overflow: hidden; }
 .contract-editor-header { display: flex; justify-content: space-between; align-items: center; padding: 16px 20px; background: var(--char); border-bottom: 1px solid rgba(255,255,255,0.06); }
@@ -1135,6 +1146,7 @@ body.modal-open { overflow: hidden; }
     height: auto;
     flex-direction: row;
     padding: 0;
+    padding-bottom: env(safe-area-inset-bottom, 0px);
     border-right: none;
     border-top: 1px solid rgba(255,255,255,0.1);
     z-index: 50;
@@ -1272,6 +1284,13 @@ body.modal-open { overflow: hidden; }
     text-align: left;
     cursor: pointer;
     margin-top: 2px;
+  }
+  .sidebar-more-backdrop {
+    display: block;
+    position: fixed;
+    inset: 0;
+    z-index: 59;
+    background: transparent;
   }
 
   /* -- MAIN CONTENT -- */
@@ -1446,9 +1465,8 @@ body.modal-open { overflow: hidden; }
   .contract-editor-body { grid-template-columns: 1fr; }
   .contract-editor-form { max-height: none; border-right: none; border-bottom: 1px solid rgba(255,255,255,0.06); }
   .contract-editor-preview { min-height: 400px; }
-  .cal-cell { min-height: 72px; padding: 4px; }
-  .cal-cell-date { font-size: 11px; }
-  .cal-event { font-size: 10px; padding: 1px 4px; }
+  .cal-desktop-only { display: none; }
+  .cal-mobile-only { display: block; }
   .cal-nav-title { font-size: 15px; }
 
   /* -- FONT SIZE FLOOR -- */

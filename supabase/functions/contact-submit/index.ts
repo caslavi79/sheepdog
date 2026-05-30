@@ -269,6 +269,8 @@ Deno.serve(async (req) => {
         stage: "lead",
         source: "contact_form",
         notes: message,
+        last_activity: new Date().toISOString(),
+        updated_at: new Date().toISOString(),
       });
 
     if (pipelineError) {
@@ -292,9 +294,11 @@ Deno.serve(async (req) => {
     const confirmHtml = `
       <div style="font-family:sans-serif;max-width:560px;margin:0 auto;color:#2A2A2A">
         <h2 style="color:#0C0C0C;margin-bottom:4px">Thanks for reaching out, ${safeName}.</h2>
-        <p style="color:#4A4A4A;font-size:16px;line-height:1.6">We received your request and will be in touch within 24 hours. If you need immediate assistance, feel free to call or text us anytime.</p>
-        <p style="color:#4A4A4A;font-size:16px;line-height:1.6">Need to add more details or update your request? Just reply to this email.</p>
-        <p style="font-size:20px;font-weight:bold;margin:24px 0"><a href="tel:9792040945" style="color:#0C0C0C;text-decoration:none">📞 (979) 204-0945</a></p>
+        <p style="color:#4A4A4A;font-size:16px;line-height:1.6">We got your request. Someone from our team will give you a call within 24 hours. If you need us sooner, call or text anytime.</p>
+        <p style="font-size:20px;font-weight:bold;margin:24px 0"><a href="tel:9792040945" style="color:#0C0C0C;text-decoration:none">&#128222; (979) 204-0945</a></p>
+        <div style="background:#F6F6F4;border-left:4px solid #0C0C0C;padding:16px 20px;margin:24px 0;border-radius:0 6px 6px 0">
+          <p style="color:#4A4A4A;font-size:15px;line-height:1.6;margin:0">If there's anything else you'd like us to know that you didn't include in your submission, just reply to this email. The more context we have before we call, the better we can help.</p>
+        </div>
         <hr style="border:none;border-top:1px solid #D0D0D0;margin:24px 0">
         <h3 style="color:#6B6B6B;font-size:12px;text-transform:uppercase;letter-spacing:2px;margin-bottom:12px">Your Submission Summary</h3>
         <table style="width:100%;font-size:15px;color:#4A4A4A;line-height:1.8">

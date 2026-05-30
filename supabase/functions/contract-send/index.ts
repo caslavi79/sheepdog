@@ -20,9 +20,28 @@ function escapeHtml(str: string): string {
   return str.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#039;");
 }
 
+const ALLOWED_ORIGINS = [
+  "https://app.sheepdogtexas.com",
+  "http://localhost:5173",
+  "http://localhost:4173",
+];
+
+function getCorsHeaders(req: Request) {
+  const origin = req.headers.get("Origin") || "";
+  const allowedOrigin = ALLOWED_ORIGINS.includes(origin) ? origin : ALLOWED_ORIGINS[0];
+  return {
+    "Access-Control-Allow-Origin": allowedOrigin,
+    "Access-Control-Allow-Methods": "POST, OPTIONS",
+    "Access-Control-Allow-Headers": "Content-Type, Authorization",
+    "Vary": "Origin",
+  };
+}
+
 Deno.serve(async (req: Request) => {
+  const corsHeaders = getCorsHeaders(req);
+
   if (req.method === "OPTIONS") {
-    return new Response(null, { status: 200, headers: { "Access-Control-Allow-Origin": "*", "Access-Control-Allow-Methods": "POST, OPTIONS", "Access-Control-Allow-Headers": "Content-Type, Authorization" } });
+    return new Response(null, { status: 200, headers: corsHeaders });
   }
 
   if (req.method !== "POST") {
@@ -30,14 +49,27 @@ Deno.serve(async (req: Request) => {
   }
 
   try {
-    const { contract_id } = await req.json();
-    if (!contract_id) {
-      return new Response(JSON.stringify({ success: false, error: "contract_id is required" }), {
-        status: 400, headers: { "Content-Type": "application/json" },
+    // Require authenticated user
+    const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY);
+    const authHeader = req.headers.get("Authorization");
+    if (!authHeader?.startsWith("Bearer ")) {
+      return new Response(JSON.stringify({ success: false, error: "Authorization required" }), {
+        status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+    const { data: { user } } = await supabase.auth.getUser(authHeader.slice(7));
+    if (!user) {
+      return new Response(JSON.stringify({ success: false, error: "Invalid or expired token" }), {
+        status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }
 
-    const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY);
+    const { contract_id } = await req.json();
+    if (!contract_id) {
+      return new Response(JSON.stringify({ success: false, error: "contract_id is required" }), {
+        status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
 
     const { data: contract, error } = await supabase
       .from("contracts")
@@ -47,31 +79,31 @@ Deno.serve(async (req: Request) => {
 
     if (error || !contract) {
       return new Response(JSON.stringify({ success: false, error: "Contract not found" }), {
-        status: 404, headers: { "Content-Type": "application/json" },
+        status: 404, headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }
 
     if (!contract.signer_email) {
       return new Response(JSON.stringify({ success: false, error: "No signer email set" }), {
-        status: 400, headers: { "Content-Type": "application/json" },
+        status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }
 
     if (!contract.filled_html) {
       return new Response(JSON.stringify({ success: false, error: "Contract has no content. Fill in the fields first." }), {
-        status: 400, headers: { "Content-Type": "application/json" },
+        status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }
 
     if (contract.status === "signed") {
       return new Response(JSON.stringify({ success: false, error: "Contract is already signed" }), {
-        status: 400, headers: { "Content-Type": "application/json" },
+        status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }
 
     if (!SIGNING_BASE_URL) {
       return new Response(JSON.stringify({ success: false, error: "Signing URL not configured" }), {
-        status: 500, headers: { "Content-Type": "application/json" },
+        status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }
 
@@ -129,16 +161,17 @@ Deno.serve(async (req: Request) => {
     if (!emailRes.ok) {
       console.error("Resend error:", JSON.stringify(emailResult));
       return new Response(JSON.stringify({ success: false, error: "Failed to send email" }), {
-        status: 500, headers: { "Content-Type": "application/json" },
+        status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }
 
     return new Response(JSON.stringify({ success: true, emailResult }), {
-      status: 200, headers: { "Content-Type": "application/json" },
+      status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
   } catch (err) {
-    return new Response(JSON.stringify({ error: err.message }), {
-      status: 500, headers: { "Content-Type": "application/json" },
+    console.error("contract-send error:", err);
+    return new Response(JSON.stringify({ error: "Internal error" }), {
+      status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
   }
 });

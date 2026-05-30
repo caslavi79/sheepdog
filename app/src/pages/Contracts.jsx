@@ -63,7 +63,7 @@ function TemplatePicker({ onSelect, onClose }) {
 /* ═══════════════════════════════════════════════════════════
    CONTRACT EDITOR (side-by-side)
    ═══════════════════════════════════════════════════════════ */
-function ContractEditor({ template, contract, clients, onSaved, onDeleted, onSent, onClose, preselectedClientId, preselectedStaffId }) {
+function ContractEditor({ template, contract, clients, onSaved, onDeleted, onSent, onClose, preselectedClientId, preselectedStaffId, onDirtyChange }) {
   const [templateHtml, setTemplateHtml] = useState('')
   const [fields, setFields] = useState([])
   const [values, setValues] = useState(contract?.field_values || {})
@@ -83,6 +83,9 @@ function ContractEditor({ template, contract, clients, onSaved, onDeleted, onSen
   const [contractStatus, setContractStatus] = useState(contract?.status || 'draft')
   const [savedSinceEdit, setSavedSinceEdit] = useState(true)
   const editorRef = useRef(null)
+
+  // Notify parent when dirty state changes
+  useEffect(() => { if (onDirtyChange) onDirtyChange(!savedSinceEdit) }, [savedSinceEdit, onDirtyChange])
 
   // Load staff member for auto-fill when staff_id is set
   useEffect(() => {
@@ -187,7 +190,7 @@ function ContractEditor({ template, contract, clients, onSaved, onDeleted, onSen
     const payload = {
       client_id: selectedClient || null, staff_id: staffId || null,
       template_name: title, title,
-      status: 'draft', field_values: values, filled_html: filledHtml, signer_email: signerEmail || null,
+      status: contractId ? (contractStatus || 'draft') : 'draft', field_values: values, filled_html: filledHtml, signer_email: signerEmail || null,
     }
     if (contractId) {
       const { error: err } = await supabase.from('contracts').update({ ...payload, updated_at: new Date().toISOString() }).eq('id', contractId)
@@ -401,13 +404,34 @@ export default function Contracts() {
   const fireToast = useToast()
   const showToast = (msg) => fireToast(setToast, msg)
 
+  const editorDirtyRef = useRef(false)
+  const [editorDirty, setEditorDirty] = useState(false)
+
+  const confirmIfDirty = () => {
+    if (editorDirtyRef.current) {
+      return window.confirm('You have unsaved changes. Discard them?')
+    }
+    return true
+  }
+
+  // Guard browser close/refresh when editor has unsaved changes
+  useEffect(() => {
+    const handler = (e) => {
+      if (showEditor && editorDirtyRef.current) { e.preventDefault(); e.returnValue = '' }
+    }
+    window.addEventListener('beforeunload', handler)
+    return () => { window.removeEventListener('beforeunload', handler); window.__unsavedChangesGuard = false }
+  }, [showEditor])
+
   const [loadError, setLoadError] = useState('')
+  const [sortCol, setSortCol] = useState('created_at')
+  const [sortDir, setSortDir] = useState('desc')
   const loadContracts = useCallback(async () => {
     setLoadError('')
-    const { data, error } = await supabase.from('contracts').select('*').order('created_at', { ascending: false })
+    const { data, error } = await supabase.from('contracts').select('*').order(sortCol, { ascending: sortDir === 'asc' })
     if (error) { setLoadError('Failed to load contracts'); if (import.meta.env.DEV) console.error('Load contracts:', error.message); return }
     setContracts(data || [])
-  }, [])
+  }, [sortCol, sortDir])
 
   const loadClients = useCallback(async () => {
     const { data } = await supabase.from('clients').select('id, contact_name, business_name, email, phone').order('business_name')
@@ -459,6 +483,7 @@ export default function Contracts() {
   })
 
   const handleSelectTemplate = (t) => {
+    if (showEditor && !confirmIfDirty()) return
     setEditorTemplate(t)
     setEditorContract(null)
     setShowEditor(true)
@@ -466,6 +491,7 @@ export default function Contracts() {
   }
 
   const handleSelectContract = (c) => {
+    if (showEditor && !confirmIfDirty()) return
     setEditorContract(c)
     setEditorTemplate(null)
     setShowEditor(true)
@@ -477,6 +503,9 @@ export default function Contracts() {
   }
 
   const handleCloseEditor = () => {
+    editorDirtyRef.current = false
+    setEditorDirty(false)
+    window.__unsavedChangesGuard = false
     setShowEditor(false)
     setEditorTemplate(null)
     setEditorContract(null)
@@ -498,7 +527,7 @@ export default function Contracts() {
           <h1>Contracts</h1>
           <p className="clients-subtitle">Fill, send, and track contracts and agreements</p>
         </div>
-        <button className="clients-add-btn" onClick={() => setShowPicker(true)}>+ New Contract</button>
+        <button className="clients-add-btn" onClick={() => { if (showEditor && !confirmIfDirty()) return; setShowPicker(true) }}>+ New Contract</button>
       </div>
 
       <div className="hub-stats" style={{ marginBottom: 24 }}>
@@ -527,7 +556,21 @@ export default function Contracts() {
       ) : (
         <div className="clients-table-wrap">
           <table className="clients-table">
-            <thead><tr><th>Template</th><th>Client</th><th>Signer</th><th>Status</th><th>Sent</th><th>Signed</th></tr></thead>
+            <thead><tr>
+              {[
+                { label: 'Template', col: 'title' },
+                { label: 'Client', col: null },
+                { label: 'Signer', col: null },
+                { label: 'Status', col: 'status' },
+                { label: 'Sent', col: 'sent_at' },
+                { label: 'Signed', col: 'signed_at' },
+              ].map(({ label, col }) => (
+                <th key={label} onClick={col ? () => { if (sortCol === col) { setSortDir(d => d === 'asc' ? 'desc' : 'asc') } else { setSortCol(col); setSortDir('asc') } } : undefined}
+                  style={col ? { cursor: 'pointer', userSelect: 'none' } : undefined}>
+                  {label}{sortCol === col ? (sortDir === 'asc' ? ' ▲' : ' ▼') : ''}
+                </th>
+              ))}
+            </tr></thead>
             <tbody>
               {filtered.map(c => (
                 <tr key={c.id} onClick={() => handleSelectContract(c)} onKeyDown={e => e.key === 'Enter' && handleSelectContract(c)} tabIndex={0} style={{ cursor: 'pointer' }}>
@@ -547,6 +590,7 @@ export default function Contracts() {
       {/* Editor */}
       {showEditor && (
         <ContractEditor
+          key={editorContract?.id || editorTemplate?.file || 'new'}
           template={editorTemplate}
           contract={editorContract}
           clients={clients}
@@ -556,6 +600,7 @@ export default function Contracts() {
           onClose={handleCloseEditor}
           preselectedClientId={preselectedClientId}
           preselectedStaffId={preselectedStaffId}
+          onDirtyChange={(dirty) => { editorDirtyRef.current = dirty; setEditorDirty(dirty); window.__unsavedChangesGuard = dirty }}
         />
       )}
 

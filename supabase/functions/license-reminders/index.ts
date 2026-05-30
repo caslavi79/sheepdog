@@ -66,7 +66,7 @@ Deno.serve(async (req: Request) => {
       );
 
       // Send reminder if expiration matches one of our reminder days
-      if (REMINDER_DAYS.includes(daysLeft) || daysLeft < 0) {
+      if (REMINDER_DAYS.includes(daysLeft) || daysLeft === 0 || daysLeft < 0) {
         const staffName = lic.staff?.name || "Unknown Staff";
         reminders.push({
           staffName,

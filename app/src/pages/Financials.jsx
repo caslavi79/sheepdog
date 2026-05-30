@@ -130,15 +130,24 @@ function StaffAssignmentsEditor({ items, onChange, staffRoster, payRateDefaults,
         if (match) {
           updated.staff_id = match.id
           updated.role = updated.role || match.role || ''
-          updated.pay_rate = updated.pay_rate || match.default_pay_rate || ''
+          let rate = match.default_pay_rate || ''
+          // Fall back to pay_rate_defaults if roster member has no default rate
+          if (!rate && updated.role) {
+            const def = payRateDefaults.find(d => d.role.toLowerCase() === updated.role.toLowerCase() && d.service_line === serviceLine)
+            if (def) rate = def.rate
+          }
+          updated.pay_rate = updated.pay_rate || rate
         } else {
           updated.staff_id = null
         }
       }
-      // Auto-fill pay rate from defaults when role changes
-      if (field === 'role' && !updated.pay_rate) {
+      // Auto-fill pay rate from defaults when role changes (only if rate is empty or zero)
+      if (field === 'role' && (!updated.pay_rate || parseFloat(updated.pay_rate) === 0)) {
         const def = payRateDefaults.find(d => d.role.toLowerCase() === val.toLowerCase() && d.service_line === serviceLine)
-        if (def) updated.pay_rate = def.rate
+        if (def) {
+          updated.pay_rate = def.rate
+          updated.pay_total = Math.round((parseFloat(updated.hours) || 0) * (parseFloat(def.rate) || 0) * 100) / 100
+        }
       }
       if (field === 'hours' || field === 'pay_rate') {
         updated.pay_total = Math.round((parseFloat(updated.hours) || 0) * (parseFloat(updated.pay_rate) || 0) * 100) / 100
@@ -151,8 +160,14 @@ function StaffAssignmentsEditor({ items, onChange, staffRoster, payRateDefaults,
   const selectRosterMember = (i, member) => {
     const next = items.map((item, idx) => {
       if (idx !== i) return item
-      const payRate = member.default_pay_rate || ''
-      return { ...item, name: member.name, staff_id: member.id, role: member.role || item.role, pay_rate: payRate, pay_total: Math.round((parseFloat(item.hours) || 0) * (parseFloat(payRate) || 0) * 100) / 100 }
+      const role = member.role || item.role
+      let payRate = member.default_pay_rate || ''
+      // Fall back to pay_rate_defaults if roster member has no default rate
+      if (!payRate && role) {
+        const def = payRateDefaults.find(d => d.role.toLowerCase() === role.toLowerCase() && d.service_line === serviceLine)
+        if (def) payRate = def.rate
+      }
+      return { ...item, name: member.name, staff_id: member.id, role, pay_rate: payRate, pay_total: Math.round((parseFloat(item.hours) || 0) * (parseFloat(payRate) || 0) * 100) / 100 }
     })
     onChange(next)
     setFocusIdx(null)
@@ -428,7 +443,12 @@ function AddInvoiceModal({ onClose, onSaved, clients, onGoToClients, staffRoster
     if (err) { setError(err.message); return }
     // Link invoice back to event if created from Scheduling
     if (fromEvent?.event_id && newInvoice?.id) {
-      await supabase.from('events').update({ invoice_id: newInvoice.id, updated_at: new Date().toISOString() }).eq('id', fromEvent.event_id)
+      const { error: linkErr } = await supabase.from('events').update({ invoice_id: newInvoice.id, updated_at: new Date().toISOString() }).eq('id', fromEvent.event_id)
+      if (linkErr) {
+        if (import.meta.env.DEV) console.error('Event→invoice link:', linkErr.message)
+        setError(`Invoice saved, but couldn't link it back to the event (${linkErr.message}). The invoice is visible in Financials.`)
+        return
+      }
     }
     onSaved(); onClose()
   }
@@ -568,15 +588,27 @@ function InvoiceDetail({ invoice, clients, onClose, onUpdated, onDeleted, showTo
 
   const handleDelete = async () => {
     // Clear invoice_id from any linked events before deleting
-    await supabase.from('events').update({ invoice_id: null, updated_at: new Date().toISOString() }).eq('invoice_id', invoice.id)
+    const { error: unlinkErr } = await supabase.from('events').update({ invoice_id: null, updated_at: new Date().toISOString() }).eq('invoice_id', invoice.id)
+    if (unlinkErr) {
+      if (import.meta.env.DEV) console.error('Unlink events before invoice delete:', unlinkErr.message)
+      showToast(`Couldn't unlink events: ${unlinkErr.message}`)
+      setConfirmDelete(false)
+      return
+    }
     const { error } = await supabase.from('invoices').delete().eq('id', invoice.id)
-    if (error) { if (import.meta.env.DEV) console.error('Delete error:', error.message); setConfirmDelete(false); return }
+    if (error) {
+      if (import.meta.env.DEV) console.error('Delete error:', error.message)
+      showToast(`Delete failed: ${error.message}`)
+      setConfirmDelete(false)
+      return
+    }
     onDeleted(); onClose()
   }
 
   const handleMarkSent = async () => {
     const { error } = await supabase.from('invoices').update({ status: 'sent', updated_at: new Date().toISOString() }).eq('id', invoice.id)
-    if (!error) { showToast('Marked as Sent'); onUpdated(); onClose() }
+    if (error) { showToast(`Mark Sent failed: ${error.message}`); return }
+    showToast('Marked as Sent'); onUpdated(); onClose()
   }
 
   const handleMarkPaid = async () => {
@@ -584,7 +616,8 @@ function InvoiceDetail({ invoice, clients, onClose, onUpdated, onDeleted, showTo
       status: 'paid', payment_date: new Date().toISOString().split('T')[0],
       payment_method: payMethod, updated_at: new Date().toISOString()
     }).eq('id', invoice.id)
-    if (!error) { showToast('Marked as Paid'); onUpdated(); onClose() }
+    if (error) { showToast(`Mark Paid failed: ${error.message}`); return }
+    showToast('Marked as Paid'); onUpdated(); onClose()
   }
 
   const handleQuickAddDone = (newStaff) => {
@@ -884,7 +917,7 @@ export default function Financials() {
   const [page, setPage] = useState(0)
   const [totalCount, setTotalCount] = useState(0)
   const [search, setSearch] = useState('')
-  const [filterStatus, setFilterStatus] = useState('')
+  const [filterStatus, setFilterStatus] = useState(() => location.state?.filterStatus || '')
   const [filterLine, setFilterLine] = useState('')
   const [selected, setSelected] = useState(null)
   const [showAdd, setShowAdd] = useState(false)
@@ -959,8 +992,10 @@ export default function Financials() {
   useEffect(() => { setPage(0) }, [filterStatus, filterLine])
 
   // Open AddInvoiceModal when arriving from Scheduling or Clients
+  const [initialFromEvent] = useState(() => location.state?.fromEvent || null)
+  const [initialFromClient] = useState(() => location.state?.fromClient || null)
   useEffect(() => {
-    if (location.state?.fromEvent || location.state?.fromClient) {
+    if (initialFromEvent || initialFromClient) {
       setShowAdd(true)
       // Clear state so modal doesn't reopen on refresh
       navigate(location.pathname, { replace: true, state: {} })
@@ -1264,7 +1299,7 @@ export default function Financials() {
       </>
       )}
 
-      {showAdd && <AddInvoiceModal onClose={() => setShowAdd(false)} onSaved={handleSaved} clients={clients} onGoToClients={() => { setShowAdd(false); navigate('/clients') }} staffRoster={staffRoster} payRateDefaults={payRateDefaults} licenses={licenses} onStaffRefresh={loadStaff} fromEvent={location.state?.fromEvent} fromClient={location.state?.fromClient} />}
+      {showAdd && <AddInvoiceModal onClose={() => setShowAdd(false)} onSaved={handleSaved} clients={clients} onGoToClients={() => { setShowAdd(false); navigate('/clients') }} staffRoster={staffRoster} payRateDefaults={payRateDefaults} licenses={licenses} onStaffRefresh={loadStaff} fromEvent={initialFromEvent} fromClient={initialFromClient} />}
       {selected && <InvoiceDetail invoice={selected} clients={clients} onClose={() => setSelected(null)} onUpdated={handleUpdated} onDeleted={handleDeleted} showToast={showToast} staffRoster={staffRoster} payRateDefaults={payRateDefaults} licenses={licenses} onStaffRefresh={loadStaff} />}
       {showPayRates && <PayRateDefaultsModal onClose={() => setShowPayRates(false)} payRateDefaults={payRateDefaults} onRefresh={loadPayRates} showToast={showToast} />}
       {toast && <div className="toast">{toast}</div>}

@@ -14,11 +14,23 @@ const RESEND_API_KEY = requireEnv("RESEND_API_KEY");
 const BRAND_FROM_EMAIL = Deno.env.get("BRAND_FROM_EMAIL") || "noreply@example.com";
 const BRAND_REPLY_TO = Deno.env.get("BRAND_REPLY_TO") || "";
 
-const corsHeaders = {
-  "Access-Control-Allow-Origin": "*",
-  "Access-Control-Allow-Methods": "POST, OPTIONS",
-  "Access-Control-Allow-Headers": "Content-Type, Authorization",
-};
+const ALLOWED_ORIGINS = [
+  "https://app.sheepdogtexas.com",
+  "http://localhost:5173",
+  "http://localhost:4173",
+];
+
+function getCorsHeaders(req: Request) {
+  const origin = req.headers.get("Origin") || "";
+  // Allow matching origins; fall back to the production origin so Supabase proxy doesn't strip CORS
+  const allowedOrigin = ALLOWED_ORIGINS.includes(origin) ? origin : ALLOWED_ORIGINS[0];
+  return {
+    "Access-Control-Allow-Origin": allowedOrigin,
+    "Access-Control-Allow-Methods": "POST, OPTIONS",
+    "Access-Control-Allow-Headers": "Content-Type, Authorization",
+    "Vary": "Origin",
+  };
+}
 
 // ---------------------------------------------------------------------------
 // Types
@@ -729,8 +741,16 @@ async function executeActions(
   const results: Array<{ table: string; id: string; success: boolean; error?: string; data: Record<string, unknown> }> = [];
   const refMap = new Map<string, string[]>();
 
+  const ALLOWED_TABLES = ["pipeline", "clients", "events", "invoices", "contracts", "staff", "licenses"];
+
   for (const action of actions) {
     const { table, data: rawData } = action;
+
+    // Reject writes to tables not in the allowlist
+    if (!ALLOWED_TABLES.includes(table)) {
+      results.push({ table, id: "", success: false, error: `Table '${table}' is not allowed`, data: rawData });
+      continue;
+    }
 
     // Resolve cross-references
     const data = resolveRefs(rawData, refMap);
@@ -986,6 +1006,8 @@ async function handleIntake(
 // ---------------------------------------------------------------------------
 
 Deno.serve(async (req: Request) => {
+  const corsHeaders = getCorsHeaders(req);
+
   if (req.method === "OPTIONS") {
     return new Response(null, { status: 200, headers: corsHeaders });
   }
@@ -1010,15 +1032,23 @@ Deno.serve(async (req: Request) => {
 
     const supabase = getSupabase();
 
-    // Extract user ID from auth header (optional — edge function uses service role,
-    // but we pass the user's JWT for identity)
-    let userId = "anonymous";
+    // Require valid auth — reject anonymous callers
     const authHeader = req.headers.get("Authorization");
-    if (authHeader?.startsWith("Bearer ")) {
-      const token = authHeader.slice(7);
-      const { data: { user } } = await supabase.auth.getUser(token);
-      if (user) userId = user.id;
+    if (!authHeader?.startsWith("Bearer ")) {
+      return new Response(JSON.stringify({ error: "Authorization required" }), {
+        status: 401,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
     }
+    const token = authHeader.slice(7);
+    const { data: { user } } = await supabase.auth.getUser(token);
+    if (!user) {
+      return new Response(JSON.stringify({ error: "Invalid or expired token" }), {
+        status: 401,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+    const userId = user.id;
 
     let result: Record<string, unknown>;
 
@@ -1068,7 +1098,7 @@ Deno.serve(async (req: Request) => {
     });
   } catch (err) {
     console.error("claude-assistant error:", err);
-    return new Response(JSON.stringify({ error: err.message || "Internal error" }), {
+    return new Response(JSON.stringify({ error: "Internal error" }), {
       status: 500,
       headers: { ...corsHeaders, "Content-Type": "application/json" },
     });

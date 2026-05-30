@@ -120,6 +120,18 @@ Deno.serve(async (req: Request) => {
         });
       }
 
+      // Input size limits (public endpoint)
+      if (typeof signer_name !== "string" || signer_name.length > 200) {
+        return new Response(JSON.stringify({ success: false, error: "Signer name must be 200 characters or less" }), {
+          status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" },
+        });
+      }
+      if (typeof signature_data !== "string" || signature_data.length > 500_000) {
+        return new Response(JSON.stringify({ success: false, error: "Signature data exceeds maximum size" }), {
+          status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" },
+        });
+      }
+
       const signerIp = req.headers.get("x-real-ip") || req.headers.get("cf-connecting-ip") || req.headers.get("x-forwarded-for")?.split(",")[0]?.trim() || "unknown";
 
       // Atomic update: only sign if still in signable state (prevents double-sign race)

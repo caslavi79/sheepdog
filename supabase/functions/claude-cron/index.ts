@@ -36,18 +36,30 @@ function escapeHtml(str: string): string {
   return str.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
 }
 
+// All date calculations anchored to Central Time (America/Chicago)
+function nowCT(): Date {
+  return new Date(new Date().toLocaleString("en-US", { timeZone: "America/Chicago" }));
+}
+
+function todayCTString(): string {
+  const ct = nowCT();
+  return ct.getFullYear() + "-" + String(ct.getMonth() + 1).padStart(2, "0") + "-" + String(ct.getDate()).padStart(2, "0");
+}
+
 function daysSince(dateStr: string): number {
-  const d = new Date(dateStr + (dateStr.includes("T") ? "" : "T00:00:00Z"));
-  const now = new Date();
-  const today = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate()));
-  return Math.floor((today.getTime() - d.getTime()) / 86400000);
+  const [y, m, d] = (dateStr.includes("T") ? dateStr.split("T")[0] : dateStr).split("-").map(Number);
+  const target = new Date(y, m - 1, d);
+  const ct = nowCT();
+  const today = new Date(ct.getFullYear(), ct.getMonth(), ct.getDate());
+  return Math.floor((today.getTime() - target.getTime()) / 86400000);
 }
 
 function daysUntil(dateStr: string): number {
-  const d = new Date(dateStr + "T00:00:00Z");
-  const now = new Date();
-  const today = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate()));
-  return Math.floor((d.getTime() - today.getTime()) / 86400000);
+  const [y, m, d] = dateStr.split("-").map(Number);
+  const target = new Date(y, m - 1, d);
+  const ct = nowCT();
+  const today = new Date(ct.getFullYear(), ct.getMonth(), ct.getDate());
+  return Math.floor((target.getTime() - today.getTime()) / 86400000);
 }
 
 function fmtMoney(val: number): string {
@@ -56,7 +68,7 @@ function fmtMoney(val: number): string {
 
 // Pick variant based on day of week
 function getDayVariant(): "a" | "b" | "c" {
-  const day = new Date().getDay(); // 0=Sun, 1=Mon, ...
+  const day = nowCT().getDay(); // 0=Sun, 1=Mon, ...
   if (day === 1) return "b"; // Monday
   if (day === 4 || day === 5) return "c"; // Thu/Fri
   return "a"; // Default
@@ -173,8 +185,8 @@ async function queueEmail(
   subject: string,
   htmlBody: string
 ): Promise<boolean> {
-  // Idempotency: check if we already sent this trigger+id+recipient today
-  const today = new Date().toISOString().slice(0, 10);
+  // Idempotency: check if we already sent this trigger+id+recipient today (CT)
+  const today = todayCTString();
 
   if (triggerId) {
     const { data: existingWithId } = await supabase
@@ -754,9 +766,9 @@ async function checkOverdueInvoices(supabase: ReturnType<typeof createClient>): 
 }
 
 async function checkTomorrowEvents(supabase: ReturnType<typeof createClient>): Promise<number> {
-  const tomorrow = new Date();
-  tomorrow.setDate(tomorrow.getDate() + 1);
-  const tomorrowStr = tomorrow.toISOString().slice(0, 10);
+  const ct = nowCT();
+  ct.setDate(ct.getDate() + 1);
+  const tomorrowStr = ct.getFullYear() + "-" + String(ct.getMonth() + 1).padStart(2, "0") + "-" + String(ct.getDate()).padStart(2, "0");
 
   const { data: events } = await supabase
     .from("events")
@@ -806,8 +818,8 @@ async function checkTomorrowEvents(supabase: ReturnType<typeof createClient>): P
 }
 
 async function checkWeeklyBriefing(supabase: ReturnType<typeof createClient>): Promise<number> {
-  // Only send on Mondays
-  const now = new Date();
+  // Only send on Mondays (Central Time)
+  const now = nowCT();
   if (now.getDay() !== 1) return 0;
 
   const weekAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000).toISOString();

@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback, useMemo } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate, useLocation } from 'react-router-dom'
 import { supabase } from '../lib/supabase'
 import { useEscapeKey, useBodyLock, useToast } from '../lib/hooks'
 import { fmtDate, daysUntil, badgeStyle, COLORS } from '../lib/format'
@@ -17,7 +17,7 @@ const STAFF_STATUSES = ['active', 'inactive']
 const BG_CHECKS = ['none', 'pending', 'cleared']
 const LICENSE_TYPES = ['general', 'tabc']
 const DOC_TYPES = ['w9', 'agreement', 'other']
-const DOC_STATUSES = ['received', 'missing', 'expired']
+const DOC_STATUSES = ['received', 'pending', 'expired']
 
 function LicenseStatusBadge({ expirationDate }) {
   const days = daysUntil(expirationDate)
@@ -72,10 +72,14 @@ function StaffModal({ staff, onClose, onSaved }) {
       // Auto-create required contractor docs
       if (newStaff?.id) {
         const { error: docErr } = await supabase.from('contractor_docs').insert([
-          { staff_id: newStaff.id, doc_type: 'w9', status: 'missing' },
-          { staff_id: newStaff.id, doc_type: 'agreement', status: 'missing' },
+          { staff_id: newStaff.id, doc_type: 'w9', status: 'pending' },
+          { staff_id: newStaff.id, doc_type: 'agreement', status: 'pending' },
         ])
-        if (docErr && import.meta.env.DEV) console.error('Auto-create docs:', docErr.message)
+        if (docErr) {
+          if (import.meta.env.DEV) console.error('Auto-create docs:', docErr.message)
+          setError(`Staff saved, but couldn't create W-9/Agreement tracking rows (${docErr.message}). Add them from the Contractor Docs tab.`)
+          return
+        }
       }
     }
     onSaved(); onClose()
@@ -191,7 +195,7 @@ function DocModal({ doc, staffList, onClose, onSaved }) {
   useEscapeKey(onClose)
   useBodyLock()
   const isEdit = !!doc?.id
-  const [form, setForm] = useState({ staff_id: '', doc_type: 'w9', status: 'missing', signature_date: '', notes: '', file_url: '', ...doc })
+  const [form, setForm] = useState({ staff_id: '', doc_type: 'w9', status: 'pending', signature_date: '', notes: '', file_url: '', ...doc })
   const [saving, setSaving] = useState(false)
   const [uploading, setUploading] = useState(false)
   const [error, setError] = useState('')
@@ -276,16 +280,17 @@ function DocModal({ doc, staffList, onClose, onSaved }) {
    ═══════════════════════════════════════════════════════════ */
 export default function Compliance() {
   const navigate = useNavigate()
-  const [tab, setTab] = useState('roster')
+  const location = useLocation()
+  const [tab, setTab] = useState(() => location.state?.tab || 'roster')
   const [staff, setStaff] = useState([])
   const [licenses, setLicenses] = useState([])
   const [docs, setDocs] = useState([])
   const [loading, setLoading] = useState(true)
   const [search, setSearch] = useState('')
   const [filterLicenseType, setFilterLicenseType] = useState('')
-  const [filterLicenseStatus, setFilterLicenseStatus] = useState('')
+  const [filterLicenseStatus, setFilterLicenseStatus] = useState(() => location.state?.filterLicenseStatus || '')
   const [filterDocType, setFilterDocType] = useState('')
-  const [filterDocStatus, setFilterDocStatus] = useState('')
+  const [filterDocStatus, setFilterDocStatus] = useState(() => location.state?.filterDocStatus || '')
   const [staffPage, setStaffPage] = useState(0)
   const [licensePage, setLicensePage] = useState(0)
   const [docPage, setDocPage] = useState(0)
@@ -303,7 +308,7 @@ export default function Compliance() {
   // Stats
   const expiringCount = licenses.filter(l => { const d = daysUntil(l.expiration_date); return d !== null && d >= 0 && d <= 30 }).length
   const expiredCount = licenses.filter(l => { const d = daysUntil(l.expiration_date); return d !== null && d < 0 }).length
-  const missingDocs = docs.filter(d => d.status === 'missing').length
+  const missingDocs = docs.filter(d => d.status === 'pending').length
 
   const loadStaff = useCallback(async () => {
     const { data, error } = await supabase.from('staff').select('*').order('name')
@@ -339,7 +344,11 @@ export default function Compliance() {
       if (docErr) { if (import.meta.env.DEV) console.error('Delete staff docs:', docErr.message); showToast('Failed to remove staff docs'); return }
     }
     const { error } = await supabase.from(table).delete().eq('id', id)
-    if (error) { if (import.meta.env.DEV) console.error(`Delete ${table}:`, error.message); return }
+    if (error) {
+      if (import.meta.env.DEV) console.error(`Delete ${table}:`, error.message)
+      showToast(`Delete failed: ${error.message}`)
+      return
+    }
     setConfirmDeleteId(null); setConfirmDeleteType(null)
     if (table === 'staff') { loadStaff(); loadLicenses(); loadDocs(); showToast('Staff removed') }
     if (table === 'licenses') { loadLicenses(); showToast('License removed') }
@@ -351,11 +360,13 @@ export default function Compliance() {
     if (!window.confirm(`Delete ${bulkSelected.size} ${table === 'staff' ? 'staff members' : table === 'licenses' ? 'licenses' : 'documents'}?`)) return
     const ids = [...bulkSelected]
     if (table === 'staff') {
-      await supabase.from('licenses').delete().in('staff_id', ids)
-      await supabase.from('contractor_docs').delete().in('staff_id', ids)
+      const { error: licErr } = await supabase.from('licenses').delete().in('staff_id', ids)
+      if (licErr) { showToast(`Couldn't delete linked licenses: ${licErr.message}`); return }
+      const { error: docErr } = await supabase.from('contractor_docs').delete().in('staff_id', ids)
+      if (docErr) { showToast(`Couldn't delete linked docs: ${docErr.message}`); return }
     }
     const { error } = await supabase.from(table).delete().in('id', ids)
-    if (error) { showToast('Failed to delete some records'); return }
+    if (error) { showToast(`Failed to delete: ${error.message}`); return }
     setBulkSelected(new Set())
     if (table === 'staff') { loadStaff(); loadLicenses(); loadDocs() }
     if (table === 'licenses') { loadLicenses() }
@@ -388,17 +399,34 @@ export default function Compliance() {
       }
     }).filter(r => r.name)
     if (rows.length === 0) { showToast('No valid rows found'); return }
-    const { error } = await supabase.from('staff').insert(rows)
+    const { data: inserted, error } = await supabase.from('staff').insert(rows).select('id')
     if (error) { showToast(`Import failed: ${error.message}`); return }
+    // Auto-create contractor docs (w9 + agreement) for each imported staff member
+    if (inserted?.length) {
+      const docsToCreate = inserted.flatMap(s => [
+        { staff_id: s.id, doc_type: 'w9', status: 'pending' },
+        { staff_id: s.id, doc_type: 'agreement', status: 'pending' },
+      ])
+      const { error: docErr } = await supabase.from('contractor_docs').insert(docsToCreate)
+      if (docErr) {
+        if (import.meta.env.DEV) console.error('Auto-create docs:', docErr.message)
+        showToast(`Staff imported, but W-9/Agreement tracking rows failed: ${docErr.message}`)
+        loadStaff(); loadDocs()
+        e.target.value = ''
+        return
+      }
+    }
     loadStaff(); loadDocs(); showToast(`${rows.length} staff imported`)
     e.target.value = '' // Reset file input
   }
 
+  const [filterStaffStatus, setFilterStaffStatus] = useState(null)
   const filteredStaff = useMemo(() => staff.filter(s => {
+    if (filterStaffStatus && s.status !== filterStaffStatus) return false
     if (!search) return true
     const q = search.toLowerCase()
     return s.name.toLowerCase().includes(q) || (s.role || '').toLowerCase().includes(q) || (s.email || '').toLowerCase().includes(q)
-  }), [staff, search])
+  }), [staff, search, filterStaffStatus])
 
   const filteredLicenses = useMemo(() => licenses.filter(l => {
     if (filterLicenseType && l.license_type !== filterLicenseType) return false
@@ -458,6 +486,11 @@ export default function Compliance() {
         <>
           <div className="clients-toolbar">
             <input className="clients-search" placeholder="Search staff..." value={search} onChange={e => setSearch(e.target.value)} />
+            <select className="clients-filter" value={filterStaffStatus || ''} onChange={e => setFilterStaffStatus(e.target.value || null)}>
+              <option value="">All Statuses</option>
+              <option value="active">Active</option>
+              <option value="inactive">Inactive</option>
+            </select>
             {staff.length > 0 && <button className="modal-btn-cancel" style={{ fontSize: 12, padding: '6px 14px' }} onClick={() => {
               const rows = staff.map(s => [s.name, s.role || '', s.phone || '', s.email || '', s.status, s.background_check, s.default_pay_rate || ''])
               downloadCSV(rows, ['Name', 'Role', 'Phone', 'Email', 'Status', 'BG Check', 'Pay Rate'], `staff-roster-${new Date().toISOString().split('T')[0]}.csv`)

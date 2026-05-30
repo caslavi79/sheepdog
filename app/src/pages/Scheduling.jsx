@@ -61,10 +61,15 @@ function EventModal({ event, clients, staff, licenses, onClose, onSaved, onDelet
       // Update all future events in the same series
       if (updateSeries && event.placement_id) {
         const { start_time, end_time, staff_needed, staff_assigned, venue_name, service_line } = rest
-        await supabase.from('events').update({
+        const { error: seriesErr } = await supabase.from('events').update({
           start_time, end_time, staff_needed, staff_assigned, venue_name, service_line,
           updated_at: new Date().toISOString(),
         }).eq('placement_id', event.placement_id).gt('date', event.date).neq('status', 'completed').neq('status', 'cancelled')
+        if (seriesErr) {
+          if (import.meta.env.DEV) console.error('Series update:', seriesErr.message)
+          setError(`This event was saved, but the rest of the series couldn't be updated (${seriesErr.message}).`)
+          return
+        }
       }
     } else {
       const { error: err } = await supabase.from('events').insert([payload])
@@ -128,11 +133,13 @@ function EventModal({ event, clients, staff, licenses, onClose, onSaved, onDelet
           {/* Staff Assignment */}
           <label className="modal-field" style={{ marginTop: 8, marginBottom: 4 }}><span>Staff Assigned</span></label>
           {(form.staff_assigned || []).map((s, i) => {
-            const hasExpired = s.staff_id && licenses ? licenses.some(l => l.staff_id === s.staff_id && daysUntil(l.expiration_date) !== null && daysUntil(l.expiration_date) < 0) : false
+            const staffLicenses = s.staff_id && licenses ? licenses.filter(l => l.staff_id === s.staff_id && daysUntil(l.expiration_date) !== null) : []
+            const hasExpired = staffLicenses.some(l => daysUntil(l.expiration_date) < 0)
+            const hasExpiring = !hasExpired && staffLicenses.some(l => daysUntil(l.expiration_date) >= 0 && daysUntil(l.expiration_date) <= 30)
+            const borderColor = hasExpired ? COLORS.red : hasExpiring ? '#C9922E' : undefined
             return (
               <div key={i} className="line-items-row">
-                <input style={{ flex: 2 }} placeholder="Name" value={s.name} onChange={e => updateStaff(i, 'name', e.target.value)}
-                  {...(hasExpired ? { style: { flex: 2, borderColor: COLORS.red } } : { style: { flex: 2 } })} />
+                <input style={{ flex: 2, borderColor }} placeholder="Name" value={s.name} onChange={e => updateStaff(i, 'name', e.target.value)} />
                 <input style={{ flex: 1.5 }} placeholder="Role" value={s.role || ''} onChange={e => updateStaff(i, 'role', e.target.value)} />
                 <button type="button" className="line-items-remove" onClick={() => removeStaff(i)}>×</button>
               </div>
@@ -288,7 +295,7 @@ function getMonthDays(year, month) {
   return days
 }
 
-function dateStr(d) { return d.toISOString().split('T')[0] }
+function dateStr(d) { return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}` }
 
 /* ═══════════════════════════════════════════════════════════
    MAIN SCHEDULING PAGE
@@ -296,7 +303,7 @@ function dateStr(d) { return d.toISOString().split('T')[0] }
 export default function Scheduling() {
   const navigate = useNavigate()
   const location = useLocation()
-  const [tab, setTab] = useState('calendar')
+  const [tab, setTab] = useState(() => location.state?.tab || 'calendar')
   const [events, setEvents] = useState([])
   const [placements, setPlacements] = useState([])
   const [clients, setClients] = useState([])
@@ -321,9 +328,10 @@ export default function Scheduling() {
   const showToast = (msg) => fireToast(setToast, msg)
 
   // Open EventModal when arriving from Clients "New Event"
+  const [initialFromClient] = useState(() => location.state?.fromClient || null)
   useEffect(() => {
-    if (location.state?.fromClient) {
-      setShowEventModal({ client_id: location.state.fromClient.client_id })
+    if (initialFromClient) {
+      setShowEventModal({ client_id: initialFromClient.client_id })
       setTab('events')
       navigate(location.pathname, { replace: true, state: {} })
     }
@@ -491,7 +499,8 @@ export default function Scheduling() {
                 <span className="cal-nav-title">{monthLabel}</span>
                 <button className="cal-nav-btn" onClick={() => { if (calMonth === 11) { setCalMonth(0); setCalYear(y => y + 1) } else setCalMonth(m => m + 1) }}>→</button>
               </div>
-              <div className="cal-grid">
+              {/* Desktop: grid calendar */}
+              <div className="cal-grid cal-desktop-only">
                 {['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'].map(d => <div key={d} className="cal-header">{d}</div>)}
                 {calDays.map((day, i) => {
                   const ds = dateStr(day.date)
@@ -511,6 +520,32 @@ export default function Scheduling() {
                     </div>
                   )
                 })}
+              </div>
+              {/* Mobile: agenda list */}
+              <div className="cal-agenda cal-mobile-only">
+                {(() => {
+                  const agendaDays = calDays.filter(day => day.current && eventsByDate[dateStr(day.date)]?.length)
+                  if (agendaDays.length === 0) return <div style={{ color: 'var(--steel)', fontFamily: 'var(--fh)', fontSize: 13, padding: '24px 0', textAlign: 'center' }}>No events this month</div>
+                  return agendaDays.map(day => {
+                    const ds = dateStr(day.date)
+                    const dayEvents = eventsByDate[ds]
+                    const isToday = ds === dateStr(new Date())
+                    return (
+                      <div key={ds} className="cal-agenda-day">
+                        <div className={`cal-agenda-date${isToday ? ' cal-agenda-date--today' : ''}`}>
+                          {day.date.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' })}
+                        </div>
+                        {dayEvents.map(ev => (
+                          <div key={ev.id} className="cal-agenda-event" style={{ borderLeftColor: ev.service_line === 'events' ? COLORS.amber : COLORS.blue }}
+                            onClick={() => setShowEventModal(ev)}>
+                            <div className="cal-agenda-event-title">{ev.title || ev.venue_name || clientMap[ev.client_id] || 'Event'}</div>
+                            {ev.start_time && <div className="cal-agenda-event-time">{ev.start_time}{ev.end_time ? ` – ${ev.end_time}` : ''}</div>}
+                          </div>
+                        ))}
+                      </div>
+                    )
+                  })
+                })()}
               </div>
             </>
           )}
