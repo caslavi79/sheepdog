@@ -45,5 +45,17 @@
       <image:geo_location>Bryan-College Station, Texas, United States</image:geo_location>
     </image:image>
   </url>
+  <url>
+    <loc>https://sheepdogtexas.com/privacy/</loc>
+    <lastmod>2026-06-22</lastmod>
+    <changefreq>yearly</changefreq>
+    <priority>0.3</priority>
+    <image:image>
+      <image:loc>https://sheepdogtexas.com/og-image.png</image:loc>
+      <image:title>Sheepdog Staffing – Staffing Agency in Bryan-College Station TX</image:title>
+      <image:caption>Social sharing image for the Sheepdog Texas staffing page covering warehouse, logistics, construction, and facility maintenance staffing in Bryan-College Station.</image:caption>
+      <image:geo_location>Bryan-College Station, Texas, United States</image:geo_location>
+    </image:image>
+  </url>
 
 </urlset>

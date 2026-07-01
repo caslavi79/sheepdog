@@ -211,9 +211,9 @@ body{font-family:var(--fb);font-size:17px;line-height:1.65;color:var(--dark);bac
 <div class="s" id="tester"><div class="fi"><div class="tag">03 — Interactive Type Tester</div><div class="title">Try It Yourself</div><p class="lead">Type anything, pick a level, see it rendered live with the exact specs used.</p></div>
 <div class="tester fi">
 <div class="tester-bar">
-<label>Level:</label>
+<label for="testerLevel">Level:</label>
 <select id="testerLevel" onchange="updateTester()"><option value="h1">H1 — Page Title</option><option value="h2">H2 — Section Header</option><option value="h3">H3 — Sub-header</option><option value="h4">H4 — Card Title</option><option value="body" selected>Body</option><option value="small">Small / Caption</option><option value="overline">Overline</option><option value="btn">Button / CTA</option></select>
-<label>Background:</label>
+<label for="testerBg">Background:</label>
 <select id="testerBg" onchange="updateTester()"><option value="light">Light</option><option value="dark">Dark</option></select>
 <input type="text" id="testerInput" value="A Presence That Protects" oninput="updateTester()" placeholder="Type anything…" style="width:260px;">
 </div>

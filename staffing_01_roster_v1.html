@@ -14,6 +14,8 @@ body{font-family:'Source Sans 3',system-ui,sans-serif;background:#1a1a1a;min-hei
 .controls label{display:inline-flex;align-items:center;gap:6px;cursor:pointer;color:#ccc}
 .controls button{padding:8px 18px;background:#444;color:#fff;border:none;border-radius:6px;cursor:pointer;font-weight:600}
 .tc{font-size:12px;color:#999;font-family:monospace;min-width:50px;text-align:right}
+.legal{margin-top:18px;font-family:'Source Sans 3',system-ui,sans-serif;font-size:12px;color:#A0A0A0}
+.legal a{color:#C9922E}
 
 .reel-frame{width:360px;height:640px;background:#0A0A0A;border-radius:14px;position:relative;overflow:hidden;font-family:'Source Sans 3',system-ui,sans-serif;color:#FAF6EE;box-shadow:0 30px 80px rgba(0,0,0,0.5);isolation:isolate}
 
@@ -252,5 +254,6 @@ body{font-family:'Source Sans 3',system-ui,sans-serif;background:#1a1a1a;min-hei
   rb.addEventListener('click',replay);raf=requestAnimationFrame(tick);setInterval(replay,TOTAL*1000);
 })();
 </script>
+<p class="legal"><a href="/privacy/">Privacy</a> &middot; <a href="/accessibility/">Accessibility</a></p>
 </body>
 </html>

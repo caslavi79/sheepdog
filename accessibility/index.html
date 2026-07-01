@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://www.googletagmanager.com https://www.google-analytics.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' data:; connect-src 'self' https://*.supabase.co https://www.google-analytics.com https://api.resend.com; frame-ancestors 'none';">
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-1ZT2F15325"></script>
+<script>window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments);}gtag('consent','default',{analytics_storage:'denied'});if(localStorage.getItem('cookie_consent')==='true'){gtag('consent','update',{analytics_storage:'granted'});}gtag('js',new Date());gtag('config','G-1ZT2F15325');</script>
+<title>Accessibility Statement | Sheepdog Security LLC</title>
+<meta name="description" content="Accessibility statement for sheepdogtexas.com and how to request help using the site.">
+<link rel="canonical" href="https://sheepdogtexas.com/accessibility/">
+<meta name="robots" content="index, follow">
+<meta name="geo.region" content="US-TX">
+<meta name="geo.placename" content="Bryan-College Station, Texas">
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
+<link rel="icon" type="image/png" sizes="32x32" href="/favicon-32.png">
+<link rel="icon" type="image/png" sizes="16x16" href="/favicon-16.png">
+<link rel="icon" type="image/x-icon" href="/favicon.ico">
+<link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
+<link rel="manifest" href="/site.webmanifest">
+<meta property="og:title" content="Accessibility Statement | Sheepdog Security LLC">
+<meta property="og:description" content="Accessibility statement for sheepdogtexas.com and how to request help using the site.">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://sheepdogtexas.com/accessibility/">
+<meta property="og:image" content="https://sheepdogtexas.com/og-image.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:site_name" content="Sheepdog">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Accessibility Statement | Sheepdog Security LLC">
+<meta name="twitter:description" content="Accessibility statement for sheepdogtexas.com and how to request help using the site.">
+<meta name="twitter:image" content="https://sheepdogtexas.com/og-image.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Barlow:wght@400;500;600;700;800;900&family=Barlow+Semi+Condensed:wght@700;800;900&family=Source+Sans+3:ital,wght@0,300;0,400;0,600;0,700;1,400&display=swap" rel="stylesheet">
+<style>
+:root{--black:#0C0C0C;--char:#161616;--graphite:#2A2A2A;--iron:#4A4A4A;--slate:#6B6B6B;--steel:#7A8490;--silver:#A0A0A0;--fog:#D0D0D0;--bone:#F4F3F1;--white:#FFFFFF;--red:#C23B22;--amber:#C9922E;--navy:#1B2A4A;--sblue:#3D5A80;--fd:'Barlow Semi Condensed',sans-serif;--fh:'Barlow',sans-serif;--fb:'Source Sans 3',sans-serif}
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{font-family:var(--fb);font-size:17px;line-height:1.65;color:var(--iron);background:var(--white);-webkit-font-smoothing:antialiased}
+
+/* NAV */
+.nav{position:fixed;top:0;left:0;right:0;z-index:100;padding:0 48px;height:72px;display:flex;align-items:center;transition:background .4s,box-shadow .4s,backdrop-filter .4s,border-color .4s;backdrop-filter:blur(0);border-bottom:1px solid transparent}
+.nav.scrolled{background:rgba(12,12,12,.97);backdrop-filter:blur(12px);box-shadow:0 1px 0 rgba(255,255,255,.04);border-bottom-color:rgba(255,255,255,.06)}
+.nav-logo{display:flex;align-items:center;gap:0;text-decoration:none;margin-right:auto}
+.nav-links{display:flex;gap:32px;align-items:center}
+.nav-link{font-family:var(--fh);font-weight:600;font-size:15px;letter-spacing:1px;text-transform:uppercase;color:var(--steel);text-decoration:none;transition:color .2s}
+.nav-link:hover{color:var(--white)}
+.nav-cta{font-family:var(--fh);font-weight:700;font-size:12px;letter-spacing:1.5px;text-transform:uppercase;color:var(--white);background:var(--red);padding:10px 24px;border-radius:6px;text-decoration:none;transition:background .2s}
+.nav-cta:hover{background:#A83220}
+.burger-btn{display:none;background:none;border:none;cursor:pointer;padding:4px;flex-direction:column;gap:5px;z-index:201}
+.burger-btn span{display:block;width:22px;height:2px;background:var(--white);border-radius:1px;transition:transform .3s,opacity .3s}
+.burger-btn.open span:nth-child(1){transform:translateY(7px) rotate(45deg)}
+.burger-btn.open span:nth-child(2){opacity:0}
+.burger-btn.open span:nth-child(3){transform:translateY(-7px) rotate(-45deg)}
+.mobile-nav-overlay{position:fixed;inset:0;background:rgba(0,0,0,.4);z-index:199;opacity:0;pointer-events:none;transition:opacity .3s}
+.mobile-nav-overlay.open{opacity:1;pointer-events:auto}
+.mobile-nav{position:fixed;top:0;right:0;bottom:0;width:75%;max-width:320px;background:var(--char);z-index:200;transform:translateX(100%);transition:transform .3s ease;display:flex;flex-direction:column;padding:80px 32px 32px}
+.mobile-nav.open{transform:translateX(0)}
+.mobile-nav-link{font-family:var(--fh);font-weight:700;font-size:18px;letter-spacing:1px;text-transform:uppercase;color:var(--steel);text-decoration:none;padding:16px 0;border-bottom:1px solid rgba(255,255,255,.06);transition:color .2s}
+.mobile-nav-link:hover,.mobile-nav-link.active{color:var(--white)}
+.mobile-nav-cta{font-family:var(--fh);font-weight:700;font-size:14px;letter-spacing:1.5px;text-transform:uppercase;color:var(--white);background:var(--red);padding:14px 28px;border-radius:4px;text-decoration:none;text-align:center;margin-top:24px;transition:background .2s}
+.mobile-nav-cta:hover{background:#A83220}
+
+/* FOCUS / SR */
+a:focus-visible,button:focus-visible{outline:2px solid var(--red);outline-offset:2px}
+.sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}
+.skip-link{position:absolute;left:-9999px;top:auto;z-index:999}.skip-link:focus{position:fixed;top:8px;left:8px;background:var(--red);color:var(--white);padding:12px 20px;border-radius:4px;font-family:var(--fh);font-weight:700;font-size:14px;letter-spacing:1px;text-transform:uppercase;text-decoration:none;z-index:999}
+
+/* LEGAL CONTENT */
+.legal{padding:140px 48px 100px;background:var(--white)}
+.legal-wrap{max-width:800px;margin:0 auto}
+.legal-tag{font-family:var(--fb);font-size:12px;font-weight:600;letter-spacing:2.5px;text-transform:uppercase;color:var(--red);margin-bottom:12px}
+.legal h1{font-family:var(--fh);font-weight:700;font-size:clamp(28px,4vw,36px);line-height:1.15;letter-spacing:-0.25px;color:var(--graphite);margin-bottom:12px}
+.legal-effective{font-family:var(--fb);font-size:15px;color:var(--slate);margin-bottom:40px}
+.legal-intro{font-size:18px;line-height:1.6;color:var(--iron);margin-bottom:40px}
+.legal h2{font-family:var(--fh);font-weight:700;font-size:21px;line-height:1.25;color:var(--graphite);margin-top:40px;margin-bottom:14px}
+.legal p{font-size:16px;line-height:1.65;color:var(--iron);margin-bottom:16px}
+.legal ul{list-style:none;margin:0 0 16px;padding:0}
+.legal li{font-size:16px;line-height:1.65;color:var(--iron);margin-bottom:14px;padding-left:20px;position:relative}
+.legal li::before{content:'';position:absolute;left:0;top:11px;width:6px;height:6px;border-radius:50%;background:var(--red)}
+.legal li strong{color:var(--graphite);font-weight:700}
+.legal a{color:var(--red);text-decoration:none;border-bottom:1px solid rgba(194,59,34,.3);transition:border-color .2s}
+.legal a:hover{border-color:var(--red)}
+
+/* FOOTER */
+.footer{padding:48px 64px;background:var(--black);text-align:center;border-top:1px solid rgba(201,146,46,.1)}
+.footer-brand{font-family:var(--fd);font-weight:800;font-size:18px;text-transform:uppercase;letter-spacing:2px;color:var(--white);margin-bottom:12px}
+.footer-links{display:flex;gap:24px;justify-content:center;margin-bottom:12px;flex-wrap:wrap}
+.footer-link{font-family:var(--fb);font-size:13px;color:var(--steel);text-decoration:none;transition:color .2s;min-height:44px;display:inline-flex;align-items:center}
+.footer-link:hover{color:var(--amber)}
+.footer-copy{font-family:var(--fb);font-size:12px;color:#B8B8B8}
+
+@media(min-width:901px) and (max-width:1199px){
+  .nav{padding:0 24px;gap:16px}
+  .nav-logo{overflow:hidden;white-space:nowrap;max-width:280px;flex-shrink:1}
+  .nav-cta{padding:8px 18px;font-size:11px}
+}
+@media(max-width:900px){
+  .nav{padding:0 24px;height:64px}
+  .nav-links{gap:20px}
+  .legal{padding:120px 24px 80px}
+  .footer{padding:48px 24px}
+}
+@media(max-width:768px){
+  .legal h1{font-size:28px}
+  body{font-size:16px}
+  .nav-link{font-size:14px}
+}
+@media(max-width:600px){
+  .nav-links{display:none}
+  .burger-btn{display:flex}
+  .nav-logo img:first-child{height:28px !important}
+  .nav-logo img:last-child{height:15px !important}
+  .nav-cta{padding:8px 18px;font-size:11px}
+}
+</style>
+</head>
+<body>
+
+<a href="#main" class="skip-link">Skip to main content</a>
+<!-- NAV -->
+<nav class="nav scrolled" id="nav" role="navigation" aria-label="Main navigation">
+<a href="/" class="nav-logo">
+<img src="/sheepdog-mark-white.svg" alt="Sheepdog – Event Security, Mobile Bartending & Staffing Agency in Bryan-College Station TX" style="height:32px;width:auto;object-fit:contain">
+<img src="/sheepdog-wordmark-white.svg" alt="" aria-hidden="true" style="height:18px;width:auto;object-fit:contain;margin-left:5px">
+</a>
+<div class="nav-links">
+<a href="/events/" class="nav-link">Events</a>
+<a href="/staffing/" class="nav-link">Staffing</a>
+<a href="/#contact" class="nav-cta">Contact Us</a>
+</div>
+<button class="burger-btn" id="burgerBtn" onclick="toggleMobileNav()" aria-label="Toggle navigation menu" aria-expanded="false" aria-controls="mobileNav"><span></span><span></span><span></span></button>
+</nav>
+<div class="mobile-nav-overlay" id="mobileOverlay" onclick="toggleMobileNav()" role="button" aria-label="Close menu" tabindex="-1"></div>
+<div class="mobile-nav" id="mobileNav">
+<a href="/events/" class="mobile-nav-link">Events</a>
+<a href="/staffing/" class="mobile-nav-link">Staffing</a>
+<a href="/#contact" class="mobile-nav-cta">Contact Us</a>
+</div>
+
+<main class="page-content" id="main">
+
+<!-- LEGAL -->
+<section class="legal">
+<div class="legal-wrap">
+<div class="legal-tag">Access</div>
+<h1>Accessibility Statement</h1>
+<p class="legal-effective">Effective date: June 30, 2026</p>
+<p class="legal-intro">Sheepdog Security LLC wants sheepdogtexas.com to be usable by as many people as possible, including visitors using screen readers, keyboard navigation, zoom, captions, or other assistive technology.</p>
+<h2>Our accessibility goal</h2>
+<p>We work toward WCAG 2.1 Level AA as a practical target for readable text, keyboard access, visible focus states, form labels, alt text, and responsive layouts.</p>
+<h2>Need assistance?</h2>
+<p>If any part of the Site is difficult to use, email <a href="mailto:sheepdogsecurityllc@gmail.com">sheepdogsecurityllc@gmail.com</a> or call <a href="tel:+19792040945">(979) 204-0945</a>. Please include the page URL and what you were trying to do so we can help and improve the page.</p>
+<h2>Third-party content</h2>
+<p>Some linked services, maps, social platforms, payment processors, or forms may be controlled by third parties. If a third-party tool creates a barrier, contact us and we will provide a reasonable alternate path.</p>
+</div>
+</section>
+
+<!-- FOOTER -->
+<footer class="footer">
+<div class="footer-brand">Sheepdog Security — Bryan-College Station, TX</div>
+<div class="footer-links">
+<a href="/events/" class="footer-link">Events</a>
+<a href="/staffing/" class="footer-link">Staffing</a>
+<a href="/" class="footer-link">Home</a>
+<a href="/#contact" class="footer-link">Contact</a>
+<a href="/privacy/" class="footer-link" style="color:var(--amber)">Privacy</a>
+<a href="/accessibility/" class="footer-link">Accessibility</a>
+</div>
+<div class="footer-copy">&copy; 2026 Sheepdog Security LLC &mdash; Licensed Event Security, TABC-Certified Mobile Bartending &amp; Contracted Staffing in Bryan-College Station, Brazos Valley, TX. All rights reserved.</div>
+</footer>
+</main><!-- /page-content -->
+<script>
+// Nav background on scroll (nav stays solid on this inner page)
+const nav = document.getElementById('nav');
+window.addEventListener('scroll', () => {
+  nav.classList.toggle('scrolled', window.scrollY > 60 || true);
+});
+
+// Mobile nav toggle
+function toggleMobileNav() {
+  const burger = document.getElementById('burgerBtn');
+  const overlay = document.getElementById('mobileOverlay');
+  const menu = document.getElementById('mobileNav');
+  const open = menu.classList.toggle('open');
+  burger.classList.toggle('open', open);
+  overlay.classList.toggle('open', open);
+  burger.setAttribute('aria-expanded', open ? 'true' : 'false');
+}
+</script>
+<div id="cookie-banner" style="display:none;position:fixed;bottom:0;left:0;right:0;background:#161616;border-top:1px solid rgba(255,255,255,0.08);padding:14px 24px;z-index:9999;font-family:'Source Sans 3',sans-serif;font-size:14px;color:#A0A0A0;text-align:center;">
+We use cookies for analytics to improve your experience. <button onclick="localStorage.setItem('cookie_consent','true');gtag('consent','update',{analytics_storage:'granted'});document.getElementById('cookie-banner').style.display='none'" style="background:#C23B22;color:#fff;border:none;padding:6px 16px;border-radius:3px;font-family:'Barlow',sans-serif;font-weight:700;font-size:12px;letter-spacing:1px;text-transform:uppercase;cursor:pointer;margin-left:12px">Accept</button><button onclick="localStorage.setItem('cookie_consent','false');gtag('consent','update',{analytics_storage:'denied'});document.getElementById('cookie-banner').style.display='none'" style="background:none;color:#7A8490;border:1px solid rgba(255,255,255,0.1);padding:6px 16px;border-radius:3px;font-family:'Barlow',sans-serif;font-weight:700;font-size:12px;letter-spacing:1px;text-transform:uppercase;cursor:pointer;margin-left:8px">Decline</button>
+</div>
+<script>if(!localStorage.getItem('cookie_consent'))document.getElementById('cookie-banner').style.display='block';</script>
+</body>
+</html>

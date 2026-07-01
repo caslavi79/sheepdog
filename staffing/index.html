@@ -187,11 +187,11 @@ a:focus-visible,button:focus-visible{outline:2px solid var(--sblue);outline-offs
 
 /* FOOTER */
 .footer{padding:48px 64px;background:var(--black);text-align:center;border-top:1px solid rgba(201,146,46,.1)}
-.footer-brand{font-family:var(--fd);font-weight:800;font-size:18px;text-transform:uppercase;letter-spacing:2px;color:var(--sblue);margin-bottom:12px}
+.footer-brand{font-family:var(--fd);font-weight:800;font-size:18px;text-transform:uppercase;letter-spacing:2px;color:#8FB3DD;margin-bottom:12px}
 .footer-links{display:flex;gap:24px;justify-content:center;margin-bottom:12px}
-.footer-link{font-family:var(--fb);font-size:13px;color:var(--steel);text-decoration:none;transition:color .2s}
+.footer-link{font-family:var(--fb);font-size:13px;color:var(--steel);text-decoration:none;transition:color .2s;min-height:44px;display:inline-flex;align-items:center}
 .footer-link:hover{color:var(--amber)}
-.footer-copy{font-family:var(--fb);font-size:12px;color:var(--slate)}
+.footer-copy{font-family:var(--fb);font-size:12px;color:#B8B8B8}
 
 /* FADE IN */
 .fi{opacity:0;transform:translateY(20px);transition:opacity .6s ease,transform .6s ease}
@@ -399,6 +399,8 @@ a:focus-visible,button:focus-visible{outline:2px solid var(--sblue);outline-offs
 <a href="/staffing/" class="footer-link" style="color:var(--amber)">Staffing</a>
 <a href="/" class="footer-link">Home</a>
 <a href="#contact" class="footer-link" onclick="event.preventDefault();document.getElementById('contact').scrollIntoView({behavior:'smooth'})">Contact</a>
+<a href="/privacy/" class="footer-link">Privacy</a>
+<a href="/accessibility/" class="footer-link">Accessibility</a>
 </div>
 <div class="footer-copy">&copy; 2026 Sheepdog Security LLC &mdash; Licensed Event Security, TABC-Certified Mobile Bartending &amp; Contracted Staffing in Bryan-College Station, Brazos Valley, TX. All rights reserved.</div>
 </footer>

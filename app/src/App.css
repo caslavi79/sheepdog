@@ -3,7 +3,7 @@
   --char: #161616;
   --dark: #1E1E1E;
   --white: #FFFFFF;
-  --red: #D4483A;
+  --red: #C23B22;
   --steel: #929BAA;
   --slate: #A0A0A0;
   --green: #357A38;
@@ -142,7 +142,9 @@ a { color: inherit; text-decoration: none; }
   letter-spacing: 1px;
   text-transform: uppercase;
   cursor: pointer;
-  padding: 4px;
+  padding: 10px 8px;
+  min-width: 44px;
+  min-height: 44px;
 }
 
 .login-toggle-pw:hover { color: var(--white); }

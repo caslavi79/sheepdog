@@ -95,7 +95,7 @@ body{font-family:var(--fb);font-size:17px;line-height:1.65;color:var(--mid);back
 .nav-brand{display:flex;align-items:center;gap:0;text-decoration:none;margin-right:auto}
 .nav-brand img{height:32px;width:auto;object-fit:contain}
 .nav-links{display:flex;gap:28px;align-items:center}
-.nav-link{font-family:var(--fh);font-weight:600;font-size:15px;letter-spacing:1px;text-transform:uppercase;color:var(--steel);text-decoration:none;transition:color .2s}
+.nav-link{font-family:var(--fh);font-weight:600;font-size:15px;letter-spacing:1px;text-transform:uppercase;color:#5F6875;text-decoration:none;transition:color .2s}
 .nav-link:hover,.nav-link.active{color:var(--black)}
 .nav-cta{font-family:var(--fh);font-weight:700;font-size:12px;letter-spacing:1.5px;text-transform:uppercase;color:var(--black);background:var(--amber);padding:10px 24px;border-radius:6px;text-decoration:none;transition:background .2s}
 .nav-cta:hover{background:var(--amber-l)}
@@ -160,7 +160,7 @@ body{font-family:var(--fb);font-size:17px;line-height:1.65;color:var(--mid);back
 .hero-points li{font-family:var(--fh);font-weight:600;font-size:19px;line-height:1.5}
 .hero-card--sec .hero-points li{color:var(--steel)}
 .hero-card--bar .hero-points li{color:var(--mid)}
-.hero-btn{font-family:var(--fh);font-weight:700;font-size:14px;letter-spacing:1.5px;text-transform:uppercase;text-decoration:none;transition:opacity .2s;display:inline-flex;align-items:center;gap:8px;padding:0;background:none;border:none;border-bottom:2px solid;cursor:pointer;padding-bottom:4px;align-self:center}
+.hero-btn{font-family:var(--fh);font-weight:700;font-size:14px;letter-spacing:1.5px;text-transform:uppercase;text-decoration:none;transition:opacity .2s;display:inline-flex;align-items:center;gap:8px;padding:10px 0 8px;background:none;border:none;border-bottom:2px solid;cursor:pointer;align-self:center;min-height:44px}
 .hero-card--sec .hero-btn{color:var(--amber);border-color:var(--amber)}
 .hero-card--bar .hero-btn{color:var(--amber-d);border-color:var(--amber-d)}
 .hero-btn:hover{opacity:.7}
@@ -263,6 +263,7 @@ body{font-family:var(--fb);font-size:17px;line-height:1.65;color:var(--mid);back
 .addon-card{background:var(--white);border-left:4px solid var(--amber);border-radius:8px;padding:0;cursor:pointer;transition:box-shadow .3s}
 .addon-card:hover{box-shadow:0 8px 32px rgba(0,0,0,.06)}
 .addon-header{display:flex;align-items:flex-start;gap:16px;padding:28px 32px}
+.addon-header:focus-visible{outline:2px solid var(--amber);outline-offset:4px}
 .addon-header-text{flex:1}
 .addon-header h3{font-family:var(--fh);font-weight:700;font-size:20px;color:var(--black);margin-bottom:4px}
 .addon-header p{font-size:15px;line-height:1.5;color:var(--mid);margin:0}
@@ -331,9 +332,9 @@ a:focus-visible,button:focus-visible{outline:2px solid var(--amber);outline-offs
 .footer{padding:48px 64px;background:var(--black);text-align:center;border-top:1px solid rgba(201,146,46,.1)}
 .footer-brand{font-family:var(--fd);font-weight:800;font-size:18px;text-transform:uppercase;letter-spacing:2px;color:var(--amber);margin-bottom:12px}
 .footer-links{display:flex;gap:24px;justify-content:center;margin-bottom:12px}
-.footer-link{font-family:var(--fb);font-size:13px;color:var(--steel);text-decoration:none;transition:color .2s}
+.footer-link{font-family:var(--fb);font-size:13px;color:var(--steel);text-decoration:none;transition:color .2s;min-height:44px;display:inline-flex;align-items:center}
 .footer-link:hover{color:var(--amber)}
-.footer-copy{font-family:var(--fb);font-size:12px;color:var(--slate)}
+.footer-copy{font-family:var(--fb);font-size:12px;color:#B8B8B8}
 
 /* SCROLL PROGRESS */
 .scroll-progress{position:fixed;top:0;left:0;height:2px;background:var(--amber);z-index:300;width:0;pointer-events:none}
@@ -503,7 +504,7 @@ a:focus-visible,button:focus-visible{outline:2px solid var(--amber);outline-offs
 <!-- HERO = DUAL CARDS -->
 <section class="hero">
 <h1 class="sr-only">Event Security &amp; Mobile Bartending in Bryan-College Station TX</h1>
-<div class="hero-card hero-card--sec si-left" id="cardSec" role="button" tabindex="0" onclick="expandCard('sec')" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();expandCard('sec')}">
+<div class="hero-card hero-card--sec si-left" id="cardSec" onclick="expandCard('sec')">
 <div class="hero-intro">
 <h2 style="color:var(--amber)">Event<br>Security</h2>
 <div class="hero-mood">A presence that protects</div>
@@ -538,7 +539,7 @@ a:focus-visible,button:focus-visible{outline:2px solid var(--amber);outline-offs
 <a href="#contact" class="hero-exp-cta" onclick="event.stopPropagation();document.getElementById('contact').scrollIntoView({behavior:'smooth'})">Get a Security Quote</a>
 </div>
 </div>
-<div class="hero-card hero-card--bar si-right" id="cardBar" role="button" tabindex="0" onclick="expandCard('bar')" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();expandCard('bar')}">
+<div class="hero-card hero-card--bar si-right" id="cardBar" onclick="expandCard('bar')">
 <div class="hero-intro">
 <h2 style="color:var(--red)">Mobile<br>Bartending</h2>
 <div class="hero-mood">Best bar at the party</div>
@@ -590,8 +591,8 @@ a:focus-visible,button:focus-visible{outline:2px solid var(--amber);outline-offs
 <div class="title" style="text-align:center;font-size:28px;margin-bottom:8px">Complete Your Event</div>
 <p class="lead" style="text-align:center;margin:0 auto 40px">Beyond security and bartending — everything you need under one roof.</p>
 <div class="addon-grid">
-<div class="addon-card" role="button" tabindex="0" aria-expanded="false" onclick="toggleAddon(this)" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();toggleAddon(this)}">
-<div class="addon-header">
+<div class="addon-card" onclick="toggleAddon(this)">
+<div class="addon-header" role="button" tabindex="0" aria-expanded="false" onclick="event.stopPropagation();toggleAddon(this.closest('.addon-card'))" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();toggleAddon(this.closest('.addon-card'))}">
 <div class="addon-header-text">
 <h3>Table &amp; Chair Rental</h3>
 <p>Tables, chairs, and layout — delivered, set up, and picked up.</p>
@@ -609,8 +610,8 @@ a:focus-visible,button:focus-visible{outline:2px solid var(--amber);outline-offs
 <a href="#contact" class="addon-cta" onclick="event.stopPropagation();document.getElementById('contact').scrollIntoView({behavior:'smooth'})">Get a Quote</a>
 </div>
 </div>
-<div class="addon-card" role="button" tabindex="0" aria-expanded="false" onclick="toggleAddon(this)" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();toggleAddon(this)}">
-<div class="addon-header">
+<div class="addon-card" onclick="toggleAddon(this)">
+<div class="addon-header" role="button" tabindex="0" aria-expanded="false" onclick="event.stopPropagation();toggleAddon(this.closest('.addon-card'))" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();toggleAddon(this.closest('.addon-card'))}">
 <div class="addon-header-text">
 <h3>Event Setup, Takedown &amp; Cleanup</h3>
 <p>We handle the heavy lifting — before, during, and after your event.</p>
@@ -697,6 +698,8 @@ a:focus-visible,button:focus-visible{outline:2px solid var(--amber);outline-offs
 <a href="/staffing/" class="footer-link">Staffing</a>
 <a href="/" class="footer-link">Home</a>
 <a href="#contact" class="footer-link" onclick="event.preventDefault();document.getElementById('contact').scrollIntoView({behavior:'smooth'})">Contact</a>
+<a href="/privacy/" class="footer-link">Privacy</a>
+<a href="/accessibility/" class="footer-link">Accessibility</a>
 </div>
 <div class="footer-copy">&copy; 2026 Sheepdog Security LLC &mdash; Licensed Event Security, TABC-Certified Mobile Bartending &amp; Contracted Staffing in Bryan-College Station, Brazos Valley, TX. All rights reserved.</div>
 </footer>
@@ -715,7 +718,9 @@ slides.forEach(el => obs.observe(el));
 // Addon card expand/collapse
 function toggleAddon(card) {
   card.classList.toggle('open');
-  card.setAttribute('aria-expanded', card.classList.contains('open'));
+  var isOpen = card.classList.contains('open');
+  var trigger = card.querySelector('.addon-header[role="button"]');
+  if (trigger) trigger.setAttribute('aria-expanded', isOpen);
 }
 
 // Card expand/collapse
